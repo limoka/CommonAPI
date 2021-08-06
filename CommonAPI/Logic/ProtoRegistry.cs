@@ -521,7 +521,7 @@ namespace CommonAPI
             return proto;
         }
 
-        //TODO resolve string id conflicts and make its ids auto assign
+        
         /// <summary>
         /// Registers a LocalizedKey
         /// </summary>

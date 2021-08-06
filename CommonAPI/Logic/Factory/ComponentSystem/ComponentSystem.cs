@@ -5,8 +5,6 @@ namespace CommonAPI
 {
     public class ComponentSystem : IUpdateMultithread, IPowerUpdateMultithread
     {
-        //TODO add automated tests, test import/export functions 
-        
         public static readonly string systemID = $"{CommonAPIPlugin.ID}:ComponentSystem";
         
         private static int _cachedId;
