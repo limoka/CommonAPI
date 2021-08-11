@@ -19,7 +19,7 @@ namespace CommonAPI
             }
         }
         
-        public static Registry<FactoryComponent, ComponentTypePool> componentRegistry = new Registry<FactoryComponent, ComponentTypePool>();
+        public static TypeRegistry<FactoryComponent, ComponentTypePool> componentRegistry = new TypeRegistry<FactoryComponent, ComponentTypePool>();
         
         private PlanetFactory factory;
 

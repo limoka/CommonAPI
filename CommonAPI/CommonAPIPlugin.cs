@@ -26,6 +26,7 @@ namespace CommonAPI
         public const string VERSION = "1.0.0";
         
         public static ManualLogSource logger;
+        public static ResourceData resource;
 
         public static Dictionary<string, ISerializeState> registries = new Dictionary<string, ISerializeState>();
         
@@ -37,12 +38,16 @@ namespace CommonAPI
             UnityThread.initUnityThread();
             ProtoRegistry.Init();
             
+            string pluginfolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            resource = new ResourceData(ID, "CommonAPI", pluginfolder);
+            resource.LoadAssetBundle("commonapi");
+            
             Harmony harmony = new Harmony(GUID);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
-            
+
             registries.Add($"{ID}:SystemsRegistry", CustomFactory.systemRegistry);
             registries.Add($"{ID}:ComponentRegistry", ComponentSystem.componentRegistry);
-            registries.Add($"{ID}:RecipeTypeRegistry", RecipeTypes.typesRegistry);
+            registries.Add($"{ID}:RecipeTypeRegistry", ProtoRegistry.recipeTypes);
 
             CustomFactory.systemRegistry.Register(ComponentSystem.systemID, typeof(ComponentSystem));
             
@@ -73,7 +78,7 @@ namespace CommonAPI
                 }
             }
 
-            CustomFactory.Init();
+            CustomFactory.InitOnLoad();
             CustomFactory.Import(r);
         }
 
@@ -99,7 +104,7 @@ namespace CommonAPI
 
         public void IntoOtherSave()
         {
-            CustomFactory.Init();
+            CustomFactory.InitOnLoad();
         }
     }
 }

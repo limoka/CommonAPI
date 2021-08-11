@@ -1,94 +1,90 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using JetBrains.Annotations;
 
 namespace CommonAPI
 {
-    
-    public class Registry<TItem, TCont> : SimpleRegistry
-        where TCont : ISerializeState
+    public class Registry : ISerializeState
     {
-        public List<Type> data = new List<Type>();
+        public Dictionary<string, int> idMap = new Dictionary<string, int>();
+        
+        public Dictionary<int, int> migrationMap = new Dictionary<int, int>();
+        public List<string> removedIds = new List<string>();
 
-        public Registry()
+        protected int lastId;
+
+        public Registry(int startId = 1)
         {
-            data.Add(null);
+            lastId = startId - 1;
         }
 
-
-        public override int Register(string key, [NotNull] Type system)
+        protected virtual void OnItemRegistered(string key, int id, object item)
         {
-            if (system == null) throw new ArgumentNullException(nameof(system));
+            
+        }
+        
+        public int Register(string key, object item = null)
+        {
             if (!idMap.ContainsKey(key))
             {
-                data.Add(system);
-                idMap.Add(key, data.Count - 1);
-                return data.Count - 1;
+                OnItemRegistered(key, lastId + 1, item);
+                idMap.Add(key, ++lastId);
+                return lastId;
             }
 
             return GetUniqueId(key);
         }
-        
-        public int Register(Type system)
+
+        public int GetUniqueId(string typeId)
         {
-            if (!idMap.ContainsKey(system.FullName))
-            {
-                data.Add(system);
-                idMap.Add(system.FullName, data.Count - 1);
-                return data.Count - 1;
-            }
-            
-            return GetUniqueId(system.FullName);
+            if (idMap.ContainsKey(typeId))
+                return idMap[typeId];
+            return 0;
         }
 
-        public TItem GetNew(int typeId)
+        public int MigrateId(int oldId)
         {
-            if (typeId > 0 && typeId < data.Count)
+            if (migrationMap.ContainsKey(oldId))
             {
-                return (TItem) Activator.CreateInstance(data[typeId]);
+                return migrationMap[oldId];
             }
 
-            return default;
+            return 0;
         }
 
-        public void ImportAndMigrate(IList<TCont> list, BinaryReader r)
+        public void Free()
         {
-            while (true)
+        }
+
+        public void Export(BinaryWriter w)
+        {
+            w.Write((byte)0);
+            w.Write(idMap.Count);
+            foreach (var kv in idMap)
             {
+                w.Write(kv.Key);
+                w.Write(kv.Value);
+            }
+        }
+
+        public void Import(BinaryReader r)
+        {
+            r.ReadByte();
+            int count = r.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                string key = r.ReadString();
                 int oldId = r.ReadInt32();
-                if (oldId == 0) break;
-                int newId = MigrateId(oldId);
-
-                if (newId != 0)
+                int newId = GetUniqueId(key);
+                if (newId == 0)
                 {
-                    TCont pool = list[newId];
-                    r.ReadInt64();
-                    pool.Import(r);
+                    removedIds.Add(key);
                 }
                 else
                 {
-                    long len = r.ReadInt64();
-                    r.ReadBytes((int)len);
+                    migrationMap.Add(oldId, newId);
                 }
             }
-        }
-        
-
-        public void ExportContainer(IList<TCont> list, BinaryWriter w)
-        {
-            for (int i = 1; i < list.Count; i++)
-            {
-                w.Write(i);
-                MemoryStream stream = new MemoryStream();
-                BinaryWriter tw = new BinaryWriter(stream);
-                TCont storage = list[i];
-                storage.Export(tw);
-                w.Write(stream.Length);
-                w.Write(stream.ToArray());
-            }
-            
-            w.Write(0);
         }
     }
 }

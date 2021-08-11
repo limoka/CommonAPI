@@ -57,9 +57,9 @@ namespace CommonAPITests
     public class TestPool2 : Pool<TestObject>
     {
         public int typeId;
-        private Registry<TestObject, TestPool2> registry;
+        private TypeRegistry<TestObject, TestPool2> registry;
 
-        public TestPool2(int id, Registry<TestObject, TestPool2> registry)
+        public TestPool2(int id, TypeRegistry<TestObject, TestPool2> registry)
         {
             typeId = id;
             this.registry = registry;
@@ -74,8 +74,10 @@ namespace CommonAPITests
     [TestFixture]
     public class RegistryTest
     {
-        public Registry<TestObject, TestPool2> registry;
-        public Registry<TestObject, TestPool2> registry2;
+        public TypeRegistry<TestObject, TestPool2> registry;
+        public TypeRegistry<TestObject, TestPool2> registry2;
+        
+        public Registry registry3;
 
         public List<TestPool2> objects;
         public List<TestPool2> objects2;
@@ -84,8 +86,9 @@ namespace CommonAPITests
         [SetUp]
         public void SetUp()
         {
-            registry = new Registry<TestObject, TestPool2>();
-            registry2 = new Registry<TestObject, TestPool2>();
+            registry = new TypeRegistry<TestObject, TestPool2>();
+            registry2 = new TypeRegistry<TestObject, TestPool2>();
+            registry3 = new Registry();
             objects = new List<TestPool2>();
             objects2 = new List<TestPool2>();
         }
@@ -95,7 +98,10 @@ namespace CommonAPITests
         {
             registry.Register("Test:ID", typeof(TestObject));
             registry.Register("Test:ID1", typeof(TestObject2));
-            registry.Register(typeof(TestObject));
+            
+            int id2 = registry3.Register("this:test");
+            registry3.Register("hello:world");
+            int id3 = registry3.Register("hello:world");
 
             int id = registry.GetUniqueId("Test:ID");
             object obj = registry.GetNew(id);
@@ -108,18 +114,19 @@ namespace CommonAPITests
             
             IsNotNull(obj);
             AreEqual(typeof(TestObject2), obj.GetType());
-            
-            id = registry.GetUniqueId(typeof(TestObject).FullName);
-            obj = registry.GetNew(id);
-            
-            IsNotNull(obj);
-            AreEqual(typeof(TestObject), obj.GetType());
-            
+
             id = registry.GetUniqueId("Test:Hello");
             obj = registry.GetNew(id);
             
             IsNull(obj);
             AreEqual(0, id);
+            
+            id = registry3.GetUniqueId("hello:world");
+            AreNotEqual(0, id);
+            AreEqual(id3, id);
+            
+            id = registry3.GetUniqueId("this:test");
+            AreEqual(id2, id);
         }
         
         [Test]

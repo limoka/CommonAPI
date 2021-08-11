@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using BepInEx.Configuration;
 using HarmonyLib;
+using JetBrains.Annotations;
 using UnityEngine;
 using xiaoye97;
 using Object = UnityEngine.Object;
@@ -12,6 +13,7 @@ using Object = UnityEngine.Object;
 
 namespace CommonAPI
 {
+    [UsedImplicitly]
     public class ResourceData
     {
         public string modId;
@@ -89,8 +91,12 @@ namespace CommonAPI
         internal static Dictionary<int, ModelProto> models = new Dictionary<int, ModelProto>();
         internal static Dictionary<string, Material[]> modelMats = new Dictionary<string, Material[]>();
 
-        public static Dictionary<string, ResourceData> customResources = new Dictionary<string, ResourceData>();
-
+        internal static List<ResourceData> modResources = new List<ResourceData>();
+        
+        public static Registry recipeTypes = new Registry();
+        public static List<List<int>> recipeTypeLists = new List<List<int>>();
+        
+        
         public static event Action onLoadingFinished;
 
 
@@ -106,18 +112,38 @@ namespace CommonAPI
 
             textureNames = new[] {mainTex, normalTex, msTex, emissionTex};
             spriteFileExtensions = new[] {".jpg", ".png", ".tif"};
+            
+            recipeTypeLists.Add(null);
 
             LDBTool.PostAddDataAction += OnPostAdd;
             LDBTool.EditDataAction += EditProto;
         }
 
         /// <summary>
-        /// Initialize Registry with needed data
+        /// Registers mod resources for loading
         /// </summary>
         /// <param name="resource"></param>
         public static void AddResource(ResourceData resource)
         {
-            customResources.Add(resource.modId, resource);
+            modResources.Add(resource);
+        }
+
+        public static int RegisterRecipeType(string typeId)
+        {
+            int id = recipeTypes.Register(typeId);
+            if (id >= recipeTypeLists.Capacity)
+            {
+                recipeTypeLists.Capacity *= 2;
+            }
+            recipeTypeLists.Add(new List<int>());
+            return id;
+        }
+
+        public static bool BelongsToType(this RecipeProto proto, int typeId)
+        {
+            if (typeId >= recipeTypeLists.Count) return false;
+            
+            return recipeTypeLists[typeId].BinarySearch(proto.ID) >= 0;
         }
 
         //Post register fixups
@@ -281,6 +307,12 @@ namespace CommonAPI
             return mainMat;
         }
 
+        public static int GetGridIndex(int tab, int x, int y)
+        {
+            return tab * 1000 + y * 100 + x;
+        }
+        
+
         //All of these register a specified proto in LDBTool
 
         /// <summary>
@@ -410,9 +442,36 @@ namespace CommonAPI
             items.Add(proto.ID, proto);
             return proto;
         }
+        
+        /// <summary>
+        /// Registers a RecipeProto with a custom type
+        /// </summary>
+        /// <param name="id">UNIQUE id of your recipe</param>
+        /// <param name="type">Recipe type in string form</param>
+        /// <param name="time">Time in ingame ticks. How long item is being made</param>
+        /// <param name="input">Array of input IDs</param>
+        /// <param name="inCounts">Array of input COUNTS</param>
+        /// <param name="output">Array of output IDs</param>
+        /// <param name="outCounts">Array of output COUNTS</param>
+        /// <param name="description">LocalizedKey of description of this item</param>
+        /// <param name="techID">Tech id, which unlock this recipe</param>
+        public static RecipeProto RegisterRecipe(int id, int type, int time, int[] input, int[] inCounts,
+            int[] output,
+            int[] outCounts, string description, int techID = 0, int gridIndex = 0)
+        {
+            if (type >= recipeTypeLists.Count) throw new ArgumentException($"Type {type} is not registered!");
+            
+            RecipeProto recipe = RegisterRecipe(id, ERecipeType.Custom, time, input, inCounts, output, outCounts, description, techID, gridIndex);
+
+            recipeTypeLists[type].Add(recipe.ID);
+            Algorithms.ListSortedAdd(recipeTypeLists[type], recipe.ID);
+
+            return recipe;
+
+        }
 
         /// <summary>
-        /// Registers a RecipeProto
+        /// Registers a RecipeProto with vanilla types
         /// </summary>
         /// <param name="id">UNIQUE id of your recipe</param>
         /// <param name="type">Recipe type</param>
@@ -425,7 +484,7 @@ namespace CommonAPI
         /// <param name="techID">Tech id, which unlock this recipe</param>
         public static RecipeProto RegisterRecipe(int id, ERecipeType type, int time, int[] input, int[] inCounts,
             int[] output,
-            int[] outCounts, string description, int techID = 0)
+            int[] outCounts, string description, int techID = 0, int gridIndex = 0)
         {
             if (output.Length > 0)
             {
@@ -447,7 +506,7 @@ namespace CommonAPI
                     Results = output,
                     ResultCounts = outCounts,
                     Description = description,
-                    GridIndex = first.GridIndex,
+                    GridIndex = gridIndex == 0 ? first.GridIndex : gridIndex,
                     IconPath = first.IconPath,
                     Name = first.Name + "Recipe",
                     preTech = tech,
@@ -455,7 +514,7 @@ namespace CommonAPI
                 };
 
                 LDBTool.PreAddProto(ProtoType.Recipe, proto);
-                recipes.Add(id, proto);
+                recipes.Add(proto.ID, proto);
 
                 return proto;
             }
@@ -682,52 +741,51 @@ namespace CommonAPI
         [HarmonyPrefix]
         public static bool Prefix(ref string path, Type systemTypeInstance, ref Object __result)
         {
-            foreach (var kv in ProtoRegistry.customResources)
+            foreach (ResourceData resource in ProtoRegistry.modResources)
             {
-                if (path.Contains(kv.Value.keyWord) && kv.Value.HasAssetBundle())
+                if (!path.Contains(resource.keyWord) || !resource.HasAssetBundle()) continue;
+                
+                if (resource.bundle.Contains(path + ".prefab") && systemTypeInstance == typeof(GameObject))
                 {
-                    if (kv.Value.bundle.Contains(path + ".prefab") && systemTypeInstance == typeof(GameObject))
+                    Object myPrefab = resource.bundle.LoadAsset(path + ".prefab");
+                    CommonAPIPlugin.logger.LogDebug($"Loading registered asset {path}: {(myPrefab != null ? "Success" : "Failure")}");
+
+                    if (!ProtoRegistry.modelMats.ContainsKey(path))
                     {
-                        Object myPrefab = kv.Value.bundle.LoadAsset(path + ".prefab");
-                        CommonAPIPlugin.logger.LogDebug($"Loading registered asset {path}: {(myPrefab != null ? "Success" : "Failure")}");
-
-                        if (!ProtoRegistry.modelMats.ContainsKey(path))
-                        {
-                            __result = myPrefab;
-                            return false;
-                        }
-
-                        Material[] mats = ProtoRegistry.modelMats[path];
-                        if (myPrefab != null)
-                        {
-                            MeshRenderer[] renderers = ((GameObject) myPrefab).GetComponentsInChildren<MeshRenderer>();
-                            foreach (MeshRenderer renderer in renderers)
-                            {
-                                Material[] newMats = new Material[renderer.sharedMaterials.Length];
-                                for (int i = 0; i < newMats.Length; i++)
-                                {
-                                    newMats[i] = mats[i];
-                                }
-
-                                renderer.sharedMaterials = newMats;
-                            }
-                        }
-
                         __result = myPrefab;
                         return false;
                     }
 
-                    foreach (string extension in ProtoRegistry.spriteFileExtensions)
+                    Material[] mats = ProtoRegistry.modelMats[path];
+                    if (myPrefab != null)
                     {
-                        if (!kv.Value.bundle.Contains(path + extension)) continue;
+                        MeshRenderer[] renderers = ((GameObject) myPrefab).GetComponentsInChildren<MeshRenderer>();
+                        foreach (MeshRenderer renderer in renderers)
+                        {
+                            Material[] newMats = new Material[renderer.sharedMaterials.Length];
+                            for (int i = 0; i < newMats.Length; i++)
+                            {
+                                newMats[i] = mats[i];
+                            }
 
-                        Object mySprite = kv.Value.bundle.LoadAsset(path + extension, systemTypeInstance);
-
-                        CommonAPIPlugin.logger.LogDebug($"Loading registered asset {path}: {(mySprite != null ? "Success" : "Failure")}");
-
-                        __result = mySprite;
-                        return false;
+                            renderer.sharedMaterials = newMats;
+                        }
                     }
+
+                    __result = myPrefab;
+                    return false;
+                }
+
+                foreach (string extension in ProtoRegistry.spriteFileExtensions)
+                {
+                    if (!resource.bundle.Contains(path + extension)) continue;
+
+                    Object mySprite = resource.bundle.LoadAsset(path + extension, systemTypeInstance);
+
+                    CommonAPIPlugin.logger.LogDebug($"Loading registered asset {path}: {(mySprite != null ? "Success" : "Failure")}");
+
+                    __result = mySprite;
+                    return false;
                 }
             }
 
@@ -742,11 +800,11 @@ namespace CommonAPI
         [HarmonyPrefix]
         public static bool Prefix(ref string filename)
         {
-            foreach (var kv in ProtoRegistry.customResources)
+            foreach (var resource in ProtoRegistry.modResources)
             {
-                if (!filename.Contains(kv.Value.keyWord) || !kv.Value.HasVertaFolder()) continue;
+                if (!filename.Contains(resource.keyWord) || !resource.HasVertaFolder()) continue;
 
-                string newName = $"{kv.Value.vertaFolder}/{filename}";
+                string newName = $"{resource.vertaFolder}/{filename}";
                 if (!File.Exists(newName)) continue;
 
                 filename = newName;
