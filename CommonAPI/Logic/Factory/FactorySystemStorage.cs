@@ -7,12 +7,12 @@ namespace CommonAPI
     public class FactorySystemStorage : ISerializeState
     {
         public List<IFactorySystem> planetSystems = new List<IFactorySystem>();
-        public int typeIndex;
+        public int systemIndex;
         
-        public void Init(GameData data, int index)
+        public void InitOnLoad(GameData data, int index)
         {
             planetSystems.Capacity = data.factoryCount;
-            typeIndex = index;
+            systemIndex = index;
             
             for (int i = 0; i < data.factoryCount; i++)
             {
@@ -22,9 +22,25 @@ namespace CommonAPI
         }
         //TODO make sure when new planets are added that system adds then here too
 
+
+        public void InitNewPlanet(PlanetData planet)
+        {
+            if (GetSystem(planet.factory) != null) return;
+            
+            planetSystems.Capacity += 1;
+            planetSystems.Add(CustomFactory.systemRegistry.GetNew(systemIndex));
+            planetSystems[planet.factory.index].Init(planet.factory);
+        }
+        
+        
         public IFactorySystem GetSystem(PlanetFactory factory)
         {
-            return planetSystems[factory.index];
+            if (factory.index >= 0 && factory.index < planetSystems.Count)
+            {
+                return planetSystems[factory.index];
+            }
+
+            return null;
         }
 
         public void PreUpdate(PlanetFactory factory)
@@ -148,7 +164,7 @@ namespace CommonAPI
 
             for (int i = 0; i < data.factoryCount; i++)
             {
-                planetSystems.Add(CustomFactory.systemRegistry.GetNew(typeIndex));
+                planetSystems.Add(CustomFactory.systemRegistry.GetNew(systemIndex));
                 planetSystems[i].Init(data.factories[i]);
                 planetSystems[i].Import(r);
             }

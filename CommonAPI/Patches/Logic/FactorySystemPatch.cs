@@ -111,28 +111,26 @@ namespace CommonAPI
         {
             CustomFactory.PostUpdateMultithread(__instance.factory, _usedThreadCnt, _curThreadIdx, 4);
         }
-    }
 
-
-    [HarmonyPatch]
-    static class PlanetFactoryCreatePatch
-    {
         [HarmonyPatch(typeof(PlanetFactory), "CreateEntityLogicComponents")]
         [HarmonyPostfix]
-        public static void Postfix(int entityId, PrefabDesc desc, int prebuildId, PlanetFactory __instance)
+        public static void AddComponents(int entityId, PrefabDesc desc, int prebuildId, PlanetFactory __instance)
         {
             CustomFactory.CreateEntityComponents(__instance, entityId, desc, prebuildId);
         }
-    }
 
-    [HarmonyPatch]
-    static class PlanetFactoryRemovePatch
-    {
         [HarmonyPatch(typeof(PlanetFactory), "RemoveEntityWithComponents")]
         [HarmonyPrefix]
-        public static void Prefix(int id, PlanetFactory __instance)
+        public static void RemoveComponents(int id, PlanetFactory __instance)
         {
             CustomFactory.RemoveEntityComponents(__instance, id);
+        }
+        
+        [HarmonyPatch(typeof(GameData), "GetOrCreateFactory")]
+        [HarmonyPostfix]
+        public static void LoadNewPlanet(PlanetData planet)
+        {
+            CustomFactory.InitNewPlanet(planet);
         }
     }
 

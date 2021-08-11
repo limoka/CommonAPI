@@ -7,11 +7,11 @@ namespace CommonAPI
     public static class CustomFactory
     {
         public static List<FactorySystemStorage> systems = new List<FactorySystemStorage>();
-        public static Registry<IFactorySystem, FactorySystemStorage> systemRegistry = new Registry<IFactorySystem, FactorySystemStorage>();
+        public static TypeRegistry<IFactorySystem, FactorySystemStorage> systemRegistry = new TypeRegistry<IFactorySystem, FactorySystemStorage>();
 
-        public static void Init()
+        public static void InitOnLoad()
         {
-            CommonAPIPlugin.logger.LogInfo("Init custom factory!");
+            CommonAPIPlugin.logger.LogInfo("Loading custom factory!");
             GameData data = GameMain.data;
             
             systems.Clear();
@@ -20,10 +20,20 @@ namespace CommonAPI
             for (int i = 1; i < systemRegistry.data.Count; i++)
             {
                 FactorySystemStorage storage = new FactorySystemStorage();
-                storage.Init(data, i);
+                storage.InitOnLoad(data, i);
                 systems.Add(storage);
             }
         }
+
+        public static void InitNewPlanet(PlanetData planet)
+        {
+            for (int i = 1; i < systemRegistry.data.Count; i++)
+            {
+                FactorySystemStorage storage = systems[i];
+                storage.InitNewPlanet(planet);
+            }
+        }
+        
 
         public static void CreateEntityComponents(PlanetFactory factory, int entityId, PrefabDesc desc, int prebuildId)
         {
