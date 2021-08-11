@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonAPI", "CommonAPI\Comm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonAPITests", "CommonAPITests\CommonAPITests.csproj", "{FE453D25-4104-41B2-AC55-A804CCA3212E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Preloader", "Preloader\Preloader.csproj", "{4C01DC6A-E738-47BC-841D-946A977664B2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonAPIPreloader", "CommonAPIPreloader\CommonAPIPreloader.csproj", "{4C01DC6A-E738-47BC-841D-946A977664B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
