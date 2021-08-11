@@ -20,8 +20,6 @@ namespace CommonAPI
                 planetSystems[i].Init(data.factories[i]);
             }
         }
-        //TODO make sure when new planets are added that system adds then here too
-
 
         public void InitNewPlanet(PlanetData planet)
         {
