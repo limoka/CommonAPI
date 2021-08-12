@@ -175,6 +175,7 @@
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="UI\ColorProperties.cs" />
         <Compile Include="UI\CustomMachineWindow.cs" />
+        <Compile Include="UI\MaterialFixer.cs" />
         <Compile Include="UI\TabData.cs" />
         <Compile Include="UI\UIRegistry.cs" />
         <Compile Include="UI\Widgets\IStorage.cs" />
@@ -192,6 +193,7 @@
         <Compile Include="Util\Extensions\PlanetFactoryExtensions.cs" />
         <Compile Include="Util\Extensions\PrefabDescExtensions.cs" />
         <Compile Include="Util\Extensions\GeneralExtensions.cs" />
+        <Compile Include="Util\LoadSaveOnLoad.cs" />
         <Compile Include="Util\PointsHelper.cs" />
         <Compile Include="Util\UnityThread.cs" />
     </ItemGroup>

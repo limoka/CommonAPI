@@ -53,6 +53,8 @@ namespace CommonAPI
             
             NetworksRegistry.AddHandler(new PowerNetworkHandler());
             
+            LoadSaveOnLoad.Init();
+            
             logger.LogInfo("Common API is initialized!");
         }
 
