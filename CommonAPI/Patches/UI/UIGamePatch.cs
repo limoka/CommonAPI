@@ -59,6 +59,22 @@ namespace CommonAPI
                 window.Close();
             }
         }
+        
+        [HarmonyPatch(typeof(UIGame), "get_isAnyFunctionWindowActive")]
+        [HarmonyPostfix]
+        public static void IsAnyActive(ref bool __result)
+        {
+            if (__result) return;
+                
+            foreach (var window in UIRegistry.windows)
+            {
+                if (window.active)
+                {
+                    __result = true;
+                    return;
+                }
+            }
+        }
 
         [HarmonyPatch(typeof(UIGame), "OnPlayerInspecteeChange")]
         [HarmonyPostfix]

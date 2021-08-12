@@ -13,10 +13,6 @@ namespace CommonAPI
 
         public int rowCount = 5;
 
-        private const int kGridSize = 50;
-
-        private const int kPadding = 2;
-
         public RectTransform rectTrans;
 
         public RectTransform contentRect;
@@ -26,12 +22,6 @@ namespace CommonAPI
         public RawImage iconImage;
 
         public Text prefabNumText;
-
-        public bool showTips = true;
-
-        public float showTipsDelay = 0.4f;
-
-        public int tipAnchor = 7;
 
         private Material iconImageMat;
 
@@ -47,21 +37,11 @@ namespace CommonAPI
 
         private Text[] numTexts;
 
-        private int[] numbers;
+        private int[] itemCounts;
 
-        private const int kMaxGrid = 400;
-
-        private IStorage storage;
+        protected IStorage storage;
 
         private StringBuilder strb = new StringBuilder("      ", 6);
-
-        private float mouseInTime;
-
-        private int mouseOnX = -1;
-
-        private int mouseOnY = -1;
-
-        private UIItemTip tip;
 
         private static readonly int buffer = Shader.PropertyToID("_StateBuffer");
         private static readonly int indexBuffer = Shader.PropertyToID("_IndexBuffer");
@@ -72,34 +52,39 @@ namespace CommonAPI
         public override void _OnCreate()
         {
             numTexts = new Text[400];
-            numbers = new int[400];
+            itemCounts = new int[400];
             iconIndexArray = new uint[1024];
             iconIndexBuffer = new ComputeBuffer(iconIndexArray.Length, 4);
             stateArray = new uint[1024];
             stateBuffer = new ComputeBuffer(stateArray.Length, 4);
-            bgImageMat = Instantiate(bgImage.material);
-            iconImageMat = Instantiate(iconImage.material);
-            bgImageMat.SetBuffer(buffer, stateBuffer);
-            iconImageMat.SetBuffer(indexBuffer, iconIndexBuffer);
-            bgImage.material = bgImageMat;
-            iconImage.material = iconImageMat;
+
+            if (bgImage != null)
+            {
+                bgImageMat = ProtoRegistry.CreateMaterial("UI Ex/Storage Bg", "storage-bg", "#FFFFFFFF", null, new String[]{});
+                bgImageMat.SetBuffer(buffer, stateBuffer);
+                bgImage.material = bgImageMat;
+            }
+
+            if (iconImage != null)
+            {
+                iconImageMat = ProtoRegistry.CreateMaterial("UI Ex/Storage Icons", "storage-icons", "#FFFFFFFF", null, new String[]{});
+                iconImageMat.SetBuffer(indexBuffer, iconIndexBuffer);
+                iconImage.material = iconImageMat;
+            }
         }
 
 
         public override void _OnDestroy()
         {
-            if (tip != null)
-            {
-                Destroy(tip.gameObject);
-                tip = null;
-            }
-
-            Destroy(bgImageMat);
-            Destroy(iconImageMat);
+            if (bgImage != null)
+                Destroy(bgImageMat);
+            if (iconImage != null)
+                Destroy(iconImageMat);
+            
             iconIndexBuffer.Release();
             stateBuffer.Release();
             numTexts = null;
-            numbers = null;
+            itemCounts = null;
             bgImageMat = null;
             iconImageMat = null;
             iconIndexArray = null;
@@ -111,114 +96,32 @@ namespace CommonAPI
 
         public override bool _OnInit()
         {
-            iconImage.texture = GameMain.iconSet.texture;
-            SetStorageData(data as IStorage);
-            return data != null;
+            if (iconImage != null)
+                iconImage.texture = GameMain.iconSet.texture;
+            return true;
         }
 
 
         public override void _OnFree()
         {
-            SetStorageData(null);
+            SetStorage(null);
         }
-
-
-        public override void _OnOpen() { }
+        
 
 
         public override void _OnClose()
         {
-            if (tip != null)
-            {
-                tip.gameObject.SetActive(false);
-            }
-
-            mouseInTime = 0f;
             OnContentMouseExit(null);
-            SetStorageData(null);
+            SetStorage(null);
         }
 
 
         public override void _OnUpdate()
         {
-            if (showTips)
-            {
-                int gridX = -1;
-                int gridY = -1;
-                if (GameMain.mainPlayer.inhandItemId > 0)
-                {
-                    mouseInTime = -1f;
-                }
-                else if (UIRoot.instance.uiGame.gridSplit.active)
-                {
-                    mouseInTime = -1f;
-                }
-                else
-                {
-                    GetGridPos(out gridX, out gridY, true);
-                }
-
-                if (mouseOnX != gridX || mouseOnY != gridY)
-                {
-                    mouseOnX = gridX;
-                    mouseOnY = gridY;
-                    if (mouseInTime > 0f)
-                        mouseInTime = 0f;
-                }
-
-                UpdateTips(gridX, gridY);
-            }
-
             if (storage != null && storage.changed)
             {
                 OnStorageContentChanged();
                 storage.changed = false;
-            }
-        }
-
-        protected void UpdateTips(int gridX, int gridY)
-        {
-            int itemId = GetItemId(mouseOnX, mouseOnY); 
-
-            if (itemId == 0)
-            {
-                mouseOnX = -1;
-                mouseOnY = -1;
-            }
-            if (mouseOnX >= 0 && mouseOnY >= 0)
-            {
-                mouseInTime += Time.deltaTime;
-                if (mouseInTime > showTipsDelay)
-                {
-                    if (tip == null)
-                    {
-                        tip = UIItemTip.Create(itemId, tipAnchor, new Vector2(gridX * 50 + 15, -(float) gridY * 50 - 50),
-                            contentRect);
-                    }
-
-                    if (!tip.gameObject.activeSelf)
-                    {
-                        tip.gameObject.SetActive(true);
-                        tip.SetTip(itemId, tipAnchor, new Vector2(gridX * 50 + 15, -(float) gridY * 50 - 50), contentRect);
-                    }
-                    else if (tip.showingItemId != itemId)
-                    {
-                        tip.SetTip(itemId, tipAnchor, new Vector2(gridX * 50 + 15, -(float) gridY * 50 - 50), contentRect);
-                    }
-                }
-            }
-            else
-            {
-                if (mouseInTime > 0f)
-                {
-                    mouseInTime = 0f;
-                }
-
-                if (tip != null)
-                {
-                    tip.showingItemId = 0;
-                    tip.gameObject.SetActive(false);
-                }
             }
         }
 
@@ -239,12 +142,11 @@ namespace CommonAPI
         {
             if (!focus)
             {
-                mouseInTime = 0f;
                 OnContentMouseExit(null);
             }
         }
 
-        protected void SetStorageData(IStorage _storage)
+        public void SetStorage(IStorage _storage)
         {
             if (_storage != storage)
             {
@@ -261,10 +163,16 @@ namespace CommonAPI
             rectTrans.sizeDelta = new Vector2(colCount * 50 + 4, rowCount * 50 + 4);
 
             Vector4 value = new Vector4(colCount, rowCount, 0.04f, 0.04f);
-            bgImageMat.SetVector(gridProp, value);
-            iconImageMat.SetVector(gridProp, value);
-            Vector4 value2 = new Vector4(0.1f, 0.1f, 1.25f, 1.25f);
-            iconImageMat.SetVector(rect, value2);
+            if (bgImageMat != null)
+            {
+                bgImageMat.SetVector(gridProp, value);
+            }
+            if (iconImageMat != null)
+            {
+                iconImageMat.SetVector(gridProp, value);
+                Vector4 value2 = new Vector4(0.1f, 0.1f, 1.25f, 1.25f);
+                iconImageMat.SetVector(rect, value2);
+            }
         }
 
 
@@ -289,7 +197,7 @@ namespace CommonAPI
             if (newState) return;
 
             numTexts[index].text = "";
-            numbers[index] = 0;
+            itemCounts[index] = 0;
             stateArray[index] = 0U;
             iconIndexArray[index] = 0U;
         }
@@ -306,7 +214,7 @@ namespace CommonAPI
                 }
             }
 
-            Array.Clear(numbers, 0, 400);
+            Array.Clear(itemCounts, 0, 400);
             Array.Clear(stateArray, 0, stateArray.Length);
             Array.Clear(iconIndexArray, 0, iconIndexArray.Length);
         }
@@ -322,12 +230,20 @@ namespace CommonAPI
 
         public void OnStorageDataChanged()
         {
-            Array.Clear(stateArray, 0, stateArray.Length);
-            stateBuffer.SetData(stateArray);
-            bgImageMat.SetBuffer(buffer, stateBuffer);
-            Array.Clear(iconIndexArray, 0, iconIndexArray.Length);
-            iconIndexBuffer.SetData(iconIndexArray);
-            iconImageMat.SetBuffer(indexBuffer, iconIndexBuffer);
+            if (bgImageMat != null)
+            {
+                Array.Clear(stateArray, 0, stateArray.Length);
+                stateBuffer.SetData(stateArray);
+                bgImageMat.SetBuffer(buffer, stateBuffer);
+            }
+
+            if (iconImageMat != null)
+            {
+                Array.Clear(iconIndexArray, 0, iconIndexArray.Length);
+                iconIndexBuffer.SetData(iconIndexArray);
+                iconImageMat.SetBuffer(indexBuffer, iconIndexBuffer);
+            }
+
             OnStorageSizeChanged();
         }
 
@@ -375,8 +291,8 @@ namespace CommonAPI
                     SetGridGraphic(i, true);
                     iconIndexArray[i] = GameMain.iconSet.itemIconIndex[item.GetItemId()];
                     stateArray[i] = 1U;
-                    bool updateValue = numbers[i] != item.GetCount();
-                    numbers[i] = item.GetCount();
+                    bool updateValue = itemCounts[i] != item.GetCount();
+                    itemCounts[i] = item.GetCount();
 
                     if (!updateValue) continue;
 
@@ -403,28 +319,27 @@ namespace CommonAPI
         }
 
 
-        public void OnContentMouseEnter(BaseEventData eventData)
+        public virtual void OnContentMouseEnter(BaseEventData eventData)
         {
-            mouseInTime = 0f;
         }
 
 
-        public void OnContentMouseExit(BaseEventData eventData)
+        public virtual void OnContentMouseExit(BaseEventData eventData)
         {
-            mouseInTime = 0f;
-            mouseOnX = -1;
-            mouseOnY = -1;
         }
 
 
         public void OnContentMouseDown(BaseEventData eventData)
         {
+            CommonAPIPlugin.logger.LogInfo("Mouse down");
             if (GameMain.mainPlayer == null)
             {
                 return;
             }
 
-            if (GetGridPos(out int gridX, out int gridY)) return;
+            if (!GetGridPos(out int gridX, out int gridY)) return;
+            
+            CommonAPIPlugin.logger.LogInfo($"pos: {gridX} {gridY}");
 
             int grid = gridX + gridY * colCount;
             if (eventData is PointerEventData pointerEventData)
@@ -481,7 +396,7 @@ namespace CommonAPI
                 OnGridRightMouseUp(GameMain.mainPlayer);
             }
 
-            if (GetGridPos(out int gridX, out int gridY)) return;
+            if (!GetGridPos(out int gridX, out int gridY)) return;
 
             int grid = gridX + gridY * colCount;
             OnGridMouseUp(grid, (int) pointer.button, VFInput.shift, VFInput.control, GameMain.mainPlayer);
