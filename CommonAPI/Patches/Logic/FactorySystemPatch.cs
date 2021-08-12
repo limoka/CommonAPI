@@ -105,9 +105,9 @@ namespace CommonAPI
             CustomFactory.UpdateMultithread(__instance.factory, _usedThreadCnt, _curThreadIdx, 4);
         }  
         
-        [HarmonyPatch(typeof(CargoTraffic), "GameTickPresentCargoPaths", new Type[] {typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int)})]
+        [HarmonyPatch(typeof(CargoTraffic), "PresentCargoPathsAsync", new Type[] {typeof(bool), typeof(int), typeof(int), typeof(int)})]
         [HarmonyPostfix]
-        public static void PostUpdateMultithread(CargoTraffic __instance, long time, bool presentCargos, int _usedThreadCnt, int _curThreadIdx)
+        public static void PostUpdateMultithread(CargoTraffic __instance, bool presentCargos, int _usedThreadCnt, int _curThreadIdx)
         {
             CustomFactory.PostUpdateMultithread(__instance.factory, _usedThreadCnt, _curThreadIdx, 4);
         }
