@@ -145,7 +145,7 @@ namespace CommonAPITests
             objects.Add(null);
             for (int i = 1; i < registry.data.Count; i++)
             {
-                TestPool2 pool = new(i, registry);
+                TestPool2 pool = new TestPool2(i, registry);
                 objects.Add(pool);
                 
                 pool.Init(8);
@@ -155,7 +155,7 @@ namespace CommonAPITests
             objects2.Add(null);
             for (int i = 1; i < registry2.data.Count; i++)
             {
-                TestPool2 pool = new(i, registry2);
+                TestPool2 pool = new TestPool2(i, registry2);
                 objects2.Add(pool);
                 
                 pool.Init(8);

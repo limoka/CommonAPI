@@ -7,13 +7,13 @@ namespace CommonAPITests
     {
         public static void GetSerializationSetup(Action<BinaryWriter> write, Action<BinaryReader> read)
         {
-            MemoryStream stream = new();
-            BinaryWriter writer = new(stream);
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter writer = new BinaryWriter(stream);
 
             write(writer);
             
             stream.Position = 0;
-            BinaryReader reader = new(stream);
+            BinaryReader reader = new BinaryReader(stream);
 
             read(reader);
         }
