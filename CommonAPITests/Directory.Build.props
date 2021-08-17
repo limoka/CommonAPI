@@ -47,8 +47,12 @@
   </ItemGroup>
 
   <ItemGroup>
-	<Reference Include="$(DumpedAssembliesDir)Assembly-CSharp.dll" Private="false" SpecificVersion="true" />
-    <Reference Include="$(DSPAssemblyDir)UnityEngine.CoreModule.dll" Private="false" SpecificVersion="true" />
+    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>$(DumpedAssembliesDir)Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>$(DSPAssemblyDir)UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
