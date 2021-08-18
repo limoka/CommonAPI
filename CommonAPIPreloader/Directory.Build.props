@@ -14,7 +14,7 @@
     <SteamDir>$([MSBuild]::EnsureTrailingSlash('$(SteamDir)'))</SteamDir>
     <BepInExDir>$(DSPGameDir)BepInEx\core\</BepInExDir>
     <DSPAssemblyDir>$(DSPGameDir)DSPGAME_Data\Managed\</DSPAssemblyDir>
-    <PluginOutputDirectory>$(DSPGameDir)BepInEx\plugins\CommonAPI\</PluginOutputDirectory>
+    <PluginOutputDirectory>$(DSPGameDir)BepInEx\patchers\CommonAPI\</PluginOutputDirectory>
   </PropertyGroup>
 
   <PropertyGroup Label="Common Properties">

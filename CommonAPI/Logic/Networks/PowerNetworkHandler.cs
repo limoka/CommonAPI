@@ -61,9 +61,14 @@ namespace CommonAPI
             return proto.prefabDesc.isPowerNode;
         }
 
-        public override int GetNodeId(EntityData entity, Vector3 pos)
+        public override int GetNodeId(EntityData entity, Vector3 pos, Func<Node, bool> filter = null)
         {
-            return entity.powerNodeId;
+            if (filter == null || filter(GetNodeWithId(entity.powerNodeId)))
+            {
+                return entity.powerNodeId;
+            }
+
+            return 0;
         }
         
         public override NodeBounds GetNodeBounds(PrefabDesc prefab, int nodeId)

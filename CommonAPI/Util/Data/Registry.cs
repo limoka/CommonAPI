@@ -22,6 +22,15 @@ namespace CommonAPI
         {
             
         }
+
+        public void InitUnitMigrationMap()
+        {
+            migrationMap.Clear();
+            foreach (var kv in idMap)
+            {
+                migrationMap.Add(kv.Value, kv.Value);
+            }
+        }
         
         public int Register(string key, object item = null)
         {
@@ -69,6 +78,7 @@ namespace CommonAPI
 
         public void Import(BinaryReader r)
         {
+            migrationMap.Clear();
             r.ReadByte();
             int count = r.ReadInt32();
             for (int i = 0; i < count; i++)

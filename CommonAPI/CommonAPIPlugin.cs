@@ -7,6 +7,7 @@ using BepInEx;
 using BepInEx.Logging;
 using crecheng.DSPModSave;
 using HarmonyLib;
+using NebulaAPI;
 
 [module: UnverifiableCode]
 #pragma warning disable 618
@@ -17,7 +18,7 @@ namespace CommonAPI
 {
     
     [BepInPlugin(GUID, NAME, VERSION)]
-    public class CommonAPIPlugin : BaseUnityPlugin, IModCanSave
+    public class CommonAPIPlugin : BaseUnityPlugin, IModCanSave, IMultiplayerMod
     {
         public const string ID = "CommonAPI";
         public const string GUID = "org.kremnev8.api." + ID;
@@ -28,7 +29,7 @@ namespace CommonAPI
         public static ManualLogSource logger;
         public static ResourceData resource;
 
-        public static Dictionary<string, ISerializeState> registries = new Dictionary<string, ISerializeState>();
+        public static Dictionary<string, Registry> registries = new Dictionary<string, Registry>();
         
 
         void Awake()
@@ -53,6 +54,9 @@ namespace CommonAPI
             
             NetworksRegistry.AddHandler(new PowerNetworkHandler());
             
+            NebulaModAPI.RegisterPackets(Assembly.GetExecutingAssembly());
+            NebulaModAPI.RegisterModFactoryData(new CustomFactorySerializer());
+            
             LoadSaveOnLoad.Init();
             
             logger.LogInfo("Common API is initialized!");
@@ -60,6 +64,7 @@ namespace CommonAPI
 
         public void Import(BinaryReader r)
         {
+            
             int ver = r.ReadInt32();
             
             while (true)
@@ -106,7 +111,18 @@ namespace CommonAPI
 
         public void IntoOtherSave()
         {
+            if (NebulaModAPI.nebulaIsInstalled && !NebulaModAPI.GetLocalPlayer().IsMasterClient)
+            {
+                foreach (var kv in registries)
+                {
+                    kv.Value.InitUnitMigrationMap();
+                }
+            }
+            
             CustomFactory.InitOnLoad();
         }
+
+        public string Verson => VERSION;
+        public bool CheckVersion => true;
     }
 }
