@@ -7,12 +7,18 @@ namespace CommonAPI
     [HarmonyPatch]
     public class UIGamePatch
     {
-
+        [HarmonyPatch(typeof(UIGame), "_OnCreate")]
+        [HarmonyPostfix]
+        public static void OnCreate(UIGame __instance)
+        {
+            UISystem.OnCreate(__instance);
+        }
+        
         [HarmonyPatch(typeof(UIGame), "_OnDestroy")]
         [HarmonyPostfix]
         public static void OnDestroy()
         {
-            foreach (var window in UIRegistry.windows)
+            foreach (var window in UISystem.windows)
             {
                 window._Destroy();
             }
@@ -22,7 +28,7 @@ namespace CommonAPI
         [HarmonyPostfix]
         public static void OnInit(UIGame __instance)
         {
-            foreach (var window in UIRegistry.windows)
+            foreach (var window in UISystem.windows)
             {
                 window._Init(__instance.gameData);
                 window.Open(0);
@@ -33,7 +39,7 @@ namespace CommonAPI
         [HarmonyPostfix]
         public static void OnFree()
         {
-            foreach (var window in UIRegistry.windows)
+            foreach (var window in UISystem.windows)
             {
                 window._Free();
             }
@@ -43,7 +49,7 @@ namespace CommonAPI
         [HarmonyPostfix]
         public static void OnUpdate()
         {
-            foreach (var window in UIRegistry.windows)
+            foreach (var window in UISystem.windows)
             {
                 window.OnUpdateUI();
             }
@@ -54,7 +60,7 @@ namespace CommonAPI
         [HarmonyPostfix]
         public static void ShutAllFunctionWindow()
         {
-            foreach (var window in UIRegistry.windows)
+            foreach (var window in UISystem.windows)
             {
                 window.Close();
             }
@@ -66,7 +72,7 @@ namespace CommonAPI
         {
             if (__result) return;
                 
-            foreach (var window in UIRegistry.windows)
+            foreach (var window in UISystem.windows)
             {
                 if (window.active)
                 {
@@ -80,44 +86,7 @@ namespace CommonAPI
         [HarmonyPostfix]
         public static void OnPlayerInspecteeChange(UIGame __instance, EObjectType objType, int objId)
         {
-            PlanetFactory factory = GameMain.mainPlayer.factory;
-            int componentId = -1;
-            int protoId = 0;
-            if (factory != null && objType == EObjectType.Entity && objId > 0)
-            {
-                componentId = factory.entityPool[objId].customType;
-                protoId = factory.entityPool[objId].protoId;
-            }
-
-            CustomMachineWindow currentWindow = null;
-
-            foreach (var window in UIRegistry.windows)
-            {
-                if (window.ShouldOpen(componentId, protoId))
-                {
-                    currentWindow = window;
-                    break;
-                }
-            }
-
-            if (currentWindow == null) return;
-
-            if (objId > 0 && UIRegistry.customInspectId != objId)
-            {
-                if (currentWindow.DoCloseOtherWindows())
-                    __instance.ShutAllFunctionWindow();
-
-                if (currentWindow.DoClosePlayerInventory())
-                    __instance.ShutPlayerInventory();
-
-                currentWindow.Open(objId);
-            }
-            else if (objId == 0 && UIRegistry.customInspectId > 0)
-            {
-                currentWindow.Close();
-            }
-
-            UIRegistry.customInspectId = objId;
+           UISystem.OnPlayerInspecteeChange(__instance, objType, objId);
         }
     }
 }

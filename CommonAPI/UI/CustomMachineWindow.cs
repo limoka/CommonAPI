@@ -41,6 +41,7 @@ namespace CommonAPI
                 OnIdChange();
             }
             transform.SetAsLastSibling();
+            UISystem.openWindow = this;
             _Open();
         }
 
@@ -63,10 +64,11 @@ namespace CommonAPI
             factory = null;
             powerSystem = null;
             
-            UIRegistry.customInspectId = 0;
+            UISystem.customInspectId = 0;
+            UISystem.openWindow = null;
         }
 
-        protected void OnIdChange()
+        internal void OnIdChange()
         {
             if (entityId == 0 || factory == null)
             {
