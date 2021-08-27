@@ -420,13 +420,13 @@ namespace CommonAPI
         /// <param name="gridIndex">Index in craft menu, format : PYXX, P - page</param>
         /// <param name="stackSize">Stack size of the item</param>
         public static ItemProto RegisterItem(int id, string name, string description, string iconPath,
-            int gridIndex, int stackSize = 50)
+            int gridIndex, int stackSize = 50, EItemType type = EItemType.Material)
         {
             //int id = findAvailableID(1001, LDB.items, items);
 
             ItemProto proto = new ItemProto
             {
-                Type = EItemType.Material,
+                Type = type,
                 StackSize = stackSize,
                 FuelType = 0,
                 IconPath = iconPath,
