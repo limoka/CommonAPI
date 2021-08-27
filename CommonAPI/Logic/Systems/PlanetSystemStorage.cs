@@ -4,20 +4,20 @@ using System.IO;
 
 namespace CommonAPI
 {
-    public class FactorySystemStorage : ISerializeState
+    public class PlanetSystemStorage : ISerializeState
     {
-        public List<IFactorySystem> planetSystems = new List<IFactorySystem>();
-        public int systemIndex;
+        public List<IPlanetSystem> systems = new List<IPlanetSystem>();
+        public int planetIndex;
         
         public void InitOnLoad(GameData data, int index)
         {
-            planetSystems.Capacity = data.factoryCount;
-            systemIndex = index;
+            systems.Capacity = data.factoryCount;
+            planetIndex = index;
             
             for (int i = 0; i < data.factoryCount; i++)
             {
-                planetSystems.Add(CustomFactory.systemRegistry.GetNew(index));
-                planetSystems[i].Init(data.factories[i]);
+                systems.Add(PlanetSystemManager.registry.GetNew(index));
+                systems[i].Init(data.factories[i]);
             }
         }
 
@@ -25,17 +25,17 @@ namespace CommonAPI
         {
             if (GetSystem(planet.factory) != null) return;
             
-            planetSystems.Capacity += 1;
-            planetSystems.Add(CustomFactory.systemRegistry.GetNew(systemIndex));
-            planetSystems[planet.factory.index].Init(planet.factory);
+            systems.Capacity += 1;
+            systems.Add(PlanetSystemManager.registry.GetNew(planetIndex));
+            systems[planet.factory.index].Init(planet.factory);
         }
         
         
-        public IFactorySystem GetSystem(PlanetFactory factory)
+        public IPlanetSystem GetSystem(PlanetFactory factory)
         {
-            if (factory.index >= 0 && factory.index < planetSystems.Count)
+            if (factory.index >= 0 && factory.index < systems.Count)
             {
-                return planetSystems[factory.index];
+                return systems[factory.index];
             }
 
             return null;
@@ -75,22 +75,22 @@ namespace CommonAPI
 
         public bool PreUpdateSupportsMultithread()
         {
-            return planetSystems[0] is IPreUpdateMultithread;
+            return systems[0] is IPreUpdateMultithread;
         }
         
         public bool UpdateSupportsMultithread()
         {
-            return planetSystems[0] is IUpdateMultithread;
+            return systems[0] is IUpdateMultithread;
         }
         
         public bool PostUpdateSupportsMultithread()
         {
-            return planetSystems[0] is IPostUpdateMultithread;
+            return systems[0] is IPostUpdateMultithread;
         }
         
         public bool PowerUpdateSupportsMultithread()
         {
-            return planetSystems[0] is IPowerUpdateMultithread;
+            return systems[0] is IPowerUpdateMultithread;
         }
         
         public void PreUpdateMultithread(PlanetFactory factory, int usedThreadCount, int currentThreadIdx, int minimumCount)
@@ -127,12 +127,12 @@ namespace CommonAPI
         
         public void Free()
         {
-            foreach (IFactorySystem system in planetSystems)
+            foreach (IPlanetSystem system in systems)
             {
                 system.Free();
             }
-            planetSystems.Clear();
-            planetSystems = null;
+            systems.Clear();
+            systems = null;
         }
 
         public void Export(BinaryWriter w)
@@ -145,7 +145,7 @@ namespace CommonAPI
 
             for (int i = 0; i < data.factoryCount; i++)
             {
-                planetSystems[i].Export(w);
+                systems[i].Export(w);
             }
         }
 
@@ -157,14 +157,14 @@ namespace CommonAPI
 
             int ver = r.ReadInt32();
             
-            planetSystems.Clear();
-            planetSystems.Capacity = data.factoryCount;
+            systems.Clear();
+            systems.Capacity = data.factoryCount;
 
             for (int i = 0; i < data.factoryCount; i++)
             {
-                planetSystems.Add(CustomFactory.systemRegistry.GetNew(systemIndex));
-                planetSystems[i].Init(data.factories[i]);
-                planetSystems[i].Import(r);
+                systems.Add(PlanetSystemManager.registry.GetNew(planetIndex));
+                systems[i].Init(data.factories[i]);
+                systems[i].Import(r);
             }
         }
     }

@@ -3,7 +3,7 @@ using System.IO;
 
 namespace CommonAPI
 {
-    public class ComponentSystem : IUpdateMultithread, IPowerUpdateMultithread
+    public class ComponentSystem : IPlanetSystem, IUpdateMultithread, IPowerUpdateMultithread, IComponentStateListener
     {
         public static readonly string systemID = $"{CommonAPIPlugin.ID}:ComponentSystem";
         
@@ -13,7 +13,7 @@ namespace CommonAPI
             get
             {
                 if (_cachedId == 0)
-                    _cachedId = CustomFactory.systemRegistry.GetUniqueId(systemID);
+                    _cachedId = PlanetSystemManager.registry.GetUniqueId(systemID);
                 
                 return _cachedId;
             }

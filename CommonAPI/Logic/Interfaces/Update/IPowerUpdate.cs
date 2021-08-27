@@ -3,7 +3,7 @@
     /// <summary>
     /// Allow this factory system to receive update calls
     /// </summary>
-    public interface IPowerUpdate : IFactorySystem
+    public interface IPowerUpdate
     {
         /// <summary>
         /// This call will happen before power update 

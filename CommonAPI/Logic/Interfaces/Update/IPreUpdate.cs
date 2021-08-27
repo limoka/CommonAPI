@@ -3,7 +3,7 @@
     /// <summary>
     /// Allow this factory system to receive update calls
     /// </summary>
-    public interface IPreUpdate : IFactorySystem
+    public interface IPreUpdate
     {
         /// <summary>
         /// This call will happen before main factory update 

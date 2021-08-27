@@ -18,6 +18,7 @@ namespace CommonAPI
 {
     
     [BepInPlugin(GUID, NAME, VERSION)]
+    [BepInDependency(NebulaModAPI.API_GUID)]
     public class CommonAPIPlugin : BaseUnityPlugin, IModCanSave, IMultiplayerMod
     {
         public const string ID = "CommonAPI";
@@ -46,16 +47,17 @@ namespace CommonAPI
             Harmony harmony = new Harmony(GUID);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            registries.Add($"{ID}:SystemsRegistry", CustomFactory.systemRegistry);
+            registries.Add($"{ID}:PlanetSystemsRegistry", PlanetSystemManager.registry);
+            registries.Add($"{ID}:StarSystemsRegistry", StarSystemManager.registry);
             registries.Add($"{ID}:ComponentRegistry", ComponentSystem.componentRegistry);
             registries.Add($"{ID}:RecipeTypeRegistry", ProtoRegistry.recipeTypes);
 
-            CustomFactory.systemRegistry.Register(ComponentSystem.systemID, typeof(ComponentSystem));
+            PlanetSystemManager.registry.Register(ComponentSystem.systemID, typeof(ComponentSystem));
             
             NetworksRegistry.AddHandler(new PowerNetworkHandler());
             
             NebulaModAPI.RegisterPackets(Assembly.GetExecutingAssembly());
-            NebulaModAPI.RegisterModFactoryData(new CustomFactorySerializer());
+            NebulaModAPI.RegisterModFactoryData(new PlanetSystemSerializer());
             
             LoadSaveOnLoad.Init();
             
@@ -65,7 +67,7 @@ namespace CommonAPI
         public void Import(BinaryReader r)
         {
             
-            int ver = r.ReadInt32();
+            r.ReadInt32();
             
             while (true)
             {
@@ -84,9 +86,12 @@ namespace CommonAPI
                     r.ReadBytes((int)len);
                 }
             }
+            
+            StarSystemManager.InitOnLoad();
+            StarSystemManager.Import(r);
 
-            CustomFactory.InitOnLoad();
-            CustomFactory.Import(r);
+            PlanetSystemManager.InitOnLoad();
+            PlanetSystemManager.Import(r);
         }
 
         public void Export(BinaryWriter w)
@@ -105,13 +110,14 @@ namespace CommonAPI
             }
 
             w.Write((byte)0);
-
-            CustomFactory.Export(w);
+            
+            StarSystemManager.Export(w);
+            PlanetSystemManager.Export(w);
         }
 
         public void IntoOtherSave()
         {
-            if (NebulaModAPI.nebulaIsInstalled && !NebulaModAPI.GetLocalPlayer().IsMasterClient)
+            if (NebulaModAPI.NebulaIsInstalled && !NebulaModAPI.GetLocalPlayer().IsMasterClient)
             {
                 foreach (var kv in registries)
                 {
@@ -119,10 +125,10 @@ namespace CommonAPI
                 }
             }
             
-            CustomFactory.InitOnLoad();
+            StarSystemManager.InitOnLoad();
+            PlanetSystemManager.InitOnLoad();
         }
 
-        public string Verson => VERSION;
-        public bool CheckVersion => true;
+        public string Version => VERSION;
     }
 }
