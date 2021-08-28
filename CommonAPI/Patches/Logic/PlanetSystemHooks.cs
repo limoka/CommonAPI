@@ -11,6 +11,16 @@ namespace CommonAPI
     [HarmonyPatch]
     public static class PlanetSystemHooks
     {
+        
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(FactoryModel), "OnCameraPostRender")]
+        public static void OnRender(FactoryModel __instance)
+        {
+            if (__instance.planet == null || !__instance.planet.factoryLoaded || __instance.planet != GameMain.localPlanet) return;
+            
+            PlanetSystemManager.DrawUpdate(__instance.planet.factory);
+        }
+
         //Single thread update calls (Only when game is running in single thread mode)
         [HarmonyPatch(typeof(FactorySystem), "GameTickBeforePower")]
         [HarmonyPostfix]

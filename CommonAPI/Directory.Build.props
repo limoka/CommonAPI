@@ -43,7 +43,7 @@
   <ItemGroup Label="Plugins">
     <Reference Include="$(MSBuildThisFileDirectory)/../Libs/DSPModSave.dll" Private="false" SpecificVersion="false" />
     <Reference Include="$(MSBuildThisFileDirectory)/../Libs/LDBTool.dll" Private="false" SpecificVersion="false" />
-    <Reference Include="$(NebulaDllDir)NebulaAPI.dll"/> 
+    <Reference Include="$(NebulaDllDir)NebulaAPI.dll" Private="false" SpecificVersion="false"/> 
   </ItemGroup>
   
   <ItemGroup Label="BepInEx">

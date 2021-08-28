@@ -48,7 +48,8 @@ namespace CommonAPI
         {
             if (idMap.ContainsKey(typeId))
                 return idMap[typeId];
-            return 0;
+            
+            throw new ArgumentException($"Item with id {typeId} is not registered!");
         }
 
         public int MigrateId(int oldId)

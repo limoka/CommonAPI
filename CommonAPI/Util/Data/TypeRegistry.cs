@@ -9,6 +9,16 @@ namespace CommonAPI
     public class TypeRegistry<TItem, TCont> : InstanceRegistry<Type>
         where TCont : ISerializeState
     {
+        public override int Register(string key, Type item)
+        {
+            if (typeof(TItem).IsAssignableFrom(item))
+            {
+                return base.Register(key, item);
+            }
+
+            throw new ArgumentException($"Trying to register type {item.FullName}, which does not implement {typeof(TItem).FullName}!");
+        }
+
         public TItem GetNew(int typeId)
         {
             if (typeId > 0 && typeId < data.Count)
@@ -16,7 +26,7 @@ namespace CommonAPI
                 return (TItem) Activator.CreateInstance(data[typeId]);
             }
 
-            return default;
+            throw new ArgumentException($"Item with id {typeId} is not registered!");
         }
 
         public void ImportAndMigrate(IList<TCont> list, BinaryReader r)

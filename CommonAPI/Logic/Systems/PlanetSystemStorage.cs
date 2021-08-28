@@ -40,6 +40,14 @@ namespace CommonAPI
 
             return null;
         }
+        
+        public void DrawUpdate(PlanetFactory factory)
+        {
+            if (GetSystem(factory) is IDrawUpdate draw)
+            {
+                draw.Draw();
+            }
+        }
 
         public void PreUpdate(PlanetFactory factory)
         {

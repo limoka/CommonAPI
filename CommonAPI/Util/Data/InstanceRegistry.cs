@@ -20,7 +20,7 @@ namespace CommonAPI
             }
         }
 
-        public int Register(string key, T item)
+        public virtual int Register(string key, T item)
         {
             return Register(key, (object)item);
         }

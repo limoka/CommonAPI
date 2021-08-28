@@ -57,7 +57,14 @@ namespace CommonAPI
             NetworksRegistry.AddHandler(new PowerNetworkHandler());
             
             NebulaModAPI.RegisterPackets(Assembly.GetExecutingAssembly());
-            NebulaModAPI.RegisterModFactoryData(new PlanetSystemSerializer());
+            NebulaModAPI.OnPlanetLoadRequest += planetId =>
+            {
+                NebulaModAPI.MultiplayerSession.Network.SendPacket(new PlanetSystemLoadRequest(planetId));
+            };
+            NebulaModAPI.OnStarLoadRequest += starIndex =>
+            {
+                NebulaModAPI.MultiplayerSession.Network.SendPacket(new StarSystemLoadRequest(starIndex));
+            };
             
             LoadSaveOnLoad.Init();
             
@@ -117,7 +124,7 @@ namespace CommonAPI
 
         public void IntoOtherSave()
         {
-            if (NebulaModAPI.NebulaIsInstalled && !NebulaModAPI.GetLocalPlayer().IsMasterClient)
+            if (NebulaModAPI.IsMultiplayerActive && !NebulaModAPI.MultiplayerSession.LocalPlayer.IsHost)
             {
                 foreach (var kv in registries)
                 {
@@ -127,6 +134,11 @@ namespace CommonAPI
             
             StarSystemManager.InitOnLoad();
             PlanetSystemManager.InitOnLoad();
+        }
+
+        public bool CheckVersion(string hostVersion, string clientVersion)
+        {
+            return hostVersion.Equals(clientVersion);
         }
 
         public string Version => VERSION;

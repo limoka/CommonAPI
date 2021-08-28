@@ -1,10 +1,20 @@
-﻿using HarmonyLib;
+﻿using System;
+using HarmonyLib;
 
 namespace CommonAPI
 {
     [HarmonyPatch]
     public static class StarSystemHooks
     {
+        [HarmonyPatch(typeof(GameData), "OnDraw")]
+        [HarmonyPostfix]
+        public static void DrawCall(GameData __instance, int frame)
+        {
+            PerformanceMonitor.BeginSample(ECpuWorkEntry.DrawCall);
+            StarSystemManager.DrawUpdate();
+            PerformanceMonitor.EndSample(ECpuWorkEntry.DrawCall);
+        }
+
         //Single thread update calls
         [HarmonyPatch(typeof(GameData), "GameTick")]
         [HarmonyPrefix]
@@ -60,7 +70,7 @@ namespace CommonAPI
         
         //TODO improve multi-thread calls
         
-        [HarmonyPatch(typeof(DysonSphere), "RocketGameTick")]
+        [HarmonyPatch(typeof(DysonSphere), "RocketGameTick", typeof(int), typeof(int), typeof(int))]
         [HarmonyPostfix]
         public static void PowerTickMultithread(DysonSphere __instance, int _usedThreadCnt, int _curThreadIdx)
         {

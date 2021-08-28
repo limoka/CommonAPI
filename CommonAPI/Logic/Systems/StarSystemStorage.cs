@@ -39,6 +39,14 @@ namespace CommonAPI
 
             return null;
         }
+        
+        public void DrawUpdate(StarData star)
+        {
+            if (GetSystem(star) is IDrawUpdate draw)
+            {
+                draw.Draw();
+            }
+        }
 
         public void PreUpdate(StarData star)
         {
