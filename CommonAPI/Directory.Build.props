@@ -6,17 +6,21 @@
   </PropertyGroup>
 
   <!-- This sets $(DSPGameDir) -->
-  <Import Project="$(DevEnvLoc)" Condition="Exists('$(DevEnvLoc)')" />
+  <Import Project="$(DevEnvLoc)" Condition="Exists('$(DevEnvLoc)')" /> 
 
   <PropertyGroup Label="Game Install Properties">
     <DSPGameDir Condition="!Exists('$(DevEnvLoc)')">C:\Program Files (x86)\Steam\steamapps\common\Dyson Sphere Program\</DSPGameDir>
     <DSPGameDir>$([MSBuild]::EnsureTrailingSlash('$(DSPGameDir)'))</DSPGameDir>
+    <NebulaSolDir>$([MSBuild]::EnsureTrailingSlash('$(NebulaSolDir)'))</NebulaSolDir>
+    <NebulaDllDir Condition="!Exists('$(NebulaSolDir)')">$(DSPGameDir)BepInEx\plugins\Nebula\</NebulaDllDir>
+    <NebulaDllDir Condition="Exists('$(NebulaSolDir)')">$(NebulaSolDir)NebulaAPI\obj\Debug\</NebulaDllDir>
     <SteamDir>$([MSBuild]::EnsureTrailingSlash('$(SteamDir)'))</SteamDir>
     <BepInExDir>$(DSPGameDir)BepInEx\core\</BepInExDir>
     <DSPAssemblyDir>$(DSPGameDir)DSPGAME_Data\Managed\</DSPAssemblyDir>
     <PluginOutputDirectory>$(DSPGameDir)BepInEx\plugins\CommonAPI\</PluginOutputDirectory>
 	<DumpedAssembliesDir>$(DSPGameDir)BepInEx\DumpedAssemblies\</DumpedAssembliesDir>
     <ProjectDir>$(MSBuildThisFileDirectory)\</ProjectDir>
+    <NebulaDir>$(DSPGameDir)BepInEx\plugins\Nebula\</NebulaDir>
   </PropertyGroup>
 
   <PropertyGroup Label="Common Properties">
@@ -39,6 +43,7 @@
   <ItemGroup Label="Plugins">
     <Reference Include="$(MSBuildThisFileDirectory)/../Libs/DSPModSave.dll" Private="false" SpecificVersion="false" />
     <Reference Include="$(MSBuildThisFileDirectory)/../Libs/LDBTool.dll" Private="false" SpecificVersion="false" />
+    <Reference Include="$(NebulaDllDir)NebulaAPI.dll" Private="false" SpecificVersion="false"/> 
   </ItemGroup>
   
   <ItemGroup Label="BepInEx">

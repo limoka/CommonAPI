@@ -22,6 +22,15 @@ namespace CommonAPI
         {
             
         }
+
+        public void InitUnitMigrationMap()
+        {
+            migrationMap.Clear();
+            foreach (var kv in idMap)
+            {
+                migrationMap.Add(kv.Value, kv.Value);
+            }
+        }
         
         public int Register(string key, object item = null)
         {
@@ -39,7 +48,8 @@ namespace CommonAPI
         {
             if (idMap.ContainsKey(typeId))
                 return idMap[typeId];
-            return 0;
+            
+            throw new ArgumentException($"Item with id {typeId} is not registered!");
         }
 
         public int MigrateId(int oldId)
@@ -69,6 +79,7 @@ namespace CommonAPI
 
         public void Import(BinaryReader r)
         {
+            migrationMap.Clear();
             r.ReadByte();
             int count = r.ReadInt32();
             for (int i = 0; i < count; i++)

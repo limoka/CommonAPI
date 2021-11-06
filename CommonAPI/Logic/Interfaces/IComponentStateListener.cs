@@ -1,17 +1,11 @@
-﻿using System.Collections.Generic;
-using System.IO;
-
-namespace CommonAPI
+﻿namespace CommonAPI
 {
     /// <summary>
-    /// Defines a factory system, which has one instance per planet.
+    /// Allows to listen to factory component add/remove events
     /// </summary>
-    public interface IFactorySystem : ISerializeState
+    public interface IComponentStateListener
     {
-        void Init(PlanetFactory factory);
-
         void OnLogicComponentsAdd(int entityId, PrefabDesc desc, int prebuildId);
-        
         void OnPostlogicComponentsAdd(int entityId, PrefabDesc desc, int prebuildId);
         void OnLogicComponentsRemove(int entityId);
     }

@@ -39,8 +39,7 @@ namespace CommonAPI
 
         public abstract bool IsRelatedTo(ItemProto proto);
 
-        public abstract int GetNodeId(EntityData entity, Vector3 pos);
-
+        public abstract int GetNodeId(EntityData entity, Vector3 pos, Func<Node, bool> filter = null);
         public abstract NodeBounds GetNodeBounds(PrefabDesc prefab, int nodeId);
         
         public bool DisconnectAll(int nodeId)

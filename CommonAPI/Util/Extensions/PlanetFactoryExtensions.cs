@@ -2,10 +2,10 @@
 {
     public static class PlanetFactoryExtensions
     {
-        public static T GetSystem<T>(this PlanetFactory factory, int systemId) where T : IFactorySystem
+        public static T GetSystem<T>(this PlanetFactory factory, int systemId) where T : IPlanetSystem
         {
             if (systemId <= 0) return default;
-            return (T)CustomFactory.systems[systemId].GetSystem(factory);
+            return (T)PlanetSystemManager.systems[systemId].GetSystem(factory);
         }
     }
 }

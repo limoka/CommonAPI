@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using CommonAPI;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
@@ -14,14 +15,14 @@ namespace CommonAPITests
         public int data;
         public bool test;
 
-        public bool updated;
+        public int updateCount;
         
         public void Free()
         {
             id = 0;
             data = 123;
             test = true;
-            updated = false;
+            updateCount = 0;
         }
 
         public void Export(BinaryWriter w)
@@ -60,7 +61,7 @@ namespace CommonAPITests
         {
             return poolable =>
             {
-                poolable.updated = true;
+                poolable.updateCount++;
             };
         }
     }
@@ -101,9 +102,14 @@ namespace CommonAPITests
             pool.AddPoolItem(new object[] {randomizer});
             pool.AddPoolItem(new object[] {randomizer});
             pool.AddPoolItem(new object[] {randomizer});
-            pool.AddPoolItem(new object[] {randomizer});
+
+            PoolItem item = new PoolItem {updateCount = 1};
+
+            int id = pool.AddPoolItem(item, new object[] {randomizer});
 
             AreEqual(10, pool.poolCursor);
+            
+            AreEqual(1, pool[id].updateCount);
         }
         
         [Test]
@@ -148,7 +154,44 @@ namespace CommonAPITests
             {
                 if (item != null && item.id != 0)
                 {
-                    True(item.updated);
+                    AreEqual(1, item.updateCount);
+                }
+            }
+        }
+        
+        [Test]
+        public void TestUpdatingElementsInMultithread()
+        {
+            pool.AddPoolItem(new object[] {randomizer});
+            int id = pool.AddPoolItem(new object[] {randomizer});
+            pool.AddPoolItem(new object[] {randomizer});
+            pool.AddPoolItem(new object[] {randomizer});
+            pool.AddPoolItem(new object[] {randomizer});
+            pool.AddPoolItem(new object[] {randomizer});
+            pool.AddPoolItem(new object[] {randomizer});
+            pool.AddPoolItem(new object[] {randomizer});
+            pool.AddPoolItem(new object[] {randomizer});
+            
+            pool.RemovePoolItem( id);
+
+            Task[] tasks = new Task[4];
+
+            for (int i = 0; i < 4; i++)
+            {
+                int threadIdx = i;
+                tasks[i] = Task.Factory.StartNew(() =>
+                {
+                    pool.UpdatePoolMultithread(4, threadIdx, 2);
+                });
+            }
+
+            Task.WaitAll(tasks);
+
+            foreach (PoolItem item in pool.pool)
+            {
+                if (item != null && item.id != 0)
+                {
+                    AreEqual(1, item.updateCount);
                 }
             }
         }

@@ -7,6 +7,7 @@ using BepInEx;
 using BepInEx.Logging;
 using crecheng.DSPModSave;
 using HarmonyLib;
+using NebulaAPI;
 
 [module: UnverifiableCode]
 #pragma warning disable 618
@@ -17,7 +18,8 @@ namespace CommonAPI
 {
     
     [BepInPlugin(GUID, NAME, VERSION)]
-    public class CommonAPIPlugin : BaseUnityPlugin, IModCanSave
+    [BepInDependency(NebulaModAPI.API_GUID)]
+    public class CommonAPIPlugin : BaseUnityPlugin, IModCanSave, IMultiplayerMod
     {
         public const string ID = "CommonAPI";
         public const string GUID = "org.kremnev8.api." + ID;
@@ -28,7 +30,7 @@ namespace CommonAPI
         public static ManualLogSource logger;
         public static ResourceData resource;
 
-        public static Dictionary<string, ISerializeState> registries = new Dictionary<string, ISerializeState>();
+        public static Dictionary<string, Registry> registries = new Dictionary<string, Registry>();
         
 
         void Awake()
@@ -45,13 +47,24 @@ namespace CommonAPI
             Harmony harmony = new Harmony(GUID);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            registries.Add($"{ID}:SystemsRegistry", CustomFactory.systemRegistry);
+            registries.Add($"{ID}:PlanetSystemsRegistry", PlanetSystemManager.registry);
+            registries.Add($"{ID}:StarSystemsRegistry", StarSystemManager.registry);
             registries.Add($"{ID}:ComponentRegistry", ComponentSystem.componentRegistry);
             registries.Add($"{ID}:RecipeTypeRegistry", ProtoRegistry.recipeTypes);
 
-            CustomFactory.systemRegistry.Register(ComponentSystem.systemID, typeof(ComponentSystem));
+            PlanetSystemManager.registry.Register(ComponentSystem.systemID, typeof(ComponentSystem));
             
             NetworksRegistry.AddHandler(new PowerNetworkHandler());
+            
+            NebulaModAPI.RegisterPackets(Assembly.GetExecutingAssembly());
+            NebulaModAPI.OnPlanetLoadRequest += planetId =>
+            {
+                NebulaModAPI.MultiplayerSession.Network.SendPacket(new PlanetSystemLoadRequest(planetId));
+            };
+            NebulaModAPI.OnStarLoadRequest += starIndex =>
+            {
+                NebulaModAPI.MultiplayerSession.Network.SendPacket(new StarSystemLoadRequest(starIndex));
+            };
             
             LoadSaveOnLoad.Init();
             
@@ -60,7 +73,8 @@ namespace CommonAPI
 
         public void Import(BinaryReader r)
         {
-            int ver = r.ReadInt32();
+            
+            r.ReadInt32();
             
             while (true)
             {
@@ -79,9 +93,12 @@ namespace CommonAPI
                     r.ReadBytes((int)len);
                 }
             }
+            
+            StarSystemManager.InitOnLoad();
+            StarSystemManager.Import(r);
 
-            CustomFactory.InitOnLoad();
-            CustomFactory.Import(r);
+            PlanetSystemManager.InitOnLoad();
+            PlanetSystemManager.Import(r);
         }
 
         public void Export(BinaryWriter w)
@@ -100,13 +117,30 @@ namespace CommonAPI
             }
 
             w.Write((byte)0);
-
-            CustomFactory.Export(w);
+            
+            StarSystemManager.Export(w);
+            PlanetSystemManager.Export(w);
         }
 
         public void IntoOtherSave()
         {
-            CustomFactory.InitOnLoad();
+            if (NebulaModAPI.IsMultiplayerActive && !NebulaModAPI.MultiplayerSession.LocalPlayer.IsHost)
+            {
+                foreach (var kv in registries)
+                {
+                    kv.Value.InitUnitMigrationMap();
+                }
+            }
+            
+            StarSystemManager.InitOnLoad();
+            PlanetSystemManager.InitOnLoad();
         }
+
+        public bool CheckVersion(string hostVersion, string clientVersion)
+        {
+            return hostVersion.Equals(clientVersion);
+        }
+
+        public string Version => VERSION;
     }
 }

@@ -112,6 +112,11 @@ namespace CommonAPI
 
         public int AddPoolItem(object[] data)
         {
+            return AddPoolItem(default, data);
+        }
+        
+        public int AddPoolItem(T item, object[] data)
+        {
             int num;
             if (recycleCursor > 0)
             {
@@ -126,7 +131,10 @@ namespace CommonAPI
                 }
             }
 
-            if (pool[num] == null)
+            if (item != null)
+            {
+                pool[num] = item;
+            }else if (pool[num] == null)
             {
                 pool[num] = GetNewInstance();
             }
