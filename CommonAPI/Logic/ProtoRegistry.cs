@@ -75,6 +75,45 @@ namespace CommonAPI
         public LoadException(string message) : base(message) { }
     }
 
+    public class LodMaterials
+    {
+        public Material[] this[int key]
+        {
+            get => materials[key];
+            set => materials[key] = value;
+        }
+
+        public LodMaterials()
+        {
+            materials = new Material[4][];
+        }
+        
+        public LodMaterials(int lod, Material[] lod0)
+        {
+            materials = new Material[4][];
+            AddLod(lod, lod0);
+        }
+        
+        public LodMaterials(Material[] lod0) : this(0, lod0)
+        {
+        }
+
+        public void AddLod(int lod, Material[] mats)
+        {
+            if (lod >= 0 && lod < 4)
+            {
+                materials[lod] = mats;
+            }
+        }
+
+        public bool HasLod(int lod)
+        {
+            return materials[lod] != null;
+        }
+
+        public Material[][] materials;
+    }
+
     public static class ProtoRegistry
     {
         //Local proto dictionaries
@@ -82,21 +121,25 @@ namespace CommonAPI
         internal static Dictionary<int, int> itemUpgradeList = new Dictionary<int, int>();
 
         internal static Dictionary<int, RecipeProto> recipes = new Dictionary<int, RecipeProto>();
+        internal static Dictionary<int, RecipeProto> recipeReplace = new Dictionary<int, RecipeProto>();
+
         internal static Dictionary<int, StringProto> strings = new Dictionary<int, StringProto>();
         internal static int lastStringId = 1000;
+
+        internal static Dictionary<string, StringProto> stringReplace = new Dictionary<string, StringProto>();
 
         internal static Dictionary<int, TechProto> techs = new Dictionary<int, TechProto>();
         internal static Dictionary<int, TechProto> techUpdateList = new Dictionary<int, TechProto>();
 
         internal static Dictionary<int, ModelProto> models = new Dictionary<int, ModelProto>();
-        internal static Dictionary<string, Material[]> modelMats = new Dictionary<string, Material[]>();
+        internal static Dictionary<string, LodMaterials> modelMats = new Dictionary<string, LodMaterials>();
 
         internal static List<ResourceData> modResources = new List<ResourceData>();
-        
+
         public static Registry recipeTypes = new Registry();
         public static List<List<int>> recipeTypeLists = new List<List<int>>();
-        
-        
+
+
         public static event Action onLoadingFinished;
 
 
@@ -109,10 +152,11 @@ namespace CommonAPI
             int normalTex = Shader.PropertyToID("_NormalTex");
             int msTex = Shader.PropertyToID("_MS_Tex");
             int emissionTex = Shader.PropertyToID("_EmissionTex");
+            int emissionJitterTex = Shader.PropertyToID("_EmissionJitterTex");
 
-            textureNames = new[] {mainTex, normalTex, msTex, emissionTex};
+            textureNames = new[] {mainTex, normalTex, msTex, emissionTex, emissionJitterTex};
             spriteFileExtensions = new[] {".jpg", ".png", ".tif"};
-            
+
             recipeTypeLists.Add(null);
 
             LDBTool.PostAddDataAction += OnPostAdd;
@@ -135,6 +179,7 @@ namespace CommonAPI
             {
                 recipeTypeLists.Capacity *= 2;
             }
+
             recipeTypeLists.Add(new List<int>());
             return id;
         }
@@ -142,7 +187,7 @@ namespace CommonAPI
         public static bool BelongsToType(this RecipeProto proto, int typeId)
         {
             if (typeId >= recipeTypeLists.Count) return false;
-            
+
             return recipeTypeLists[typeId].BinarySearch(proto.ID) >= 0;
         }
 
@@ -160,13 +205,16 @@ namespace CommonAPI
                     continue;
                 }
 
-                Material[] mats = modelMats[kv.Value.PrefabPath];
+                LodMaterials mats = modelMats[kv.Value.PrefabPath];
 
                 for (int i = 0; i < pdesc.lodCount; i++)
                 {
                     for (int j = 0; j < pdesc.lodMaterials[i].Length; j++)
                     {
-                        pdesc.lodMaterials[i][j] = mats[j];
+                        if (mats.HasLod(i))
+                        {
+                            pdesc.lodMaterials[i][j] = mats[i][j];
+                        }
                     }
                 }
 
@@ -207,7 +255,7 @@ namespace CommonAPI
                 if (itemUpgradeList.ContainsKey(itemProto.ID))
                 {
                     itemProto.Grade = itemUpgradeList[itemProto.ID];
-                    CommonAPIPlugin.logger.LogDebug("Changing grade of " + itemProto.name);
+                    CommonAPIPlugin.logger.LogDebug($"Changing grade of {itemProto.name} to {itemProto.Grade}");
                 }
 
                 if (itemProto.Grade == 0 || items.ContainsKey(itemProto.ID)) return;
@@ -220,8 +268,17 @@ namespace CommonAPI
                     if (kv.Value.Upgrades[itemProto.Grade - 1] == itemProto.ID)
                     {
                         itemProto.Upgrades = kv.Value.Upgrades;
-                        CommonAPIPlugin.logger.LogDebug("Updating upgrade list of " + itemProto.name);
+                        CommonAPIPlugin.logger.LogDebug($"Updating upgrade list of {itemProto.name} to {itemProto.Upgrades.Join()}");
                     }
+                }
+            }
+            else if (proto is RecipeProto recipeProto)
+            {
+                if (recipeReplace.ContainsKey(recipeProto.ID))
+                {
+                    RecipeProto newProto = recipeReplace[recipeProto.ID];
+                    newProto.CopyPropsTo(ref recipeProto);
+                    recipeProto.Preload(recipeProto.index);
                 }
             }
         }
@@ -241,12 +298,11 @@ namespace CommonAPI
             return false;
         }
 
-        
-        
+
         internal static int FindAvailableStringID()
         {
             int id = lastStringId + 1;
-            
+
             while (true)
             {
                 if (!HasStringIdRegisted(id))
@@ -311,7 +367,7 @@ namespace CommonAPI
         {
             return tab * 1000 + y * 100 + x;
         }
-        
+
 
         //All of these register a specified proto in LDBTool
 
@@ -334,7 +390,7 @@ namespace CommonAPI
             models.Add(model.ID, model);
 
             if (mats != null)
-                modelMats.Add(prefabPath, mats);
+                modelMats.Add(prefabPath, new LodMaterials(mats));
 
             return model;
         }
@@ -366,9 +422,22 @@ namespace CommonAPI
             models.Add(model.ID, model);
 
             if (mats != null)
-                modelMats.Add(prefabPath, mats);
+                modelMats.Add(prefabPath, new LodMaterials(mats));
 
             return model;
+        }
+
+        public static void AddLodMaterials(string prefabPath, int lod, Material[] mats)
+        {
+            if (modelMats.ContainsKey(prefabPath))
+            {
+                LodMaterials lodMats = modelMats[prefabPath];
+                lodMats.AddLod(lod, mats);
+            }
+            else
+            {
+                modelMats.Add(prefabPath, new LodMaterials(lod, mats));
+            }
         }
 
         /// <summary>
@@ -398,7 +467,8 @@ namespace CommonAPI
                     int itemID = upgradesIDs[i];
                     if (itemID == 0) continue;
 
-                    itemUpgradeList.Add(itemID, i + 1);
+                    if (!itemUpgradeList.ContainsKey(itemID))
+                        itemUpgradeList.Add(itemID, i + 1);
                 }
 
                 upgradesIDs[grade - 1] = item.ID;
@@ -442,7 +512,7 @@ namespace CommonAPI
             items.Add(proto.ID, proto);
             return proto;
         }
-        
+
         /// <summary>
         /// Registers a RecipeProto with a custom type
         /// </summary>
@@ -460,14 +530,13 @@ namespace CommonAPI
             int[] outCounts, string description, int techID = 0, int gridIndex = 0)
         {
             if (type >= recipeTypeLists.Count) throw new ArgumentException($"Type {type} is not registered!");
-            
+
             RecipeProto recipe = RegisterRecipe(id, ERecipeType.Custom, time, input, inCounts, output, outCounts, description, techID, gridIndex);
 
             recipeTypeLists[type].Add(recipe.ID);
             Algorithms.ListSortedAdd(recipeTypeLists[type], recipe.ID);
 
             return recipe;
-
         }
 
         /// <summary>
@@ -485,6 +554,18 @@ namespace CommonAPI
         public static RecipeProto RegisterRecipe(int id, ERecipeType type, int time, int[] input, int[] inCounts,
             int[] output,
             int[] outCounts, string description, int techID = 0, int gridIndex = 0)
+        {
+            RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex);
+
+            LDBTool.PreAddProto(ProtoType.Recipe, proto);
+            recipes.Add(id, proto);
+
+            return proto;
+        }
+
+        private static RecipeProto NewRecipeProto(int id, ERecipeType type, int time, int[] input, int[] inCounts, int[] output, int[] outCounts,
+            string description,
+            int techID, int gridIndex)
         {
             if (output.Length > 0)
             {
@@ -513,13 +594,35 @@ namespace CommonAPI
                     ID = id
                 };
 
-                LDBTool.PreAddProto(ProtoType.Recipe, proto);
-                recipes.Add(proto.ID, proto);
-
                 return proto;
             }
 
             throw new ArgumentException("Output array must not be empty");
+        }
+
+       /* private static void CopyRecipeProto(RecipeProto target, RecipeProto source)
+        {
+            target.Type = source.Type;
+            target.Handcraft = source.Handcraft;
+            target.TimeSpend = source.TimeSpend;
+            target.Items = source.Items;
+            target.ItemCounts = source.ItemCounts;
+            target.Results = source.Results;
+            target.ResultCounts = source.ResultCounts;
+            target.Description = source.Description;
+            target.GridIndex = source.GridIndex;
+            target.IconPath = source.IconPath;
+            target.Name = source.Name;
+            target.preTech = source.preTech;
+            target.ID = source.ID;
+        }
+*/
+        public static void ReplaceRecipe(int id, ERecipeType type, int time, int[] input, int[] inCounts,
+            int[] output,
+            int[] outCounts, string description, int techID = 0, int gridIndex = 0)
+        {
+            RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex);
+            recipeReplace.Add(proto.ID, proto);
         }
 
 
@@ -579,14 +682,33 @@ namespace CommonAPI
 
             return proto;
         }
-
         
         /// <summary>
-        /// Registers a LocalizedKey
+        /// Changes already existing localized string.
+        /// If new translation for a language is not specified it will not be modified!
+        /// </summary>
+        /// <param name="key">key of your target localized string</param>
+        /// <param name="enTrans">New English translation for this key</param>
+        /// <param name="cnTrans">New Chinese translation for this key</param>
+        /// <param name="frTrans">New French translation for this key</param>
+        public static void EditString(string key, string enTrans, string cnTrans = "", string frTrans = "")
+        {
+            StringProto stringProto = LDB.strings[key];
+            
+            stringProto.ENUS = enTrans;
+            stringProto.ZHCN = cnTrans.Equals("") ? stringProto.ZHCN : cnTrans;
+            stringProto.FRFR = frTrans.Equals("") ? stringProto.FRFR : frTrans;
+        }
+
+
+        /// <summary>
+        /// Registers a new localized string
         /// </summary>
         /// <param name="key">UNIQUE key of your localizedKey</param>
         /// <param name="enTrans">English translation for this key</param>
-        public static void RegisterString(string key, string enTrans)
+        /// <param name="cnTrans">Chinese translation for this key</param>
+        /// <param name="frTrans">French translation for this key</param>
+        public static void RegisterString(string key, string enTrans, string cnTrans = "", string frTrans = "")
         {
             //int id = FindAvailableStringID(3500);
 
@@ -594,6 +716,8 @@ namespace CommonAPI
             {
                 Name = key,
                 ENUS = enTrans,
+                ZHCN = cnTrans.Equals("") ? enTrans : cnTrans,
+                FRFR = frTrans.Equals("") ? enTrans : frTrans,
                 ID = -1
             };
 
@@ -611,13 +735,13 @@ namespace CommonAPI
         {
             if (!(proto is StringProto))
                 return;
-            
+
             int id = ProtoRegistry.FindAvailableStringID();
             proto.ID = id;
-            ProtoRegistry.strings.Add(id, (StringProto)proto);
+            ProtoRegistry.strings.Add(id, (StringProto) proto);
         }
-        
-        
+
+
         [HarmonyPatch(typeof(LDBTool), "IdBind")]
         [HarmonyPrefix]
         public static bool FixStringBinding2(ProtoType protoType, Proto proto)
@@ -744,7 +868,7 @@ namespace CommonAPI
             foreach (ResourceData resource in ProtoRegistry.modResources)
             {
                 if (!path.Contains(resource.keyWord) || !resource.HasAssetBundle()) continue;
-                
+
                 if (resource.bundle.Contains(path + ".prefab") && systemTypeInstance == typeof(GameObject))
                 {
                     Object myPrefab = resource.bundle.LoadAsset(path + ".prefab");
@@ -756,8 +880,8 @@ namespace CommonAPI
                         return false;
                     }
 
-                    Material[] mats = ProtoRegistry.modelMats[path];
-                    if (myPrefab != null)
+                    LodMaterials mats = ProtoRegistry.modelMats[path];
+                    if (myPrefab != null && mats.HasLod(0))
                     {
                         MeshRenderer[] renderers = ((GameObject) myPrefab).GetComponentsInChildren<MeshRenderer>();
                         foreach (MeshRenderer renderer in renderers)
@@ -765,7 +889,7 @@ namespace CommonAPI
                             Material[] newMats = new Material[renderer.sharedMaterials.Length];
                             for (int i = 0; i < newMats.Length; i++)
                             {
-                                newMats[i] = mats[i];
+                                newMats[i] = mats[0][i];
                             }
 
                             renderer.sharedMaterials = newMats;
@@ -802,7 +926,7 @@ namespace CommonAPI
         {
             foreach (var resource in ProtoRegistry.modResources)
             {
-                if (!filename.Contains(resource.keyWord) || !resource.HasVertaFolder()) continue;
+                if (!filename.ToLower().Contains(resource.keyWord.ToLower()) || !resource.HasVertaFolder()) continue;
 
                 string newName = $"{resource.vertaFolder}/{filename}";
                 if (!File.Exists(newName)) continue;

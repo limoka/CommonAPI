@@ -42,7 +42,7 @@ namespace CommonAPI
 
         public static T GetSystem<T>(StarData star, int systemId) where T : IStarSystem
         {
-            if (systemId <= 0) return default;
+            if (systemId <= 0 || systemId >= systems.Count) return default;
             return (T) systems[systemId].GetSystem(star);
         }
 
