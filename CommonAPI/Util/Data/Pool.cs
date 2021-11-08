@@ -3,6 +3,12 @@ using System.IO;
 
 namespace CommonAPI
 {
+    /// <summary>
+    /// Data structure that allows to store objects with persistant ID's.<br/>
+    /// When an item is removed it's <see cref="ISerializeState.Free"/> is called and ID added to free ID's list<br/>
+    /// When adding new items free list is checked first to fill in the gaps.
+    /// </summary>
+    /// <typeparam name="T">Base class all items must inherit</typeparam>
     public class Pool<T> : ISerializeState
         where T : IPoolable, new()
     {
@@ -12,26 +18,37 @@ namespace CommonAPI
         protected int[] poolRecycle;
         protected int recycleCursor;
 
+        /// <summary>
+        /// Returns default instance for type T
+        /// </summary>
+        /// <returns>New Instance</returns>
         protected virtual T GetNewInstance()
         {
             return new T();
         }
 
+        /// <summary>
+        /// Init newly added items here
+        /// </summary>
+        /// <param name="item">Added item</param>
+        /// <param name="data">Additional parameters passed to <see cref="AddPoolItem(object[])"/></param>
         protected virtual void InitPoolItem(T item, object[] data)
         {
             
         }
 
+        /// <summary>
+        /// Handle removing items here. Passed item is still valid at the time of the call. Don't forget to <see cref="ISerializeState.Free"/> it.
+        /// </summary>
+        /// <param name="item">Removed pool item</param>
         protected virtual void RemovePoolItem(T item)
         {
             item.Free();
         }
 
-        protected virtual Action<T> InitUpdate()
-        {
-            return poolable => { };
-        }
-
+        /// <summary>
+        /// Free the pool and all of items contained within
+        /// </summary>
         public virtual void Free()
         {
             foreach (T item in pool)
@@ -49,6 +66,10 @@ namespace CommonAPI
             recycleCursor = 0;
         }
         
+        /// <summary>
+        /// Import data of pool and all item's
+        /// </summary>
+        /// <param name="r">Binary Reader</param>
         public virtual void Import(BinaryReader r)
         {
             r.ReadInt32();
@@ -70,6 +91,10 @@ namespace CommonAPI
             }
         }
 
+        /// <summary>
+        /// Save pool and all of item's data
+        /// </summary>
+        /// <param name="w"></param>
         public virtual void Export(BinaryWriter w)
         {
             w.Write(0);
@@ -95,6 +120,10 @@ namespace CommonAPI
             }
         }
         
+        /// <summary>
+        /// Prepare pool for set size. Also allows to resize pool as needed
+        /// </summary>
+        /// <param name="newSize"></param>
         public void Init(int newSize)
         {
             T[] array = pool;
@@ -107,14 +136,24 @@ namespace CommonAPI
 
             poolCapacity = newSize;
         }
-
+        
         public T this[int index] => pool[index];
 
+        /// <summary>
+        /// Add default item
+        /// </summary>
+        /// <param name="data">Additional parameters</param>
+        /// <returns>item's ID</returns>
         public int AddPoolItem(object[] data)
         {
             return AddPoolItem(default, data);
         }
         
+        /// <summary>
+        /// Add item
+        /// </summary>
+        /// <param name="data">Additional parameters</param>
+        /// <returns>item's ID</returns>
         public int AddPoolItem(T item, object[] data)
         {
             int num;
@@ -145,6 +184,10 @@ namespace CommonAPI
             return num;
         }
         
+        /// <summary>
+        /// Remove item with specified ID from pool
+        /// </summary>
+        /// <param name="id">item ID</param>
         public void RemovePoolItem(int id)
         {
             if (pool[id]?.GetId() != 0)
@@ -155,6 +198,19 @@ namespace CommonAPI
             }
         }
         
+        /// <summary>
+        /// Define Update behavior here. Code in gets called only once. Returned lambda is called for each valid item
+        /// </summary>
+        /// <returns>Lambda that will be called for each valid item</returns>
+        protected virtual Action<T> InitUpdate()
+        {
+            return poolable => { };
+        }
+        
+        /// <summary>
+        /// Update all pool items in single thread. Appropriate function will be called depending on player settings.
+        /// </summary>
+        /// <param name="initFunc">Optional Update logic function</param>
         public void UpdatePool(Func<Action<T>> initFunc = null)
         {
             Action<T> update = (initFunc ?? InitUpdate)();
@@ -167,6 +223,10 @@ namespace CommonAPI
             }
         }
         
+        /// <summary>
+        /// Update all pool items using multithreading. Appropriate function will be called depending on player settings.
+        /// </summary>
+        /// <param name="initFunc">Optional Update logic function</param>
         public void UpdatePoolMultithread(int usedThreadCount, int currentThreadIdx, int minimumCount, Func<Action<T>> initFunc = null)
         {
             Action<T> update = (initFunc ?? InitUpdate)();

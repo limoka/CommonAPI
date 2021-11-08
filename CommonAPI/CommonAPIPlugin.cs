@@ -16,7 +16,9 @@ using NebulaAPI;
 
 namespace CommonAPI
 {
-    
+    /// <summary>
+    /// Plugin class of Common API. Entry point
+    /// </summary>
     [BepInPlugin(GUID, NAME, VERSION)]
     [BepInDependency(NebulaModAPI.API_GUID)]
     public class CommonAPIPlugin : BaseUnityPlugin, IModCanSave, IMultiplayerMod

@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 namespace CommonAPI
 {
+    /// <summary>
+    /// Data structure that allows to register instances of objects with unique string ID's
+    /// </summary>
+    /// <typeparam name="T">Base class for all instances</typeparam>
     public class InstanceRegistry<T> : Registry
     {
         public List<T> data = new List<T>();
@@ -20,6 +24,12 @@ namespace CommonAPI
             }
         }
 
+        /// <summary>
+        /// Register new instance
+        /// </summary>
+        /// <param name="key">Unique string ID</param>
+        /// <param name="item">instance of object</param>
+        /// <returns>Assigned integer ID</returns>
         public virtual int Register(string key, T item)
         {
             return Register(key, (object)item);

@@ -4,6 +4,9 @@ using PowerNetworkStructures;
 
 namespace CommonAPI
 {
+    /// <summary>
+    /// Class with some array helper functions that are frequently used by Networks
+    /// </summary>
     public static class Algorithms
     {
         public static void NodeDfs(Node n)

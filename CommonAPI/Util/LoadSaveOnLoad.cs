@@ -2,6 +2,10 @@
 
 namespace CommonAPI
 {
+    /// <summary>
+    /// Allows to load directly into a save once the game has loaded. <br/>
+    /// To use use <b>loadSave [Save File Name]</b> argument when launching the game
+    /// </summary>
     [HarmonyPatch]
     public static class LoadSaveOnLoad
     {

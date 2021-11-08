@@ -9,6 +9,9 @@ namespace CommonAPI
         void SetPoints(Vector3[] points);
     }
     
+    /// <summary>
+    /// Helper class to assign position data to classes such as <see cref="BuildConditionConfig"/> or that implement <see cref="IPointsAssignable"/>
+    /// </summary>
     public class PointsHelper : MonoBehaviour
     {
         public Component target;
@@ -22,6 +25,9 @@ namespace CommonAPI
             if (target == null)
             {
                 target = GetComponent<BuildConditionConfig>();
+            }else if (landPoints)
+            {
+                target = target.gameObject.GetComponent<BuildConditionConfig>();
             }
 
             if (target == null) return;
