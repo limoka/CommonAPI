@@ -123,14 +123,14 @@ namespace CommonAPI
             {
                 string key = r.ReadString();
                 int oldId = r.ReadInt32();
-                int newId = GetUniqueId(key);
-                if (newId == 0)
+                try
+                {
+                    int newId = GetUniqueId(key);
+                    migrationMap.Add(oldId, newId);
+                }
+                catch (ArgumentException)
                 {
                     removedIds.Add(key);
-                }
-                else
-                {
-                    migrationMap.Add(oldId, newId);
                 }
             }
         }

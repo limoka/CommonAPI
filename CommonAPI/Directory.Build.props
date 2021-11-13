@@ -50,6 +50,14 @@
     <Reference Include="$(BepInExDir)0Harmony.dll" Private="false" SpecificVersion="false" />
     <Reference Include="$(BepInExDir)BepInEx.dll" Private="false" SpecificVersion="false" />
     <Reference Include="$(BepInExDir)BepInEx.Harmony.dll" Private="false" SpecificVersion="false" />
+    <!-- Mono Cecil -->
+    <Reference Include="$(BepInExDir)Mono.Cecil.dll" Private="false" SpecificVersion="false" />
+    <Reference Include="$(BepInExDir)Mono.Cecil.Mdb.dll" Private="false" SpecificVersion="false" />
+    <Reference Include="$(BepInExDir)Mono.Cecil.Pdb.dll" Private="false" SpecificVersion="false" />
+    <Reference Include="$(BepInExDir)Mono.Cecil.Rocks.dll" Private="false" SpecificVersion="false" />
+
+    <Reference Include="$(BepInExDir)MonoMod.RuntimeDetour.dll" Private="false" SpecificVersion="false" />
+    <Reference Include="$(BepInExDir)MonoMod.Utils.dll" Private="false" SpecificVersion="false" />
   </ItemGroup>
 
   <ItemGroup Label="Dyson Sphere Program">

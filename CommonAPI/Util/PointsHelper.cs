@@ -8,6 +8,13 @@ namespace CommonAPI
     {
         void SetPoints(Vector3[] points);
     }
+
+    public enum PointsType
+    {
+        Land,
+        Water,
+        Custom
+    }
     
     /// <summary>
     /// Helper class to assign position data to classes such as <see cref="BuildConditionConfig"/> or that implement <see cref="IPointsAssignable"/>
@@ -16,7 +23,7 @@ namespace CommonAPI
     {
         public Component target;
         public Transform searchPoint;
-        public bool landPoints;
+        public PointsType pointsType;
 
         public void Assign()
         {
@@ -25,14 +32,14 @@ namespace CommonAPI
             if (target == null)
             {
                 target = GetComponent<BuildConditionConfig>();
-            }else if (landPoints)
+            }else if (pointsType == PointsType.Land || pointsType == PointsType.Water)
             {
                 target = target.gameObject.GetComponent<BuildConditionConfig>();
             }
 
             if (target == null) return;
             
-            if (target is IPointsAssignable trg)
+            if (target is IPointsAssignable trg && pointsType == PointsType.Custom)
             {
                 trg.SetPoints(points);
                 return;
@@ -40,7 +47,7 @@ namespace CommonAPI
 
             if (target is BuildConditionConfig config)
             {
-                if (landPoints)
+                if (pointsType == PointsType.Land)
                 {
                     config.landPoints = points;
                 }

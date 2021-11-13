@@ -115,12 +115,11 @@ namespace CommonAPITests
             IsNotNull(obj);
             AreEqual(typeof(TestObject2), obj.GetType());
 
-            id = registry.GetUniqueId("Test:Hello");
-            obj = registry.GetNew(id);
-            
-            IsNull(obj);
-            AreEqual(0, id);
-            
+            Throws<ArgumentException>(() =>
+            {
+                id = registry.GetUniqueId("Test:Hello");
+            });
+
             id = registry3.GetUniqueId("hello:world");
             AreNotEqual(0, id);
             AreEqual(id3, id);

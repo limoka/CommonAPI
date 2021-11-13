@@ -42,4 +42,5 @@
   &lt;Solution /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=keybind/@EntryIndexedValue">True</s:Boolean>
-	<s:Boolean x:Key="/Default/UserDictionary/Words/=keybinds/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=keybinds/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=verta/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
