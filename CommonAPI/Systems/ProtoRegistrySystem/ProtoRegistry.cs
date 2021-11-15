@@ -28,6 +28,7 @@ namespace CommonAPI.Systems
     {
         //Local proto dictionaries
         internal static Dictionary<int, ItemProto> items = new Dictionary<int, ItemProto>();
+        internal static Dictionary<int, IconToolNew.IconDesc> itemIconDescs = new Dictionary<int, IconToolNew.IconDesc>();
         internal static Dictionary<int, int> itemUpgradeList = new Dictionary<int, int>();
 
         internal static Dictionary<int, RecipeProto> recipes = new Dictionary<int, RecipeProto>();
@@ -77,6 +78,8 @@ namespace CommonAPI.Systems
             
             CommonAPIPlugin.harmony.PatchAll(typeof(AssemblerComponentPatch));
             CommonAPIPlugin.harmony.PatchAll(typeof(UIAssemblerWindowPatch));
+            
+            CommonAPIPlugin.harmony.PatchAll(typeof(IconSetPatch));
         }
 
 
@@ -298,15 +301,146 @@ namespace CommonAPI.Systems
         /// <param name="keywords">Array of keywords to use</param>
         /// <param name="textureIDs">Array of texture property ids (Use Shader.PropertyToID)</param>
         public static Material CreateMaterial(string shaderName, string materialName, string color,
-            string[] textures = null, string[] keywords = null, int[] textureIDs = null)
+            string[] textures, string[] keywords)
+        {
+            return CreateMaterial(shaderName, materialName, color, textures, keywords, null);
+        }
+
+        /// <summary>
+        /// Creates custom material with given shader name.
+        /// _MainTex ("Albedo (RGB) diffuse reflection (A) color mask", 2D)
+        /// _NormalTex ("Normal map", 2D)
+        /// _MS_Tex ("Metallic (R) transparent paste (G) metal (a) highlight", 2D)
+        /// _EmissionTex ("Emission (RGB) self-luminous (A) jitter mask", 2D)
+        /// </summary>
+        /// <param name="shaderName">Name of shader to use</param>
+        /// <param name="materialName">Name of finished material, can be anything</param>
+        /// <param name="color">Tint color (In html format, #RRGGBBAA)</param>
+        /// <param name="textures">Array of texture names in this order: albedo, normal, metallic, emission</param>
+        /// <param name="keywords">Array of keywords to use</param>
+        /// <param name="textureIDs">Array of texture property ids (Use Shader.PropertyToID)</param>
+        public static Material CreateMaterial(string shaderName, string materialName, string color,
+            string[] textures)
+        {
+            return CreateMaterial(shaderName, materialName, color, textures, null, null);
+        }
+
+        /// <summary>
+        /// Creates custom material with given shader name.
+        /// _MainTex ("Albedo (RGB) diffuse reflection (A) color mask", 2D)
+        /// _NormalTex ("Normal map", 2D)
+        /// _MS_Tex ("Metallic (R) transparent paste (G) metal (a) highlight", 2D)
+        /// _EmissionTex ("Emission (RGB) self-luminous (A) jitter mask", 2D)
+        /// </summary>
+        /// <param name="shaderName">Name of shader to use</param>
+        /// <param name="materialName">Name of finished material, can be anything</param>
+        /// <param name="color">Tint color (In html format, #RRGGBBAA)</param>
+        /// <param name="textures">Array of texture names in this order: albedo, normal, metallic, emission</param>
+        /// <param name="keywords">Array of keywords to use</param>
+        /// <param name="textureIDs">Array of texture property ids (Use Shader.PropertyToID)</param>
+        public static Material CreateMaterial(string shaderName, string materialName, string color)
+        {
+            return CreateMaterial(shaderName, materialName, color, null, null, null);
+        }
+
+        /// <summary>
+        /// Creates custom material with given shader name.
+        /// _MainTex ("Albedo (RGB) diffuse reflection (A) color mask", 2D)
+        /// _NormalTex ("Normal map", 2D)
+        /// _MS_Tex ("Metallic (R) transparent paste (G) metal (a) highlight", 2D)
+        /// _EmissionTex ("Emission (RGB) self-luminous (A) jitter mask", 2D)
+        /// </summary>
+        /// <param name="shaderName">Name of shader to use</param>
+        /// <param name="materialName">Name of finished material, can be anything</param>
+        /// <param name="color">Tint color (In html format, #RRGGBBAA)</param>
+        /// <param name="textures">Array of texture names in this order: albedo, normal, metallic, emission</param>
+        /// <param name="keywords">Array of keywords to use</param>
+        /// <param name="textureIDs">Array of texture property ids (Use Shader.PropertyToID)</param>
+        public static Material CreateMaterial(string shaderName, string materialName, string color,
+            string[] textures, string[] keywords, int[] textureIDs)
+        {
+            ColorUtility.TryParseHtmlString(color, out Color newCol);
+            return CreateMaterial(shaderName, materialName, newCol, textures, keywords, textureIDs);
+        }
+
+        /// <summary>
+        /// Creates custom material with given shader name.
+        /// _MainTex ("Albedo (RGB) diffuse reflection (A) color mask", 2D)
+        /// _NormalTex ("Normal map", 2D)
+        /// _MS_Tex ("Metallic (R) transparent paste (G) metal (a) highlight", 2D)
+        /// _EmissionTex ("Emission (RGB) self-luminous (A) jitter mask", 2D)
+        /// </summary>
+        /// <param name="shaderName">Name of shader to use</param>
+        /// <param name="materialName">Name of finished material, can be anything</param>
+        /// <param name="color">Tint color</param>
+        /// <param name="textures">Array of texture names in this order: albedo, normal, metallic, emission</param>
+        /// <param name="keywords">Array of keywords to use</param>
+        /// <param name="textureIDs">Array of texture property ids (Use Shader.PropertyToID)</param>
+        public static Material CreateMaterial(string shaderName, string materialName, Color color,
+            string[] textures, string[] keywords)
+        {
+            return CreateMaterial(shaderName, materialName, color, textures, keywords, null);
+        }
+
+        /// <summary>
+        /// Creates custom material with given shader name.
+        /// _MainTex ("Albedo (RGB) diffuse reflection (A) color mask", 2D)
+        /// _NormalTex ("Normal map", 2D)
+        /// _MS_Tex ("Metallic (R) transparent paste (G) metal (a) highlight", 2D)
+        /// _EmissionTex ("Emission (RGB) self-luminous (A) jitter mask", 2D)
+        /// </summary>
+        /// <param name="shaderName">Name of shader to use</param>
+        /// <param name="materialName">Name of finished material, can be anything</param>
+        /// <param name="color">Tint color</param>
+        /// <param name="textures">Array of texture names in this order: albedo, normal, metallic, emission</param>
+        /// <param name="keywords">Array of keywords to use</param>
+        /// <param name="textureIDs">Array of texture property ids (Use Shader.PropertyToID)</param>
+        public static Material CreateMaterial(string shaderName, string materialName, Color color,
+            string[] textures)
+        {
+            return CreateMaterial(shaderName, materialName, color, textures, null, null);
+        }
+
+        /// <summary>
+        /// Creates custom material with given shader name.
+        /// _MainTex ("Albedo (RGB) diffuse reflection (A) color mask", 2D)
+        /// _NormalTex ("Normal map", 2D)
+        /// _MS_Tex ("Metallic (R) transparent paste (G) metal (a) highlight", 2D)
+        /// _EmissionTex ("Emission (RGB) self-luminous (A) jitter mask", 2D)
+        /// </summary>
+        /// <param name="shaderName">Name of shader to use</param>
+        /// <param name="materialName">Name of finished material, can be anything</param>
+        /// <param name="color">Tint color</param>
+        /// <param name="textures">Array of texture names in this order: albedo, normal, metallic, emission</param>
+        /// <param name="keywords">Array of keywords to use</param>
+        /// <param name="textureIDs">Array of texture property ids (Use Shader.PropertyToID)</param>
+        public static Material CreateMaterial(string shaderName, string materialName, Color color)
+        {
+            return CreateMaterial(shaderName, materialName, color, null, null, null);
+        }
+
+        /// <summary>
+        /// Creates custom material with given shader name.
+        /// _MainTex ("Albedo (RGB) diffuse reflection (A) color mask", 2D)
+        /// _NormalTex ("Normal map", 2D)
+        /// _MS_Tex ("Metallic (R) transparent paste (G) metal (a) highlight", 2D)
+        /// _EmissionTex ("Emission (RGB) self-luminous (A) jitter mask", 2D)
+        /// </summary>
+        /// <param name="shaderName">Name of shader to use</param>
+        /// <param name="materialName">Name of finished material, can be anything</param>
+        /// <param name="color">Tint color</param>
+        /// <param name="textures">Array of texture names in this order: albedo, normal, metallic, emission</param>
+        /// <param name="keywords">Array of keywords to use</param>
+        /// <param name="textureIDs">Array of texture property ids (Use Shader.PropertyToID)</param>
+        public static Material CreateMaterial(string shaderName, string materialName, Color color,
+            string[] textures, string[] keywords, int[] textureIDs)
         {
             ThrowIfNotLoaded();
-            ColorUtility.TryParseHtmlString(color, out Color newCol);
 
             Material mainMat = new Material(Shader.Find(shaderName))
             {
                 shaderKeywords = keywords ?? new[] {"_ENABLE_VFINST"},
-                color = newCol,
+                color = color,
                 name = materialName
             };
 
@@ -335,9 +469,7 @@ namespace CommonAPI.Systems
         {
             return tab * 1000 + y * 100 + x;
         }
-
-
-        //All of these register a specified proto in LDBTool
+        
 
         /// <summary>
         /// Registers a ModelProto
@@ -377,7 +509,41 @@ namespace CommonAPI.Systems
         /// <param name="grade">Grade of the building, used to add upgrading</param>
         /// <param name="upgradesIDs">List of buildings ids, that are upgradable to this one. You need to include all of them here in order. ID of this building should be zero</param>
         public static ModelProto RegisterModel(int id, ItemProto proto, string prefabPath, Material[] mats,
-            int[] descFields, int buildIndex, int grade = 0, int[] upgradesIDs = null, int rendererType = 0)
+            int[] descFields, int buildIndex)
+        {
+            return RegisterModel(id, proto, prefabPath, mats, descFields, buildIndex, 0, new int[] { }, 0);
+        }
+
+        /// <summary>
+        /// Registers a ModelProto and links an proto item to it
+        /// </summary>
+        /// <param name="id">UNIQUE id of your model</param>
+        /// <param name="proto">ItemProto which will be turned into building</param>
+        /// <param name="prefabPath">Path to the prefab, starting from asset folder in your unity project</param>
+        /// <param name="mats">List of materials to use</param>
+        /// <param name="descFields">int Array of used description fields</param>
+        /// <param name="buildIndex">Index in build Toolbar, FSS, F - first submenu, S - second submenu</param>
+        /// <param name="grade">Grade of the building, used to add upgrading</param>
+        /// <param name="upgradesIDs">List of buildings ids, that are upgradable to this one. You need to include all of them here in order. ID of this building should be zero</param>
+        public static ModelProto RegisterModel(int id, ItemProto proto, string prefabPath, Material[] mats,
+            int[] descFields, int buildIndex, int grade, int[] upgradesIDs)
+        {
+            return RegisterModel(id, proto, prefabPath, mats, descFields, buildIndex, grade, upgradesIDs, 0);
+        }
+
+        /// <summary>
+        /// Registers a ModelProto and links an proto item to it
+        /// </summary>
+        /// <param name="id">UNIQUE id of your model</param>
+        /// <param name="proto">ItemProto which will be turned into building</param>
+        /// <param name="prefabPath">Path to the prefab, starting from asset folder in your unity project</param>
+        /// <param name="mats">List of materials to use</param>
+        /// <param name="descFields">int Array of used description fields</param>
+        /// <param name="buildIndex">Index in build Toolbar, FSS, F - first submenu, S - second submenu</param>
+        /// <param name="grade">Grade of the building, used to add upgrading</param>
+        /// <param name="upgradesIDs">List of buildings ids, that are upgradable to this one. You need to include all of them here in order. ID of this building should be zero</param>
+        public static ModelProto RegisterModel(int id, ItemProto proto, string prefabPath, Material[] mats,
+            int[] descFields, int buildIndex, int grade, int[] upgradesIDs, int rendererType)
         {
             ThrowIfNotLoaded();
             ModelProto model = new ModelProto
@@ -428,7 +594,21 @@ namespace CommonAPI.Systems
         /// <param name="buildIndex">Index in build Toolbar, FSS, F - first submenu, S - second submenu</param>
         /// <param name="grade">Grade of the building, used to add upgrading</param>
         /// <param name="upgradesIDs">List of buildings ids, that are upgradable to this one. You need to include all of them here in order. ID of this building should be zero</param>
-        public static void AddModelToItemProto(ModelProto model, ItemProto item, int[] descFields, int buildIndex, int grade = 0, int[] upgradesIDs = null)
+        public static void AddModelToItemProto(ModelProto model, ItemProto item, int[] descFields, int buildIndex)
+        {
+            AddModelToItemProto(model, item, descFields, buildIndex, 0, new int[] { });
+        }
+
+        /// <summary>
+        /// Link ModelProto to an ItemProto
+        /// </summary>
+        /// <param name="model">ModelProto which will contain building model</param>
+        /// <param name="item">ItemProto which will be turned into building</param>
+        /// <param name="descFields">int Array of used description fields</param>
+        /// <param name="buildIndex">Index in build Toolbar, FSS, F - first submenu, S - second submenu</param>
+        /// <param name="grade">Grade of the building, used to add upgrading</param>
+        /// <param name="upgradesIDs">List of buildings ids, that are upgradable to this one. You need to include all of them here in order. ID of this building should be zero</param>
+        public static void AddModelToItemProto(ModelProto model, ItemProto item, int[] descFields, int buildIndex, int grade, int[] upgradesIDs)
         {
             ThrowIfNotLoaded();
             item.Type = EItemType.Production;
@@ -469,11 +649,60 @@ namespace CommonAPI.Systems
         /// <param name="iconPath">Path to icon, starting from assets folder of your unity project</param>
         /// <param name="gridIndex">Index in craft menu, format : PYXX, P - page</param>
         /// <param name="stackSize">Stack size of the item</param>
+        /// <param name="type">What type this is item is</param>
         public static ItemProto RegisterItem(int id, string name, string description, string iconPath,
-            int gridIndex, int stackSize = 50, EItemType type = EItemType.Material)
+            int gridIndex, int stackSize, EItemType type)
+        {
+            return RegisterItem(id, name, description, iconPath, gridIndex, stackSize, type, null);
+        }
+
+        /// <summary>
+        /// Registers a ItemProto
+        /// </summary>
+        /// <param name="id">UNIQUE id of your item</param>
+        /// <param name="name">LocalizedKey of name of the item</param>
+        /// <param name="description">LocalizedKey of description of the item</param>
+        /// <param name="iconPath">Path to icon, starting from assets folder of your unity project</param>
+        /// <param name="gridIndex">Index in craft menu, format : PYXX, P - page</param>
+        /// <param name="stackSize">Stack size of the item</param>
+        public static ItemProto RegisterItem(int id, string name, string description, string iconPath,
+            int gridIndex, int stackSize)
+        {
+            return RegisterItem(id, name, description, iconPath, gridIndex, stackSize, EItemType.Material, null);
+        }
+
+        /// <summary>
+        /// Registers a ItemProto
+        /// </summary>
+        /// <param name="id">UNIQUE id of your item</param>
+        /// <param name="name">LocalizedKey of name of the item</param>
+        /// <param name="description">LocalizedKey of description of the item</param>
+        /// <param name="iconPath">Path to icon, starting from assets folder of your unity project</param>
+        /// <param name="gridIndex">Index in craft menu, format : PYXX, P - page</param>
+        /// <param name="stackSize">Stack size of the item</param>
+        public static ItemProto RegisterItem(int id, string name, string description, string iconPath,
+            int gridIndex)
+        {
+            return RegisterItem(id, name, description, iconPath, gridIndex, 50, EItemType.Material, null);
+        }
+
+        /// <summary>
+        /// Registers a ItemProto
+        /// </summary>
+        /// <param name="id">UNIQUE id of your item</param>
+        /// <param name="name">LocalizedKey of name of the item</param>
+        /// <param name="description">LocalizedKey of description of the item</param>
+        /// <param name="iconPath">Path to icon, starting from assets folder of your unity project</param>
+        /// <param name="gridIndex">Index in craft menu, format : PYXX, P - page</param>
+        /// <param name="stackSize">Stack size of the item</param>
+        /// <param name="type">What type this is item is</param>
+        /// <param name="beltItemDesc">Item appearance on belts description</param>
+        public static ItemProto RegisterItem(int id, string name, string description, string iconPath,
+            int gridIndex, int stackSize, EItemType type, IconToolNew.IconDesc beltItemDesc)
         {
             ThrowIfNotLoaded();
-            //int id = findAvailableID(1001, LDB.items, items);
+
+            beltItemDesc ??= GetDefaultIconDesc(Color.gray, Color.gray);
 
             ItemProto proto = new ItemProto
             {
@@ -491,9 +720,34 @@ namespace CommonAPI.Systems
             LDBTool.PreAddProto(ProtoType.Item, proto);
 
             items.Add(proto.ID, proto);
+            itemIconDescs.Add(proto.ID, beltItemDesc);
             return proto;
         }
 
+        public static IconToolNew.IconDesc GetDefaultIconDesc(Color faceColor, Color sideColor)
+        {
+            return new IconToolNew.IconDesc
+            {
+                faceColor = faceColor,
+                sideColor = sideColor,
+                faceEmission = Color.black,
+                sideEmission = Color.black,
+                iconEmission = new Color(0.2f, 0.2f, 0.2f, 1f),
+                metallic = 0.8f,
+                smoothness = 0.5f,
+                solidAlpha = 1f,
+                iconAlpha = 1f,
+                
+            };
+        }
+        
+        public static IconToolNew.IconDesc GetDefaultIconDesc(Color faceColor, Color sideColor, Color faceEmission, Color sideEmission)
+        {
+            IconToolNew.IconDesc desc = GetDefaultIconDesc(faceColor, sideColor);
+            desc.faceEmission = faceEmission;
+            desc.sideEmission = sideEmission;
+            return desc;
+        }
 
 
         /// <summary>
@@ -510,7 +764,45 @@ namespace CommonAPI.Systems
         /// <param name="techID">Tech id, which unlock this recipe</param>
         public static RecipeProto RegisterRecipe(int id, int type, int time, int[] input, int[] inCounts,
             int[] output,
-            int[] outCounts, string description, int techID = 0, int gridIndex = 0)
+            int[] outCounts, string description, int techID)
+        {
+            return RegisterRecipe(id, type, time, input, inCounts, output, outCounts, description, techID, 0);
+        }
+
+        /// <summary>
+        /// Registers a RecipeProto with a custom type
+        /// </summary>
+        /// <param name="id">UNIQUE id of your recipe</param>
+        /// <param name="type">Recipe type in string form</param>
+        /// <param name="time">Time in ingame ticks. How long item is being made</param>
+        /// <param name="input">Array of input IDs</param>
+        /// <param name="inCounts">Array of input COUNTS</param>
+        /// <param name="output">Array of output IDs</param>
+        /// <param name="outCounts">Array of output COUNTS</param>
+        /// <param name="description">LocalizedKey of description of this item</param>
+        /// <param name="techID">Tech id, which unlock this recipe</param>
+        public static RecipeProto RegisterRecipe(int id, int type, int time, int[] input, int[] inCounts,
+            int[] output,
+            int[] outCounts, string description)
+        {
+            return RegisterRecipe(id, type, time, input, inCounts, output, outCounts, description, 0, 0);
+        }
+
+        /// <summary>
+        /// Registers a RecipeProto with a custom type
+        /// </summary>
+        /// <param name="id">UNIQUE id of your recipe</param>
+        /// <param name="type">Recipe type in string form</param>
+        /// <param name="time">Time in ingame ticks. How long item is being made</param>
+        /// <param name="input">Array of input IDs</param>
+        /// <param name="inCounts">Array of input COUNTS</param>
+        /// <param name="output">Array of output IDs</param>
+        /// <param name="outCounts">Array of output COUNTS</param>
+        /// <param name="description">LocalizedKey of description of this item</param>
+        /// <param name="techID">Tech id, which unlock this recipe</param>
+        public static RecipeProto RegisterRecipe(int id, int type, int time, int[] input, int[] inCounts,
+            int[] output,
+            int[] outCounts, string description, int techID, int gridIndex)
         {
             ThrowIfNotLoaded();
             if (type >= recipeTypeLists.Count) throw new ArgumentException($"Recipe Type: {type} is not registered!");
@@ -537,7 +829,45 @@ namespace CommonAPI.Systems
         /// <param name="techID">Tech id, which unlock this recipe</param>
         public static RecipeProto RegisterRecipe(int id, ERecipeType type, int time, int[] input, int[] inCounts,
             int[] output,
-            int[] outCounts, string description, int techID = 0, int gridIndex = 0)
+            int[] outCounts, string description, int techID)
+        {
+            return RegisterRecipe(id, type, time, input, inCounts, output, outCounts, description, techID, 0);
+        }
+
+        /// <summary>
+        /// Registers a RecipeProto with vanilla types
+        /// </summary>
+        /// <param name="id">UNIQUE id of your recipe</param>
+        /// <param name="type">Recipe type</param>
+        /// <param name="time">Time in ingame ticks. How long item is being made</param>
+        /// <param name="input">Array of input IDs</param>
+        /// <param name="inCounts">Array of input COUNTS</param>
+        /// <param name="output">Array of output IDs</param>
+        /// <param name="outCounts">Array of output COUNTS</param>
+        /// <param name="description">LocalizedKey of description of this item</param>
+        /// <param name="techID">Tech id, which unlock this recipe</param>
+        public static RecipeProto RegisterRecipe(int id, ERecipeType type, int time, int[] input, int[] inCounts,
+            int[] output,
+            int[] outCounts, string description)
+        {
+            return RegisterRecipe(id, type, time, input, inCounts, output, outCounts, description, 0, 0);
+        }
+
+        /// <summary>
+        /// Registers a RecipeProto with vanilla types
+        /// </summary>
+        /// <param name="id">UNIQUE id of your recipe</param>
+        /// <param name="type">Recipe type</param>
+        /// <param name="time">Time in ingame ticks. How long item is being made</param>
+        /// <param name="input">Array of input IDs</param>
+        /// <param name="inCounts">Array of input COUNTS</param>
+        /// <param name="output">Array of output IDs</param>
+        /// <param name="outCounts">Array of output COUNTS</param>
+        /// <param name="description">LocalizedKey of description of this item</param>
+        /// <param name="techID">Tech id, which unlock this recipe</param>
+        public static RecipeProto RegisterRecipe(int id, ERecipeType type, int time, int[] input, int[] inCounts,
+            int[] output,
+            int[] outCounts, string description, int techID, int gridIndex)
         {
             ThrowIfNotLoaded();
             RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex);
@@ -600,7 +930,45 @@ namespace CommonAPI.Systems
         /// <param name="techID">Tech id, which unlock this recipe</param>
         public static void EditRecipe(int id, ERecipeType type, int time, int[] input, int[] inCounts,
             int[] output,
-            int[] outCounts, string description, int techID = 0, int gridIndex = 0)
+            int[] outCounts, string description, int techID)
+        {
+            EditRecipe(id, type, time, input, inCounts, output, outCounts, description, techID, 0);
+        }
+
+        /// <summary>
+        /// Entirely replace recipe proto with specified ID
+        /// </summary>
+        /// <param name="id">ID of target recipe</param>
+        /// <param name="type">Recipe type</param>
+        /// <param name="time">Time in ingame ticks. How long item is being made</param>
+        /// <param name="input">Array of input IDs</param>
+        /// <param name="inCounts">Array of input COUNTS</param>
+        /// <param name="output">Array of output IDs</param>
+        /// <param name="outCounts">Array of output COUNTS</param>
+        /// <param name="description">LocalizedKey of description of this item</param>
+        /// <param name="techID">Tech id, which unlock this recipe</param>
+        public static void EditRecipe(int id, ERecipeType type, int time, int[] input, int[] inCounts,
+            int[] output,
+            int[] outCounts, string description)
+        {
+            EditRecipe(id, type, time, input, inCounts, output, outCounts, description, 0, 0);
+        }
+
+        /// <summary>
+        /// Entirely replace recipe proto with specified ID
+        /// </summary>
+        /// <param name="id">ID of target recipe</param>
+        /// <param name="type">Recipe type</param>
+        /// <param name="time">Time in ingame ticks. How long item is being made</param>
+        /// <param name="input">Array of input IDs</param>
+        /// <param name="inCounts">Array of input COUNTS</param>
+        /// <param name="output">Array of output IDs</param>
+        /// <param name="outCounts">Array of output COUNTS</param>
+        /// <param name="description">LocalizedKey of description of this item</param>
+        /// <param name="techID">Tech id, which unlock this recipe</param>
+        public static void EditRecipe(int id, ERecipeType type, int time, int[] input, int[] inCounts,
+            int[] output,
+            int[] outCounts, string description, int techID, int gridIndex)
         {
             ThrowIfNotLoaded();
             RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex);
@@ -674,7 +1042,33 @@ namespace CommonAPI.Systems
         /// <param name="enTrans">New English translation for this key</param>
         /// <param name="cnTrans">New Chinese translation for this key</param>
         /// <param name="frTrans">New French translation for this key</param>
-        public static void EditString(string key, string enTrans, string cnTrans = "", string frTrans = "")
+        public static void EditString(string key, string enTrans)
+        {
+            EditString(key, enTrans, "", "");
+        }
+
+        /// <summary>
+        /// Changes already existing localized string.
+        /// If new translation for a language is not specified it will not be modified!
+        /// </summary>
+        /// <param name="key">key of your target localized string</param>
+        /// <param name="enTrans">New English translation for this key</param>
+        /// <param name="cnTrans">New Chinese translation for this key</param>
+        /// <param name="frTrans">New French translation for this key</param>
+        public static void EditString(string key, string enTrans, string cnTrans)
+        {
+            EditString(key, enTrans, cnTrans, "");
+        }
+
+        /// <summary>
+        /// Changes already existing localized string.
+        /// If new translation for a language is not specified it will not be modified!
+        /// </summary>
+        /// <param name="key">key of your target localized string</param>
+        /// <param name="enTrans">New English translation for this key</param>
+        /// <param name="cnTrans">New Chinese translation for this key</param>
+        /// <param name="frTrans">New French translation for this key</param>
+        public static void EditString(string key, string enTrans, string cnTrans, string frTrans)
         {
             ThrowIfNotLoaded();
             StringProto stringProto = LDB.strings[key];
@@ -692,7 +1086,31 @@ namespace CommonAPI.Systems
         /// <param name="enTrans">English translation for this key</param>
         /// <param name="cnTrans">Chinese translation for this key</param>
         /// <param name="frTrans">French translation for this key</param>
-        public static void RegisterString(string key, string enTrans, string cnTrans = "", string frTrans = "")
+        public static void RegisterString(string key, string enTrans, string cnTrans)
+        {
+            RegisterString(key, enTrans, cnTrans, "");
+        }
+
+        /// <summary>
+        /// Registers a new localized string
+        /// </summary>
+        /// <param name="key">UNIQUE key of your localizedKey</param>
+        /// <param name="enTrans">English translation for this key</param>
+        /// <param name="cnTrans">Chinese translation for this key</param>
+        /// <param name="frTrans">French translation for this key</param>
+        public static void RegisterString(string key, string enTrans)
+        {
+            RegisterString(key, enTrans, "", "");
+        }
+
+        /// <summary>
+        /// Registers a new localized string
+        /// </summary>
+        /// <param name="key">UNIQUE key of your localizedKey</param>
+        /// <param name="enTrans">English translation for this key</param>
+        /// <param name="cnTrans">Chinese translation for this key</param>
+        /// <param name="frTrans">French translation for this key</param>
+        public static void RegisterString(string key, string enTrans, string cnTrans, string frTrans)
         {
             ThrowIfNotLoaded();
 
