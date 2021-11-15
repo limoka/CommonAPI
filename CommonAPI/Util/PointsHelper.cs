@@ -13,6 +13,8 @@ namespace CommonAPI
     {
         Land,
         Water,
+        Insert,
+        Belt,
         Custom
     }
     
@@ -27,6 +29,11 @@ namespace CommonAPI
 
         public void Assign()
         {
+            if (searchPoint == null)
+            {
+                searchPoint = gameObject.transform;
+            }
+            
             Transform[] transforms = searchPoint.Cast<Transform>().ToArray();
             Vector3[] points = transforms.Select(trs => trs.position).ToArray();
             if (target == null)
@@ -35,6 +42,9 @@ namespace CommonAPI
             }else if (pointsType == PointsType.Land || pointsType == PointsType.Water)
             {
                 target = target.gameObject.GetComponent<BuildConditionConfig>();
+            }else if (pointsType == PointsType.Insert || pointsType == PointsType.Belt)
+            {
+                target = target.gameObject.GetComponent<SlotConfig>();
             }
 
             if (target == null) return;
@@ -54,6 +64,18 @@ namespace CommonAPI
                 else
                 {
                     config.waterPoints = points;
+                }
+            }
+
+            if (target is SlotConfig slots)
+            {
+                if (pointsType == PointsType.Insert)
+                {
+                    slots.insertPoses = transforms;
+                }
+                else
+                {
+                    slots.slotPoses = transforms;
                 }
             }
         }
