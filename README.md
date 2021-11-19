@@ -14,7 +14,7 @@ A modding library for Dyson Sphere Program. Provides multiple features to make a
 
 More will come in the future. If want write your own module and add it to the list you can open a Pull Request. Contrubitions are welcome.
 
-## Installation
+# Installation
 ### With Mod Manager
 
 Simply open the mod manager (if you don't have it install it [here](https://dsp.thunderstore.io/package/ebkr/r2modman/)), select **CommonAPI by CommonAPI**, then **Download**.
@@ -32,16 +32,16 @@ Unzip folder `plugins` into `Dyson Sphere Program/BepInEx/plugins/CommonAPI/`. (
 ## Feedback and Bug Report
 Feel free to contact me via Discord (Kremnev8#3756) for any feedback, bug-reports or suggestions.
 
+# How develop mods using CommonAPI
+All features are written as self-contained modules (Inspired by [R2API](https://github.com/risk-of-thunder/R2API)). By default NO modules are loaded. To use a module at the top of your BepInEx plugin class add an attribute `CommonAPISubmoduleDependency`. That will ensure that specified modules are loaded. Make sure you don't ask to load modules that you are not using.
+
 ## How to setup development environment
 1. Download and install [CommonAPI](https://dsp.thunderstore.io/package/CommonAPI/CommonAPI/) and its dependencies
 3. Create development environment. You can find how to do that [here](https://docs.bepinex.dev/master/articles/dev_guide/plugin_tutorial/index.html#sidetoggle)
 4. Add LDBTool and CommonAPI assemblies to your references.
 5. You also likely will need a Unity Project. You can find instructions on setting that up [here](https://github.com/kremnev8/DSP-Mods/wiki/Setting-up-development-environment)
 
-# How develop mods using CommonAPI
-
-All features are written as self-contained modules (Inspired by [R2API](https://github.com/risk-of-thunder/R2API)). By default NO modules are loaded. To use a module at the top of your BepInEx plugin class add an attribute `CommonAPISubmoduleDependency`. That will ensure that specified modules are loaded. Make sure you don't ask to load modules that you are not using.
-## Example
+### Usage Example
 ```csharp
 [BepInPlugin(GUID, NAME, VERSION)]
 
