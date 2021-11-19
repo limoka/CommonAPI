@@ -1,4 +1,4 @@
-# Registry Tool
+# ProtoRegistry module
 
 ProtoRegistry is a module that makes adding new content to Dyson Sphere Program easy.
 
