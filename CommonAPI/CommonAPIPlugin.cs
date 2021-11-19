@@ -6,6 +6,7 @@ using System.Security;
 using System.Security.Permissions;
 using BepInEx;
 using BepInEx.Logging;
+using CommonAPI.Patches;
 using CommonAPI.ShotScene;
 using CommonAPI.Systems;
 using crecheng.DSPModSave;
@@ -23,11 +24,17 @@ namespace CommonAPI
     /// Plugin class of Common API. Entry point
     /// </summary>
     [BepInPlugin(GUID, NAME, VERSION)]
+    [BepInDependency(LDB_TOOL_GUID)]
+    [BepInDependency(DSP_MOD_SAVE_GUID)]
+    [BepInProcess("DSPGAME.exe")]
     public class CommonAPIPlugin : BaseUnityPlugin, IModCanSave
     {
-        public const string ID = "common-api";
-        public const string GUID = "dsp.common-tools." + ID;
+        public const string ID = "CommonAPI";
+        public const string GUID = "dsp.common-api.CommonAPI";
         public const string NAME = "DSP Common API";
+        
+        public const string LDB_TOOL_GUID = "me.xiaoye97.plugin.Dyson.LDBTool";
+        public const string DSP_MOD_SAVE_GUID = "crecheng.DSPModSave";
         
         public const string VERSION = "1.0.0";
 
@@ -59,6 +66,7 @@ namespace CommonAPI
             resource.LoadAssetBundle("commonapi");
             
             harmony = new Harmony(GUID);
+            harmony.PatchAll(typeof(DSPModSavePatch));
             
             var pluginScanner = new PluginScanner();
             var submoduleHandler = new APISubmoduleHandler(buildFor, Logger);

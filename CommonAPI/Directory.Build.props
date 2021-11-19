@@ -38,7 +38,8 @@
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
-  
+
+
   <!-- Shared Items -->
   <ItemGroup Label="Plugins">
     <Reference Include="$(MSBuildThisFileDirectory)/../Libs/DSPModSave.dll" Private="false" SpecificVersion="false" />
