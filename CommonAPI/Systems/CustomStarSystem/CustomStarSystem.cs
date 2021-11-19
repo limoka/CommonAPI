@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using CommonAPI.Nebula;
 using CommonAPI.Patches;
-using NebulaAPI;
 
 namespace CommonAPI.Systems
 {
@@ -35,10 +33,7 @@ namespace CommonAPI.Systems
         internal static void load()
         {
             CommonAPIPlugin.registries.Add($"{CommonAPIPlugin.ID}:StarSystemsRegistry", registry);
-            NebulaModAPI.OnStarLoadRequest += starIndex =>
-            {
-                NebulaModAPI.MultiplayerSession.Network.SendPacket(new StarSystemLoadRequest(starIndex));
-            };
+            
         }
 
         private static void ThrowIfNotLoaded()

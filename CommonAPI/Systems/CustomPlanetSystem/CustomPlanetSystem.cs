@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using CommonAPI.Nebula;
 using CommonAPI.Patches;
-using NebulaAPI;
 
 namespace CommonAPI.Systems
 {
@@ -14,7 +12,8 @@ namespace CommonAPI.Systems
         public static TypeRegistry<IPlanetSystem, PlanetSystemStorage> registry = new TypeRegistry<IPlanetSystem, PlanetSystemStorage>();
 
         internal static Dictionary<int, byte[]> pendingData = new Dictionary<int, byte[]>();
-
+        internal static Action<PlanetData> onInitNewPlanet;
+        
         /// <summary>
         /// Return true if the submodule is loaded.
         /// </summary>
@@ -38,10 +37,6 @@ namespace CommonAPI.Systems
         {
             CommonAPIPlugin.registries.Add($"{CommonAPIPlugin.ID}:PlanetSystemsRegistry", CustomPlanetSystem.registry);
             registry.Register(ComponentSystem.systemID, typeof(ComponentSystem));
-            NebulaModAPI.OnPlanetLoadRequest += planetId =>
-            {
-                NebulaModAPI.MultiplayerSession.Network.SendPacket(new PlanetSystemLoadRequest(planetId));
-            };
         }
         
         internal static void ThrowIfNotLoaded()
@@ -80,18 +75,8 @@ namespace CommonAPI.Systems
                 PlanetSystemStorage storage = systems[i];
                 storage.InitNewPlanet(planet);
             }
-
-            if (!NebulaModAPI.IsMultiplayerActive || NebulaModAPI.MultiplayerSession.LocalPlayer.IsHost) return;
-            if (!pendingData.TryGetValue(planet.id, out byte[] bytes)) return;
-            pendingData.Remove(planet.id);
             
-            using IReaderProvider p = NebulaModAPI.GetBinaryReader(bytes);
-
-            for (int i = 1; i < registry.data.Count; i++)
-            {
-                PlanetSystemStorage system = systems[i];
-                system.GetSystem(planet.factory).Import(p.BinaryReader);
-            }
+            onInitNewPlanet?.Invoke(planet);
         }
 
 

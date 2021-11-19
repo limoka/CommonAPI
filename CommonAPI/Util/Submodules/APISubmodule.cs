@@ -90,8 +90,20 @@ namespace CommonAPI {
                 }
             }
 
-            void CallWhenAssembliesAreScanned() {
-                var moduleTypes = Assembly.GetExecutingAssembly().GetTypes().Where(APISubmoduleFilter).ToList();
+            void CallWhenAssembliesAreScanned()
+            {
+                Type[] types;
+                try
+                {
+                    types = Assembly.GetExecutingAssembly().GetTypes();
+                }
+                catch (ReflectionTypeLoadException e)
+                {
+                    types = e.Types;
+                }
+
+
+                var moduleTypes = types.Where(APISubmoduleFilter).ToList();
 
                 foreach (var moduleType in moduleTypes) {
                     CommonAPIPlugin.logger.LogInfo($"Enabling CommonAPI Submodule: {moduleType.Name}");
@@ -130,7 +142,9 @@ namespace CommonAPI {
         }
 
         // ReSharper disable once InconsistentNaming
-        private bool APISubmoduleFilter(Type type) {
+        private bool APISubmoduleFilter(Type type)
+        {
+            if (type == null) return false;
             var attr = type.GetCustomAttribute<CommonAPISubmodule>();
 
             if (attr == null)
