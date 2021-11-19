@@ -10,8 +10,7 @@ namespace CommonAPI.Systems
     public class TabSystem
     {
         internal static InstanceRegistry<TabData> tabsRegistry = new InstanceRegistry<TabData>(3);
-        internal static ResourceData resource;
-        
+
         /// <summary>
         /// Return true if the submodule is loaded.
         /// </summary>
@@ -34,9 +33,6 @@ namespace CommonAPI.Systems
         [CommonAPISubmoduleInit(Stage = InitStage.Load)]
         internal static void Load()
         {
-            string pluginfolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            resource = new ResourceData(CommonAPIPlugin.ID, "CommonAPI", pluginfolder);
-            resource.LoadAssetBundle("commonapi");
         }
 
         internal static void ThrowIfNotLoaded()

@@ -71,6 +71,8 @@
     <Reference Include="$(DSPAssemblyDir)UnityEngine.UI.dll" Private="false" SpecificVersion="true" />
     <Reference Include="$(DSPAssemblyDir)UnityEngine.UIElementsModule.dll" Private="false" SpecificVersion="true" />
     <Reference Include="$(DSPAssemblyDir)UnityEngine.UIModule.dll" Private="false" SpecificVersion="true" />
+    <Reference Include="$(DSPAssemblyDir)UnityEngine.IMGUIModule.dll" Private="false" SpecificVersion="true" />
+    <Reference Include="$(DSPAssemblyDir)UnityEngine.ImageConversionModule.dll" Private="false" SpecificVersion="true" />
   </ItemGroup>
 
 </Project>

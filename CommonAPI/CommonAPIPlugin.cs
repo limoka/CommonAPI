@@ -6,10 +6,11 @@ using System.Security;
 using System.Security.Permissions;
 using BepInEx;
 using BepInEx.Logging;
+using CommonAPI.ShotScene;
 using CommonAPI.Systems;
 using crecheng.DSPModSave;
 using HarmonyLib;
-using NebulaAPI;
+using UnityEngine;
 
 [module: UnverifiableCode]
 #pragma warning disable 618
@@ -22,11 +23,10 @@ namespace CommonAPI
     /// Plugin class of Common API. Entry point
     /// </summary>
     [BepInPlugin(GUID, NAME, VERSION)]
-    [BepInDependency(NebulaModAPI.API_GUID)]
-    public class CommonAPIPlugin : BaseUnityPlugin, IModCanSave, IMultiplayerMod
+    public class CommonAPIPlugin : BaseUnityPlugin, IModCanSave
     {
-        public const string ID = "CommonAPI";
-        public const string GUID = "org.kremnev8.api." + ID;
+        public const string ID = "common-api";
+        public const string GUID = "dsp.common-tools." + ID;
         public const string NAME = "DSP Common API";
         
         public const string VERSION = "1.0.0";
@@ -34,10 +34,14 @@ namespace CommonAPI
         internal static HashSet<string> LoadedSubmodules;
         internal static Harmony harmony;
         internal static ManualLogSource logger;
+        internal static ResourceData resource;
+        internal static Action onIntoOtherSave;
         
         public static Dictionary<string, Registry> registries = new Dictionary<string, Registry>();
-        public static readonly Version buildFor = GameVersionUtil.GetVersion(0, 8, 22, 9331);
-        
+        public static readonly Version buildFor = GameVersionUtil.GetVersion(0, 8, 23, 9808);
+
+        public static bool iconShotMenuEnabled;
+        public static KeyCode openIconShotMenuButton;
         
 
         void Awake()
@@ -45,8 +49,14 @@ namespace CommonAPI
             logger = Logger;
 
             UnityThread.initUnityThread();
+
+            iconShotMenuEnabled = Config.Bind("General", "enableIconShotMenu", false, "Is Icon shot menu enabled. It is useful for mod developers, because it allows to create consistent icons.").Value;
+
+            openIconShotMenuButton = Config.Bind("General", "OpenIconShotMenuButton", KeyCode.F6, "Button used to open special Icon shot menu. It is useful for mod developers, because it allows to create consistent icons.").Value;
             
-            logger.LogInfo($"Current version: {GameConfig.gameVersion.ToFullString()}");
+            string pluginfolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            resource = new ResourceData(ID, "CommonAPI", pluginfolder);
+            resource.LoadAssetBundle("commonapi");
             
             harmony = new Harmony(GUID);
             
@@ -55,21 +65,28 @@ namespace CommonAPI
             LoadedSubmodules = submoduleHandler.LoadRequested(pluginScanner);
             pluginScanner.ScanPlugins();
 
-            NebulaModAPI.RegisterPackets(Assembly.GetExecutingAssembly());
-
             LoadSaveOnLoad.Init();
             harmony.PatchAll(typeof(VFPreloadPatch));
             
             logger.LogInfo("Common API is initialized!");
         }
-        
+
+        private void Update()
+        {
+            if (iconShotMenuEnabled && DSPGame.MenuDemoLoaded && Input.GetKeyDown(openIconShotMenuButton))
+            {
+                GeneratorSceneController.LoadIconGeneratorScene();
+            }
+        }
+
         internal static void CheckIfUsedOnRightGameVersion() {
             var buildId = GameConfig.gameVersion;
 
             if (buildFor == buildId)
                 return;
 
-            logger.LogWarning($"This version of CommonAPI was built for build id \"{buildFor}\", you are running \"{buildId}\".");
+            // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
+            logger.LogWarning($"This version of CommonAPI was built for build id \"{buildFor.ToFullString()}\", you are running \"{buildId.ToFullString()}\".");
             logger.LogWarning("Should any problems arise, please check for a new version before reporting issues.");
         }
         
@@ -77,7 +94,7 @@ namespace CommonAPI
         /// Return true if the specified submodule is loaded.
         /// </summary>
         /// <param name="submodule">nameof the submodule</param>
-        public static bool IsLoaded(string submodule) {
+        public static bool IsSubmoduleLoaded(string submodule) {
             if (LoadedSubmodules == null) {
                 logger.LogWarning("IsLoaded called before submodules were loaded, result may not reflect actual load status.");
                 return false;
@@ -138,24 +155,11 @@ namespace CommonAPI
 
         public void IntoOtherSave()
         {
-            if (NebulaModAPI.IsMultiplayerActive && !NebulaModAPI.MultiplayerSession.LocalPlayer.IsHost)
-            {
-                foreach (var kv in registries)
-                {
-                    kv.Value.InitUnitMigrationMap();
-                }
-            }
-            
+            onIntoOtherSave?.Invoke();
+
             CustomStarSystem.InitOnLoad();
             CustomPlanetSystem.InitOnLoad();
         }
-
-        public bool CheckVersion(string hostVersion, string clientVersion)
-        {
-            return hostVersion.Equals(clientVersion);
-        }
-
-        public string Version => VERSION;
     }
 
     [HarmonyPatch]

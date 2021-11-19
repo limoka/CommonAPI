@@ -23,7 +23,7 @@ namespace CommonAPI.Patches
             for (int i = 0; i < TabSystem.tabsRegistry.idMap.Count; i++)
             {
                 TabData data = TabSystem.tabsRegistry.data[i + 3];
-                GameObject buttonPrefab = TabSystem.resource.bundle.LoadAsset<GameObject>("Assets/CommonAPI/UI/tab-button.prefab");
+                GameObject buttonPrefab = CommonAPIPlugin.resource.bundle.LoadAsset<GameObject>("Assets/CommonAPI/UI/tab-button.prefab");
                 GameObject button = Object.Instantiate(buttonPrefab, __instance.recipeGroup, false);
                 ((RectTransform)button.transform).anchoredPosition = new Vector2(115 + 70 * i, 50);
                 UITabButton tabButton = button.GetComponent<UITabButton>();
