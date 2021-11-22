@@ -8,7 +8,7 @@ namespace CommonAPI.Systems
         public string componentId;
         public override void ApplyProperties(PrefabDesc desc)
         {
-            int id = ComponentSystem.componentRegistry.GetUniqueId(componentId);
+            int id = ComponentExtension.componentRegistry.GetUniqueId(componentId);
             desc.SetProperty(FIELD_NAME, id);
         }
     }

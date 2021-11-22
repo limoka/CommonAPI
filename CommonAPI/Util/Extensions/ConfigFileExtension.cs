@@ -18,6 +18,14 @@ namespace CommonAPI
             OrphanedEntriesProp = configFile.GetProperty("OrphanedEntries", AccessTools.all);
         }
 
+        /// <summary>
+        /// Migrate BepInEx config file entries from one category to another.
+        /// </summary>
+        /// <param name="file">target BepInEx config file</param>
+        /// <param name="oldSection">Section to migrate from</param>
+        /// <param name="newSection">Section to migrate to</param>
+        /// <param name="keyFilter">Array of keys to migrate</param>
+        /// <typeparam name="T">Type of config entries</typeparam>
         public static void MigrateConfig<T>(this ConfigFile file, string oldSection, string newSection, string[] keyFilter)
         {
             Dictionary<ConfigDefinition, string> oldEntries = (Dictionary<ConfigDefinition, string>)OrphanedEntriesProp.GetValue(file);
@@ -42,7 +50,16 @@ namespace CommonAPI
                 oldEntries.Remove(key);
             }
         }
-        
+
+        /// <summary>
+        /// Migrate BepInEx config file entry.
+        /// </summary>
+        /// <param name="file">target BepInEx config file</param>
+        /// <param name="oldSection">Section to migrate from</param>
+        /// <param name="oldName">Old entry key</param>
+        /// <param name="newSection">Section to migrate to</param>
+        /// <param name="newName">New entry key</param>
+        /// <typeparam name="T">Type of config entry</typeparam>
         public static void MigrateConfig<T>(this ConfigFile file, string oldSection, string oldName, string newSection, string newName)
         {
             Dictionary<ConfigDefinition, string> oldEntries = (Dictionary<ConfigDefinition, string>)OrphanedEntriesProp.GetValue(file);

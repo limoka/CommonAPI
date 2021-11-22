@@ -75,10 +75,7 @@ namespace CommonAPI.Systems
             CommonAPIPlugin.harmony.PatchAll(typeof(StorageComponentPatch));
             CommonAPIPlugin.harmony.PatchAll(typeof(UIBuildMenuPatch));
             CommonAPIPlugin.harmony.PatchAll(typeof(VertaBufferPatch));
-            
-            CommonAPIPlugin.harmony.PatchAll(typeof(AssemblerComponentPatch));
-            CommonAPIPlugin.harmony.PatchAll(typeof(UIAssemblerWindowPatch));
-            
+
             CommonAPIPlugin.harmony.PatchAll(typeof(IconSetPatch));
         }
 
@@ -86,6 +83,14 @@ namespace CommonAPI.Systems
         [CommonAPISubmoduleInit(Stage = InitStage.Load)]
         internal static void load()
         {
+            if (CommonAPIPlugin.IsSubmoduleLoaded(nameof(PickerExtensionsSystem)) &&
+                CommonAPIPlugin.IsSubmoduleLoaded(nameof(CustomDescSystem)))
+            {
+                CommonAPIPlugin.harmony.PatchAll(typeof(AssemblerComponentPatch));
+                CommonAPIPlugin.harmony.PatchAll(typeof(UIAssemblerWindowPatch));
+            }
+            
+            
             CommonAPIPlugin.registries.Add($"{ CommonAPIPlugin.ID}:RecipeTypeRegistry", recipeTypes);
             
             int mainTex = Shader.PropertyToID("_MainTex");

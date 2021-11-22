@@ -24,16 +24,4 @@ namespace CommonAPI.Patches
             __instance.customData = null;
         }
     }
-
-    [HarmonyPatch]
-    static class PrefabDescCustomDataPatch
-    {
-
-        [HarmonyPatch(typeof(PrefabDesc), "Free")]
-        [HarmonyPostfix]
-        public static void Free(PrefabDesc __instance)
-        {
-            __instance.customData = null;
-        }
-    }
 }

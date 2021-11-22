@@ -3,20 +3,20 @@ using System.IO;
 
 namespace CommonAPI.Systems
 {
-    public class StarSystemStorage : ISerializeState
+    public class StarExtensionStorage : ISerializeState
     {
-        public List<IStarSystem> systems = new List<IStarSystem>();
+        public List<IStarExtension> extensions = new List<IStarExtension>();
         public int starIndex;
         
         public void InitOnLoad(int index)
         {
-            systems.Capacity = GameMain.galaxy.starCount;
+            extensions.Capacity = GameMain.galaxy.starCount;
             starIndex = index;
             
             for (int i = 0; i < GameMain.galaxy.starCount; i++)
             {
-                systems.Add(CustomStarSystem.registry.GetNew(index));
-                systems[i].Init(GameMain.galaxy.stars[i]);
+                extensions.Add(StarExtensionSystem.registry.GetNew(index));
+                extensions[i].Init(GameMain.galaxy.stars[i]);
             }
         }
 
@@ -24,17 +24,17 @@ namespace CommonAPI.Systems
         {
             if (GetSystem(star) != null) return;
             
-            systems.Capacity += 1;
-            systems.Add(CustomStarSystem.registry.GetNew(starIndex));
-            systems[star.index].Init(GameMain.galaxy.stars[star.index]);
+            extensions.Capacity += 1;
+            extensions.Add(StarExtensionSystem.registry.GetNew(starIndex));
+            extensions[star.index].Init(GameMain.galaxy.stars[star.index]);
         }
         
         
-        public IStarSystem GetSystem(StarData star)
+        public IStarExtension GetSystem(StarData star)
         {
-            if (star.index >= 0 && star.index < systems.Count)
+            if (star.index >= 0 && star.index < extensions.Count)
             {
-                return systems[star.index];
+                return extensions[star.index];
             }
 
             return null;
@@ -82,22 +82,22 @@ namespace CommonAPI.Systems
 
         public bool PreUpdateSupportsMultithread()
         {
-            return systems[0] is IPreUpdateMultithread;
+            return extensions[0] is IPreUpdateMultithread;
         }
         
         public bool UpdateSupportsMultithread()
         {
-            return systems[0] is IUpdateMultithread;
+            return extensions[0] is IUpdateMultithread;
         }
         
         public bool PostUpdateSupportsMultithread()
         {
-            return systems[0] is IPostUpdateMultithread;
+            return extensions[0] is IPostUpdateMultithread;
         }
         
         public bool PowerUpdateSupportsMultithread()
         {
-            return systems[0] is IPowerUpdateMultithread;
+            return extensions[0] is IPowerUpdateMultithread;
         }
         
         public void PreUpdateMultithread(StarData star, int usedThreadCount, int currentThreadIdx, int minimumCount)
@@ -134,12 +134,12 @@ namespace CommonAPI.Systems
         
         public void Free()
         {
-            foreach (IStarSystem system in systems)
+            foreach (IStarExtension system in extensions)
             {
                 system.Free();
             }
-            systems.Clear();
-            systems = null;
+            extensions.Clear();
+            extensions = null;
         }
 
         public void Export(BinaryWriter w)
@@ -150,7 +150,7 @@ namespace CommonAPI.Systems
 
             for (int i = 0; i < GameMain.galaxy.starCount; i++)
             {
-                systems[i].Export(w);
+                extensions[i].Export(w);
             }
         }
 
@@ -162,14 +162,14 @@ namespace CommonAPI.Systems
 
             int ver = r.ReadInt32();
             
-            systems.Clear();
-            systems.Capacity = GameMain.galaxy.starCount;
+            extensions.Clear();
+            extensions.Capacity = GameMain.galaxy.starCount;
 
             for (int i = 0; i < GameMain.galaxy.starCount; i++)
             {
-                systems.Add(CustomStarSystem.registry.GetNew(starIndex));
-                systems[i].Init(GameMain.galaxy.stars[i]);
-                systems[i].Import(r);
+                extensions.Add(StarExtensionSystem.registry.GetNew(starIndex));
+                extensions[i].Init(GameMain.galaxy.stars[i]);
+                extensions[i].Import(r);
             }
         }
     

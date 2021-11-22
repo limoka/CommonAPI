@@ -6,10 +6,10 @@ using CommonAPI.Patches;
 namespace CommonAPI.Systems
 {
     [CommonAPISubmodule]
-    public static class CustomStarSystem
+    public static class StarExtensionSystem
     {
-        public static List<StarSystemStorage> systems = new List<StarSystemStorage>();
-        public static TypeRegistry<IStarSystem, StarSystemStorage> registry = new TypeRegistry<IStarSystem, StarSystemStorage>();
+        public static List<StarExtensionStorage> extensions = new List<StarExtensionStorage>();
+        public static TypeRegistry<IStarExtension, StarExtensionStorage> registry = new TypeRegistry<IStarExtension, StarExtensionStorage>();
 
         /// <summary>
         /// Return true if the submodule is loaded.
@@ -25,7 +25,7 @@ namespace CommonAPI.Systems
         [CommonAPISubmoduleInit(Stage = InitStage.SetHooks)]
         internal static void SetHooks()
         {
-            CommonAPIPlugin.harmony.PatchAll(typeof(StarSystemHooks));
+            CommonAPIPlugin.harmony.PatchAll(typeof(StarExtensionHooks));
         }
 
 
@@ -41,7 +41,7 @@ namespace CommonAPI.Systems
             if (!Loaded)
             {
                 throw new InvalidOperationException(
-                    $"{nameof(CustomStarSystem)} is not loaded. Please use [{nameof(CommonAPISubmoduleDependency)}(nameof({nameof(CustomStarSystem)})]");
+                    $"{nameof(StarExtensionSystem)} is not loaded. Please use [{nameof(CommonAPISubmoduleDependency)}(nameof({nameof(StarExtensionSystem)})]");
             }
         }
 
@@ -50,17 +50,17 @@ namespace CommonAPI.Systems
         {
             if (Loaded)
             {
-                CommonAPIPlugin.logger.LogInfo("Loading star system manager");
+                CommonAPIPlugin.logger.LogInfo("Loading star extension system");
                 GameData data = GameMain.data;
 
-                systems.Clear();
-                systems.Capacity = registry.data.Count + 1;
-                systems.Add(null);
+                extensions.Clear();
+                extensions.Capacity = registry.data.Count + 1;
+                extensions.Add(null);
                 for (int i = 1; i < registry.data.Count; i++)
                 {
-                    StarSystemStorage storage = new StarSystemStorage();
+                    StarExtensionStorage storage = new StarExtensionStorage();
                     storage.InitOnLoad(i);
-                    systems.Add(storage);
+                    extensions.Add(storage);
                 }
             }
         }
@@ -69,23 +69,23 @@ namespace CommonAPI.Systems
         {
             for (int i = 1; i < registry.data.Count; i++)
             {
-                StarSystemStorage storage = systems[i];
+                StarExtensionStorage storage = extensions[i];
                 storage.InitNewStar(star);
             }
         }
 
-        public static T GetSystem<T>(int starId, int systemId) where T : IStarSystem
+        public static T GetExtension<T>(int starId, int systemId) where T : IStarExtension
         {
             ThrowIfNotLoaded();
             StarData star = GameMain.galaxy.StarById(starId);
-            return GetSystem<T>(star, systemId);
+            return GetExtension<T>(star, systemId);
         }
 
-        public static T GetSystem<T>(StarData star, int systemId) where T : IStarSystem
+        public static T GetExtension<T>(StarData star, int systemId) where T : IStarExtension
         {
             ThrowIfNotLoaded();
-            if (systemId <= 0 || systemId >= systems.Count) return default;
-            return (T) systems[systemId].GetSystem(star);
+            if (systemId <= 0 || systemId >= extensions.Count) return default;
+            return (T) extensions[systemId].GetSystem(star);
         }
 
         public static void DrawUpdate()
@@ -95,9 +95,9 @@ namespace CommonAPI.Systems
                 StarData star = GameMain.data.localStar;
                 if (star == null) return;
 
-                for (int j = 1; j < systems.Count; j++)
+                for (int j = 1; j < extensions.Count; j++)
                 {
-                    StarSystemStorage storage = systems[j];
+                    StarExtensionStorage storage = extensions[j];
 
                     storage.DrawUpdate(star);
                 }
@@ -108,9 +108,9 @@ namespace CommonAPI.Systems
         {
             if (star == null) return;
 
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                StarSystemStorage storage = systems[i];
+                StarExtensionStorage storage = extensions[i];
                 storage.PreUpdate(star);
             }
         }
@@ -119,9 +119,9 @@ namespace CommonAPI.Systems
         {
             if (star == null) return;
 
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                StarSystemStorage storage = systems[i];
+                StarExtensionStorage storage = extensions[i];
                 storage.Update(star);
             }
         }
@@ -133,9 +133,9 @@ namespace CommonAPI.Systems
                 StarData star = GameMain.galaxy.stars[i];
                 if (star == null) continue;
 
-                for (int j = 1; j < systems.Count; j++)
+                for (int j = 1; j < extensions.Count; j++)
                 {
-                    StarSystemStorage storage = systems[j];
+                    StarExtensionStorage storage = extensions[j];
                     if (storage.PreUpdateSupportsMultithread()) return;
 
                     storage.PreUpdate(star);
@@ -150,9 +150,9 @@ namespace CommonAPI.Systems
                 StarData star = GameMain.galaxy.stars[i];
                 if (star == null) continue;
 
-                for (int j = 1; j < systems.Count; j++)
+                for (int j = 1; j < extensions.Count; j++)
                 {
-                    StarSystemStorage storage = systems[j];
+                    StarExtensionStorage storage = extensions[j];
                     if (storage.UpdateSupportsMultithread()) return;
 
                     storage.Update(star);
@@ -162,18 +162,18 @@ namespace CommonAPI.Systems
 
         public static void PreUpdateMultithread(StarData star, int usedThreadCount, int currentThreadIdx, int minimumCount)
         {
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                StarSystemStorage storage = systems[i];
+                StarExtensionStorage storage = extensions[i];
                 storage.PreUpdateMultithread(star, usedThreadCount, currentThreadIdx, minimumCount);
             }
         }
 
         public static void UpdateMultithread(StarData star, int usedThreadCount, int currentThreadIdx, int minimumCount)
         {
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                StarSystemStorage storage = systems[i];
+                StarExtensionStorage storage = extensions[i];
                 storage.UpdateMultithread(star, usedThreadCount, currentThreadIdx, minimumCount);
             }
         }
@@ -186,7 +186,7 @@ namespace CommonAPI.Systems
 
             if (wasLoaded)
             {
-                registry.ImportAndMigrate(systems, r);
+                registry.ImportAndMigrate(extensions, r);
             }
         }
 
@@ -197,7 +197,7 @@ namespace CommonAPI.Systems
 
             if (Loaded)
             {
-                registry.ExportContainer(systems, w);
+                registry.ExportContainer(extensions, w);
             }
         }
     }

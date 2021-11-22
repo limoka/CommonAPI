@@ -25,6 +25,7 @@ Then just click **Start modded**, and the game will run with the mod installed.
 ### Manually
 Install BepInEx from [here](https://dsp.thunderstore.io/package/xiaoye97/BepInEx/)<br/>
 Install LDBTool from [here](https://dsp.thunderstore.io/package/xiaoye97/LDBTool/)<br/>
+Install DSPModSave from [here](https://dsp.thunderstore.io/package/crecheng/DSPModSave/)<br/>
 
 Unzip folder `patchers` into `Dyson Sphere Program/BepInEx/patchers/CommonAPI/` (Create folder named `CommonAPI`)<br/>
 Unzip folder `plugins` into `Dyson Sphere Program/BepInEx/plugins/CommonAPI/`. (Create folder named `CommonAPI`)<br/>
@@ -67,5 +68,7 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.0.1
+- Fix issues selecting recipes in Assembler UI
 ### v1.0.0
 - Initial Release

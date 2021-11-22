@@ -15,7 +15,6 @@ namespace CommonAPI
 
             if (propageToRecipe && proto.maincraft != null)
             {
-                CommonAPIPlugin.logger.LogDebug("Setting recipe icon!");
                 RecipeProto recipe = LDB.recipes.Select(proto.maincraft.ID);
                 
                 recipe.IconPath = "";

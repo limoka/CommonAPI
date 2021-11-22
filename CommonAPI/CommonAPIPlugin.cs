@@ -23,7 +23,7 @@ namespace CommonAPI
     /// <summary>
     /// Plugin class of Common API. Entry point
     /// </summary>
-    [BepInPlugin(GUID, NAME, VERSION)]
+    [BepInPlugin(GUID, DISPNAME, VERSION)]
     [BepInDependency(LDB_TOOL_GUID)]
     [BepInDependency(DSP_MOD_SAVE_GUID)]
     [BepInProcess("DSPGAME.exe")]
@@ -31,12 +31,12 @@ namespace CommonAPI
     {
         public const string ID = "CommonAPI";
         public const string GUID = "dsp.common-api.CommonAPI";
-        public const string NAME = "DSP Common API";
+        public const string DISPNAME = "DSP Common API";
         
         public const string LDB_TOOL_GUID = "me.xiaoye97.plugin.Dyson.LDBTool";
         public const string DSP_MOD_SAVE_GUID = "crecheng.DSPModSave";
         
-        public const string VERSION = "1.0.0";
+        public const string VERSION = "1.0.1";
 
         internal static HashSet<string> LoadedSubmodules;
         internal static Harmony harmony;
@@ -133,11 +133,11 @@ namespace CommonAPI
                 }
             }
             
-            CustomStarSystem.InitOnLoad();
-            CustomStarSystem.Import(r);
+            StarExtensionSystem.InitOnLoad();
+            StarExtensionSystem.Import(r);
 
-            CustomPlanetSystem.InitOnLoad();
-            CustomPlanetSystem.Import(r);
+            PlanetExtensionSystem.InitOnLoad();
+            PlanetExtensionSystem.Import(r);
         }
 
         public void Export(BinaryWriter w)
@@ -157,16 +157,16 @@ namespace CommonAPI
 
             w.Write((byte)0);
             
-            CustomStarSystem.Export(w);
-            CustomPlanetSystem.Export(w);
+            StarExtensionSystem.Export(w);
+            PlanetExtensionSystem.Export(w);
         }
 
         public void IntoOtherSave()
         {
             onIntoOtherSave?.Invoke();
 
-            CustomStarSystem.InitOnLoad();
-            CustomPlanetSystem.InitOnLoad();
+            StarExtensionSystem.InitOnLoad();
+            PlanetExtensionSystem.InitOnLoad();
         }
     }
 
@@ -178,6 +178,7 @@ namespace CommonAPI
         public static void OnMainMenuOpen()
         {
             CommonAPIPlugin.CheckIfUsedOnRightGameVersion();
+            LoadSaveOnLoad.LoadSave();
         }
     }
 }

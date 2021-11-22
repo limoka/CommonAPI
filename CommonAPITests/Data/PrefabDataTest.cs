@@ -32,9 +32,9 @@ namespace CommonAPITests
         {
             component.componentId = "TEST:ID1";
 
-            ComponentSystem.componentRegistry.Register("TEST:ID1", typeof(TestComponent));
+            ComponentExtension.componentRegistry.Register("TEST:ID1", typeof(TestComponent));
 
-            int id = ComponentSystem.componentRegistry.GetUniqueId("TEST:ID1");
+            int id = ComponentExtension.componentRegistry.GetUniqueId("TEST:ID1");
             
             component.ApplyProperties(desc);
             int id2 = desc.GetProperty<int>(ComponentDesc.FIELD_NAME);

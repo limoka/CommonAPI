@@ -26,12 +26,12 @@ namespace CommonAPI.Nebula
 
             using IWriterProvider p = NebulaModAPI.GetBinaryWriter();
             
-            for (int i = 1; i < CustomPlanetSystem.registry.data.Count; i++)
+            for (int i = 1; i < PlanetExtensionSystem.registry.data.Count; i++)
             {
-                PlanetSystemStorage system = CustomPlanetSystem.systems[i];
-                system.GetSystem(factory).Export(p.BinaryWriter);
+                PlanetExtensionStorage extension = PlanetExtensionSystem.extensions[i];
+                extension.GetExtension(factory).Export(p.BinaryWriter);
             }
-            conn.SendPacket(new PlanetSystemData(packet.planetID, p.CloseAndGetBytes()));
+            conn.SendPacket(new PlanetExtensionData(packet.planetID, p.CloseAndGetBytes()));
         }
     }
 }

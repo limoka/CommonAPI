@@ -22,6 +22,8 @@
         
         public static T GetProperty<T>(this PrefabDesc desc, string name)
         {
+            
+            
             if (desc.customData.ContainsKey(name))
             {
                 return (T)desc.customData[name];

@@ -35,7 +35,7 @@ namespace CommonAPI.Systems
 
         protected override FactoryComponent GetNewInstance()
         {
-            return ComponentSystem.componentRegistry.GetNew(PoolTypeId);
+            return ComponentExtension.componentRegistry.GetNew(PoolTypeId);
         }
 
         public void OnPostComponentAdded()

@@ -53,7 +53,7 @@ function main() {
 function getPluginInfo() {
     const pluginInfoRaw = fs.readFileSync(PLUGIN_INFO).toString("utf-8")
     return {
-        name: pluginInfoRaw.match(/NAME = "(.*)";/)[1],
+        name: pluginInfoRaw.match(/ID = "(.*)";/)[1],
         id: pluginInfoRaw.match(/GUID = "(.*)";/)[1],
         version: pluginInfoRaw.match(/VERSION = "(.*)";/)[1],
     }

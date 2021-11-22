@@ -27,7 +27,7 @@ namespace CommonAPI.Patches
                 return true;
             }
 
-            FactoryComponent component = ComponentSystem.GetComponent(factory,customType, customId);
+            FactoryComponent component = ComponentExtension.GetComponent(factory,customType, customId);
             if (component is ICopyPasteSettings storage)
             {
                 __instance.SetEmpty();
@@ -89,7 +89,7 @@ namespace CommonAPI.Patches
             int targetCustomType = factory.entityPool[objectId].customType;
             if (targetCustomId <= 0) return true;
             
-            FactoryComponent component = ComponentSystem.GetComponent(factory,targetCustomType, targetCustomId);
+            FactoryComponent component = ComponentExtension.GetComponent(factory,targetCustomType, targetCustomId);
             if (component is ICopyPasteSettings storage)
             {
                 int len = __instance.parameters.Length - 2;
@@ -102,7 +102,7 @@ namespace CommonAPI.Patches
                 MemoryStream stream = new MemoryStream(bytes);
                 BinaryReader reader = new BinaryReader(stream);
                 
-                FactoryComponent originalObject = ComponentSystem.GetComponent(factory,customType, customId);
+                FactoryComponent originalObject = ComponentExtension.GetComponent(factory,customType, customId);
                 
                 if (storage.CanPasteSettings(originalObject, reader))
                 {
@@ -130,7 +130,7 @@ namespace CommonAPI.Patches
                     if (customId > 0)
                     {
                         PlanetFactory factory = GameMain.mainPlayer.factory;
-                        FactoryComponent component = ComponentSystem.GetComponent(factory, customType, customId);
+                        FactoryComponent component = ComponentExtension.GetComponent(factory, customType, customId);
                         if (component is ICopyPasteSettings storage)
                         {
                             __result = storage.GetCopyMessage();
@@ -157,7 +157,7 @@ namespace CommonAPI.Patches
                     {
                         PlanetFactory factory = GameMain.mainPlayer.factory;
                         
-                        FactoryComponent component = ComponentSystem.GetComponent(factory, customType, customId);
+                        FactoryComponent component = ComponentExtension.GetComponent(factory, customType, customId);
                         if (component is ICopyPasteSettings storage)
                         {
                             __result = storage.GetPasteMessage();

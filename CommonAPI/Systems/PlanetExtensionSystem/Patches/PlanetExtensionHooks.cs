@@ -10,7 +10,7 @@ namespace CommonAPI.Patches
 
 
     [HarmonyPatch]
-    public static class PlanetSystemHooks
+    public static class PlanetExtensionHooks
     {
         
         [HarmonyPostfix]
@@ -19,7 +19,7 @@ namespace CommonAPI.Patches
         {
             if (__instance.planet == null || !__instance.planet.factoryLoaded || __instance.planet != GameMain.localPlanet) return;
             
-            CustomPlanetSystem.DrawUpdate(__instance.planet.factory);
+            PlanetExtensionSystem.DrawUpdate(__instance.planet.factory);
         }
 
         //Single thread update calls (Only when game is running in single thread mode)
@@ -27,28 +27,28 @@ namespace CommonAPI.Patches
         [HarmonyPostfix]
         public static void PowerTick(FactorySystem __instance, long time, bool isActive)
         {
-            CustomPlanetSystem.PowerUpdate(__instance.factory);
+            PlanetExtensionSystem.PowerUpdate(__instance.factory);
         }
         
         [HarmonyPatch(typeof(FactorySystem), "GameTick", new Type[] {typeof(long), typeof(bool)})]
         [HarmonyPrefix]
         public static void PreUpdate(FactorySystem __instance, long time, bool isActive)
         {
-            CustomPlanetSystem.PreUpdate(__instance.factory);
+            PlanetExtensionSystem.PreUpdate(__instance.factory);
         }
 
         [HarmonyPatch(typeof(FactorySystem), "GameTickLabOutputToNext", new Type[] {typeof(long), typeof(bool)})]
         [HarmonyPostfix]
         public static void Update(FactorySystem __instance, long time, bool isActive)
         {
-            CustomPlanetSystem.Update(__instance.factory);
+            PlanetExtensionSystem.Update(__instance.factory);
         }
         
         [HarmonyPatch(typeof(PlanetFactory), "GameTick")]
         [HarmonyPostfix]
         public static void PostUpdate(PlanetFactory __instance, long time)
         {
-            CustomPlanetSystem.PostUpdate(__instance);
+            PlanetExtensionSystem.PostUpdate(__instance);
         }
         
         //Fall-back calls for systems that do not support multi-thread update calls
@@ -58,7 +58,7 @@ namespace CommonAPI.Patches
         public static void PowerUpdateSinglethread()
         {
             if (!GameMain.multithreadSystem.multithreadSystemEnable) return;
-            CustomPlanetSystem.PowerUpdateOnlySinglethread(GameMain.data);
+            PlanetExtensionSystem.PowerUpdateOnlySinglethread(GameMain.data);
         }
         
         [HarmonyPatch(typeof(MultithreadSystem), "PrepareAssemblerFactoryData")]
@@ -66,7 +66,7 @@ namespace CommonAPI.Patches
         public static void PreUpdateSinglethread()
         {
             if (!GameMain.multithreadSystem.multithreadSystemEnable) return;
-            CustomPlanetSystem.PreUpdateOnlySinglethread(GameMain.data);
+            PlanetExtensionSystem.PreUpdateOnlySinglethread(GameMain.data);
         }
         
         [HarmonyPatch(typeof(MultithreadSystem), "PrepareTransportData")]
@@ -74,7 +74,7 @@ namespace CommonAPI.Patches
         public static void UpdateSinglethread()
         {
             if (!GameMain.multithreadSystem.multithreadSystemEnable) return;
-            CustomPlanetSystem.UpdateOnlySinglethread(GameMain.data);
+            PlanetExtensionSystem.UpdateOnlySinglethread(GameMain.data);
         }
         
         [HarmonyPatch(typeof(TrashSystem), "GameTick")]
@@ -82,7 +82,7 @@ namespace CommonAPI.Patches
         public static void PostUpdateSinglethread()
         {
             if (!GameMain.multithreadSystem.multithreadSystemEnable) return;
-            CustomPlanetSystem.PostUpdateOnlySinglethread(GameMain.data);
+            PlanetExtensionSystem.PostUpdateOnlySinglethread(GameMain.data);
         }
         
         //Multi-thread update calls, used only if player system support multithreading
@@ -91,49 +91,49 @@ namespace CommonAPI.Patches
         [HarmonyPostfix]
         public static void PowerTickMultithread(FactorySystem __instance, long time, bool isActive, int _usedThreadCnt, int _curThreadIdx)
         {
-            CustomPlanetSystem.PowerUpdateMultithread(__instance.factory, _usedThreadCnt, _curThreadIdx, 4);
+            PlanetExtensionSystem.PowerUpdateMultithread(__instance.factory, _usedThreadCnt, _curThreadIdx, 4);
         }
 
         [HarmonyPatch(typeof(FactorySystem), "GameTick", new Type[] {typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int)})]
         [HarmonyPrefix]
         public static void PreUpdateMultithread(FactorySystem __instance, long time, bool isActive, int _usedThreadCnt, int _curThreadIdx)
         {
-            CustomPlanetSystem.PreUpdateMultithread(__instance.factory, _usedThreadCnt, _curThreadIdx, 4);
+            PlanetExtensionSystem.PreUpdateMultithread(__instance.factory, _usedThreadCnt, _curThreadIdx, 4);
         }
         
         [HarmonyPatch(typeof(FactorySystem), "GameTickLabOutputToNext", new Type[] {typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int)})]
         [HarmonyPrefix]
         public static void UpdateMultithread(FactorySystem __instance, long time, bool isActive, int _usedThreadCnt, int _curThreadIdx)
         {
-            CustomPlanetSystem.UpdateMultithread(__instance.factory, _usedThreadCnt, _curThreadIdx, 4);
+            PlanetExtensionSystem.UpdateMultithread(__instance.factory, _usedThreadCnt, _curThreadIdx, 4);
         }  
         
         [HarmonyPatch(typeof(CargoTraffic), "PresentCargoPathsAsync", new Type[] {typeof(bool), typeof(int), typeof(int), typeof(int)})]
         [HarmonyPostfix]
         public static void PostUpdateMultithread(CargoTraffic __instance, bool presentCargos, int _usedThreadCnt, int _curThreadIdx)
         {
-            CustomPlanetSystem.PostUpdateMultithread(__instance.factory, _usedThreadCnt, _curThreadIdx, 4);
+            PlanetExtensionSystem.PostUpdateMultithread(__instance.factory, _usedThreadCnt, _curThreadIdx, 4);
         }
 
         [HarmonyPatch(typeof(PlanetFactory), "CreateEntityLogicComponents")]
         [HarmonyPostfix]
         public static void AddComponents(int entityId, PrefabDesc desc, int prebuildId, PlanetFactory __instance)
         {
-            CustomPlanetSystem.CreateEntityComponents(__instance, entityId, desc, prebuildId);
+            PlanetExtensionSystem.CreateEntityComponents(__instance, entityId, desc, prebuildId);
         }
 
         [HarmonyPatch(typeof(PlanetFactory), "RemoveEntityWithComponents")]
         [HarmonyPrefix]
         public static void RemoveComponents(int id, PlanetFactory __instance)
         {
-            CustomPlanetSystem.RemoveEntityComponents(__instance, id);
+            PlanetExtensionSystem.RemoveEntityComponents(__instance, id);
         }
         
         [HarmonyPatch(typeof(GameData), "GetOrCreateFactory")]
         [HarmonyPostfix]
         public static void LoadNewPlanet(PlanetData planet)
         {
-            CustomPlanetSystem.InitNewPlanet(planet);
+            PlanetExtensionSystem.InitNewPlanet(planet);
         }
     }
 }

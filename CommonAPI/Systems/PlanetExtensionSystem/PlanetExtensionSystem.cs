@@ -6,10 +6,10 @@ using CommonAPI.Patches;
 namespace CommonAPI.Systems
 {
     [CommonAPISubmodule]
-    public static class CustomPlanetSystem
+    public static class PlanetExtensionSystem
     {
-        public static List<PlanetSystemStorage> systems = new List<PlanetSystemStorage>();
-        public static TypeRegistry<IPlanetSystem, PlanetSystemStorage> registry = new TypeRegistry<IPlanetSystem, PlanetSystemStorage>();
+        public static List<PlanetExtensionStorage> extensions = new List<PlanetExtensionStorage>();
+        public static TypeRegistry<IPlanetExtension, PlanetExtensionStorage> registry = new TypeRegistry<IPlanetExtension, PlanetExtensionStorage>();
 
         internal static Dictionary<int, byte[]> pendingData = new Dictionary<int, byte[]>();
         internal static Action<PlanetData> onInitNewPlanet;
@@ -28,15 +28,14 @@ namespace CommonAPI.Systems
         [CommonAPISubmoduleInit(Stage = InitStage.SetHooks)]
         internal static void SetHooks()
         {
-            CommonAPIPlugin.harmony.PatchAll(typeof(PlanetSystemHooks));
+            CommonAPIPlugin.harmony.PatchAll(typeof(PlanetExtensionHooks));
         }
 
 
         [CommonAPISubmoduleInit(Stage = InitStage.Load)]
         internal static void load()
         {
-            CommonAPIPlugin.registries.Add($"{CommonAPIPlugin.ID}:PlanetSystemsRegistry", CustomPlanetSystem.registry);
-            registry.Register(ComponentSystem.systemID, typeof(ComponentSystem));
+            CommonAPIPlugin.registries.Add($"{CommonAPIPlugin.ID}:PlanetExtensionRegistry", registry);
         }
         
         internal static void ThrowIfNotLoaded()
@@ -44,7 +43,7 @@ namespace CommonAPI.Systems
             if (!Loaded)
             {
                 throw new InvalidOperationException(
-                    $"{nameof(CustomPlanetSystem)} is not loaded. Please use [{nameof(CommonAPISubmoduleDependency)}(nameof({nameof(CustomPlanetSystem)})]");
+                    $"{nameof(PlanetExtensionSystem)} is not loaded. Please use [{nameof(CommonAPISubmoduleDependency)}(nameof({nameof(PlanetExtensionSystem)})]");
             }
         }
 
@@ -53,17 +52,17 @@ namespace CommonAPI.Systems
         {
             if (Loaded)
             {
-                CommonAPIPlugin.logger.LogInfo("Loading planet system manager");
+                CommonAPIPlugin.logger.LogInfo("Loading planet extension system");
                 GameData data = GameMain.data;
 
-                systems.Clear();
-                systems.Capacity = registry.data.Count + 1;
-                systems.Add(null);
+                extensions.Clear();
+                extensions.Capacity = registry.data.Count + 1;
+                extensions.Add(null);
                 for (int i = 1; i < registry.data.Count; i++)
                 {
-                    PlanetSystemStorage storage = new PlanetSystemStorage();
+                    PlanetExtensionStorage storage = new PlanetExtensionStorage();
                     storage.InitOnLoad(data, i);
-                    systems.Add(storage);
+                    extensions.Add(storage);
                 }
             }
         }
@@ -72,7 +71,7 @@ namespace CommonAPI.Systems
         {
             for (int i = 1; i < registry.data.Count; i++)
             {
-                PlanetSystemStorage storage = systems[i];
+                PlanetExtensionStorage storage = extensions[i];
                 storage.InitNewPlanet(planet);
             }
             
@@ -82,21 +81,21 @@ namespace CommonAPI.Systems
 
         public static void CreateEntityComponents(PlanetFactory factory, int entityId, PrefabDesc desc, int prebuildId)
         {
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                PlanetSystemStorage storage = systems[i];
-                IPlanetSystem system = storage.GetSystem(factory);
-                if (system is IComponentStateListener listener)
+                PlanetExtensionStorage storage = extensions[i];
+                IPlanetExtension extension = storage.GetExtension(factory);
+                if (extension is IComponentStateListener listener)
                 {
                     listener.OnLogicComponentsAdd(entityId, desc, prebuildId);
                 }
             }
 
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                PlanetSystemStorage storage = systems[i];
-                IPlanetSystem system = storage.GetSystem(factory);
-                if (system is IComponentStateListener listener)
+                PlanetExtensionStorage storage = extensions[i];
+                IPlanetExtension extension = storage.GetExtension(factory);
+                if (extension is IComponentStateListener listener)
                 {
                     listener.OnPostlogicComponentsAdd(entityId, desc, prebuildId);
                 }
@@ -105,11 +104,11 @@ namespace CommonAPI.Systems
 
         public static void RemoveEntityComponents(PlanetFactory factory, int entityId)
         {
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                PlanetSystemStorage storage = systems[i];
-                IPlanetSystem system = storage.GetSystem(factory);
-                if (system is IComponentStateListener listener)
+                PlanetExtensionStorage storage = extensions[i];
+                IPlanetExtension extension = storage.GetExtension(factory);
+                if (extension is IComponentStateListener listener)
                 {
                     listener.OnLogicComponentsRemove(entityId);
                 }
@@ -120,9 +119,9 @@ namespace CommonAPI.Systems
         {
             if (factory == null) return;
 
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                PlanetSystemStorage storage = systems[i];
+                PlanetExtensionStorage storage = extensions[i];
 
                 storage.DrawUpdate(factory);
             }
@@ -132,9 +131,9 @@ namespace CommonAPI.Systems
         {
             if (factory == null) return;
 
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                PlanetSystemStorage storage = systems[i];
+                PlanetExtensionStorage storage = extensions[i];
 
                 storage.PowerUpdate(factory);
             }
@@ -144,9 +143,9 @@ namespace CommonAPI.Systems
         {
             if (factory == null) return;
 
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                PlanetSystemStorage storage = systems[i];
+                PlanetExtensionStorage storage = extensions[i];
                 storage.PreUpdate(factory);
             }
         }
@@ -155,9 +154,9 @@ namespace CommonAPI.Systems
         {
             if (factory == null) return;
 
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                PlanetSystemStorage storage = systems[i];
+                PlanetExtensionStorage storage = extensions[i];
                 storage.Update(factory);
             }
         }
@@ -166,9 +165,9 @@ namespace CommonAPI.Systems
         {
             if (factory == null) return;
 
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                PlanetSystemStorage storage = systems[i];
+                PlanetExtensionStorage storage = extensions[i];
                 storage.PostUpdate(factory);
             }
         }
@@ -180,9 +179,9 @@ namespace CommonAPI.Systems
                 PlanetFactory factory = data.factories[i];
                 if (factory == null) continue;
 
-                for (int j = 1; j < systems.Count; j++)
+                for (int j = 1; j < extensions.Count; j++)
                 {
-                    PlanetSystemStorage storage = systems[j];
+                    PlanetExtensionStorage storage = extensions[j];
                     if (storage.PowerUpdateSupportsMultithread()) return;
 
                     storage.PowerUpdate(factory);
@@ -197,9 +196,9 @@ namespace CommonAPI.Systems
                 PlanetFactory factory = data.factories[i];
                 if (factory == null) continue;
 
-                for (int j = 1; j < systems.Count; j++)
+                for (int j = 1; j < extensions.Count; j++)
                 {
-                    PlanetSystemStorage storage = systems[j];
+                    PlanetExtensionStorage storage = extensions[j];
                     if (storage.PreUpdateSupportsMultithread()) return;
 
                     storage.PreUpdate(factory);
@@ -214,9 +213,9 @@ namespace CommonAPI.Systems
                 PlanetFactory factory = data.factories[i];
                 if (factory == null) continue;
 
-                for (int j = 1; j < systems.Count; j++)
+                for (int j = 1; j < extensions.Count; j++)
                 {
-                    PlanetSystemStorage storage = systems[j];
+                    PlanetExtensionStorage storage = extensions[j];
                     if (storage.UpdateSupportsMultithread()) return;
 
                     storage.Update(factory);
@@ -232,9 +231,9 @@ namespace CommonAPI.Systems
                 if (factory == null) continue;
 
 
-                for (int j = 1; j < systems.Count; j++)
+                for (int j = 1; j < extensions.Count; j++)
                 {
-                    PlanetSystemStorage storage = systems[j];
+                    PlanetExtensionStorage storage = extensions[j];
                     if (storage.PostUpdateSupportsMultithread()) return;
 
                     storage.PostUpdate(factory);
@@ -244,36 +243,36 @@ namespace CommonAPI.Systems
 
         public static void PowerUpdateMultithread(PlanetFactory factory, int usedThreadCount, int currentThreadIdx, int minimumCount)
         {
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                PlanetSystemStorage storage = systems[i];
+                PlanetExtensionStorage storage = extensions[i];
                 storage.PowerUpdateMultithread(factory, usedThreadCount, currentThreadIdx, minimumCount);
             }
         }
 
         public static void PreUpdateMultithread(PlanetFactory factory, int usedThreadCount, int currentThreadIdx, int minimumCount)
         {
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                PlanetSystemStorage storage = systems[i];
+                PlanetExtensionStorage storage = extensions[i];
                 storage.PreUpdateMultithread(factory, usedThreadCount, currentThreadIdx, minimumCount);
             }
         }
 
         public static void UpdateMultithread(PlanetFactory factory, int usedThreadCount, int currentThreadIdx, int minimumCount)
         {
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                PlanetSystemStorage storage = systems[i];
+                PlanetExtensionStorage storage = extensions[i];
                 storage.UpdateMultithread(factory, usedThreadCount, currentThreadIdx, minimumCount);
             }
         }
 
         public static void PostUpdateMultithread(PlanetFactory factory, int usedThreadCount, int currentThreadIdx, int minimumCount)
         {
-            for (int i = 1; i < systems.Count; i++)
+            for (int i = 1; i < extensions.Count; i++)
             {
-                PlanetSystemStorage storage = systems[i];
+                PlanetExtensionStorage storage = extensions[i];
                 storage.PostUpdateMultithread(factory, usedThreadCount, currentThreadIdx, minimumCount);
             }
         }
@@ -286,7 +285,7 @@ namespace CommonAPI.Systems
 
             if (wasLoaded)
             {
-                registry.ImportAndMigrate(systems, r);
+                registry.ImportAndMigrate(extensions, r);
             }
         }
 
@@ -297,7 +296,7 @@ namespace CommonAPI.Systems
 
             if (Loaded)
             {
-                registry.ExportContainer(systems, w);
+                registry.ExportContainer(extensions, w);
             }
         }
     }

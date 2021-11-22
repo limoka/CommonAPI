@@ -5,14 +5,14 @@ using HarmonyLib;
 namespace CommonAPI.Patches
 {
     [HarmonyPatch]
-    public static class StarSystemHooks
+    public static class StarExtensionHooks
     {
         [HarmonyPatch(typeof(GameData), "OnDraw")]
         [HarmonyPostfix]
         public static void DrawCall(GameData __instance, int frame)
         {
             PerformanceMonitor.BeginSample(ECpuWorkEntry.DrawCall);
-            CustomStarSystem.DrawUpdate();
+            StarExtensionSystem.DrawUpdate();
             PerformanceMonitor.EndSample(ECpuWorkEntry.DrawCall);
         }
 
@@ -24,7 +24,7 @@ namespace CommonAPI.Patches
             if (GameMain.multithreadSystem.multithreadSystemEnable)
             {
                 PerformanceMonitor.BeginSample(ECpuWorkEntry.DysonSphere);
-                CustomStarSystem.PreUpdateOnlySinglethread();
+                StarExtensionSystem.PreUpdateOnlySinglethread();
                 PerformanceMonitor.EndSample(ECpuWorkEntry.DysonSphere);
                 return;
             }
@@ -35,7 +35,7 @@ namespace CommonAPI.Patches
                 StarData star = GameMain.galaxy.stars[i];
                 if (star == null) continue;
 
-                CustomStarSystem.PreUpdate(star);
+                StarExtensionSystem.PreUpdate(star);
             }
             PerformanceMonitor.EndSample(ECpuWorkEntry.DysonSphere);
         }
@@ -48,7 +48,7 @@ namespace CommonAPI.Patches
             {
                 PerformanceMonitor.EndSample(ECpuWorkEntry.Trash);
                 PerformanceMonitor.BeginSample(ECpuWorkEntry.DysonSphere);
-                CustomStarSystem.UpdateOnlySinglethread();
+                StarExtensionSystem.UpdateOnlySinglethread();
                 PerformanceMonitor.EndSample(ECpuWorkEntry.DysonSphere);
                 PerformanceMonitor.BeginSample(ECpuWorkEntry.Trash);
                 return;
@@ -61,7 +61,7 @@ namespace CommonAPI.Patches
                 StarData star = GameMain.galaxy.stars[i];
                 if (star == null) continue;
 
-                CustomStarSystem.Update(star);
+                StarExtensionSystem.Update(star);
             }
             PerformanceMonitor.EndSample(ECpuWorkEntry.DysonSphere);
             PerformanceMonitor.BeginSample(ECpuWorkEntry.Trash);
@@ -75,7 +75,7 @@ namespace CommonAPI.Patches
         [HarmonyPostfix]
         public static void PowerTickMultithread(DysonSphere __instance, int _usedThreadCnt, int _curThreadIdx)
         {
-            CustomStarSystem.UpdateMultithread(__instance.starData, _usedThreadCnt, _curThreadIdx, 12);
+            StarExtensionSystem.UpdateMultithread(__instance.starData, _usedThreadCnt, _curThreadIdx, 12);
         }
     }
 }

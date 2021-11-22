@@ -86,7 +86,7 @@ namespace CommonAPI.Systems
 
             if (customId > 0)
             {
-                component = ComponentSystem.GetComponent(factory, entity.customType, customId);
+                component = ComponentExtension.GetComponent(factory, entity.customType, customId);
             }
 
             OnMachineChanged();
@@ -110,7 +110,7 @@ namespace CommonAPI.Systems
 
             if (customId > 0)
             {
-                component = ComponentSystem.GetComponent(factory, entity.customType, customId);
+                component = ComponentExtension.GetComponent(factory, entity.customType, customId);
             }
 
             if (component != null)

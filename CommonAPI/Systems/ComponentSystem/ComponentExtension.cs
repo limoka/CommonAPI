@@ -5,7 +5,7 @@ using CommonAPI.Patches;
 namespace CommonAPI.Systems
 {
     [CommonAPISubmodule]
-    public class ComponentSystem : IPlanetSystem, IUpdateMultithread, IPowerUpdateMultithread, IComponentStateListener
+    public class ComponentExtension : IPlanetExtension, IUpdateMultithread, IPowerUpdateMultithread, IComponentStateListener
     {
         public static readonly string systemID = $"{CommonAPIPlugin.ID}:ComponentSystem";
         
@@ -15,7 +15,7 @@ namespace CommonAPI.Systems
             get
             {
                 if (_cachedId == 0)
-                    _cachedId = CustomPlanetSystem.registry.GetUniqueId(systemID);
+                    _cachedId = PlanetExtensionSystem.registry.GetUniqueId(systemID);
                 
                 return _cachedId;
             }
@@ -37,7 +37,6 @@ namespace CommonAPI.Systems
         {
             CommonAPIPlugin.harmony.PatchAll(typeof(CopyPastePatch));
             CommonAPIPlugin.harmony.PatchAll(typeof(EntityDataSetNullPatch));
-            CommonAPIPlugin.harmony.PatchAll(typeof(PrefabDescCustomDataPatch));
             CommonAPIPlugin.harmony.PatchAll(typeof(UIGamePatch));
         }
 
@@ -46,6 +45,7 @@ namespace CommonAPI.Systems
         internal static void load()
         {
             CommonAPIPlugin.registries.Add($"{CommonAPIPlugin.ID}:ComponentRegistry", componentRegistry);
+            PlanetExtensionSystem.registry.Register(systemID, typeof(ComponentExtension));
         }
         
         
@@ -111,9 +111,9 @@ namespace CommonAPI.Systems
         {
             if (customId == 0 || typeId == 0) return null;
             
-            ComponentSystem system = factory.GetSystem<ComponentSystem>(cachedId);
+            ComponentExtension extension = factory.GetSystem<ComponentExtension>(cachedId);
 
-            return system.GetPool(typeId).pool[customId];
+            return extension.GetPool(typeId).pool[customId];
         }
 
         public void Import(BinaryReader r)

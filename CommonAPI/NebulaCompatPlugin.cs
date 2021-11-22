@@ -20,7 +20,7 @@ namespace CommonAPI
         private void Start()
         {
             //Moved Custom Star and Planet Systems behavior here for easier compatibility with Nebula
-            if (CommonAPIPlugin.IsSubmoduleLoaded(nameof(CustomPlanetSystem)))
+            if (CommonAPIPlugin.IsSubmoduleLoaded(nameof(PlanetExtensionSystem)))
             {
                 NebulaModAPI.OnPlanetLoadRequest += planetId =>
                 {
@@ -28,17 +28,17 @@ namespace CommonAPI
                 };
             }
 
-            if (CommonAPIPlugin.IsSubmoduleLoaded(nameof(CustomStarSystem)))
+            if (CommonAPIPlugin.IsSubmoduleLoaded(nameof(StarExtensionSystem)))
             {
                 NebulaModAPI.OnStarLoadRequest += starIndex =>
                 {
-                    NebulaModAPI.MultiplayerSession.Network.SendPacket(new StarSystemLoadRequest(starIndex));
+                    NebulaModAPI.MultiplayerSession.Network.SendPacket(new StarExtensionLoadRequest(starIndex));
                 };
             }
             
             NebulaModAPI.RegisterPackets(Assembly.GetExecutingAssembly());
             CommonAPIPlugin.onIntoOtherSave = CheckNebulaInIntoOtherSave;
-            CustomPlanetSystem.onInitNewPlanet = HandleNebulaPacket;
+            PlanetExtensionSystem.onInitNewPlanet = HandleNebulaPacket;
             
             Logger.LogInfo("Common API Nebula Compatibility ready!");
         }
@@ -57,15 +57,15 @@ namespace CommonAPI
         public static void HandleNebulaPacket(PlanetData planet)
         {
             if (!NebulaModAPI.IsMultiplayerActive || NebulaModAPI.MultiplayerSession.LocalPlayer.IsHost) return;
-            if (!CustomPlanetSystem.pendingData.TryGetValue(planet.id, out byte[] bytes)) return;
-            CustomPlanetSystem.pendingData.Remove(planet.id);
+            if (!PlanetExtensionSystem.pendingData.TryGetValue(planet.id, out byte[] bytes)) return;
+            PlanetExtensionSystem.pendingData.Remove(planet.id);
             
             using IReaderProvider p = NebulaModAPI.GetBinaryReader(bytes);
 
-            for (int i = 1; i < CustomPlanetSystem.registry.data.Count; i++)
+            for (int i = 1; i < PlanetExtensionSystem.registry.data.Count; i++)
             {
-                PlanetSystemStorage system = CustomPlanetSystem.systems[i];
-                system.GetSystem(planet.factory).Import(p.BinaryReader);
+                PlanetExtensionStorage extension = PlanetExtensionSystem.extensions[i];
+                extension.GetExtension(planet.factory).Import(p.BinaryReader);
             }
         }
 

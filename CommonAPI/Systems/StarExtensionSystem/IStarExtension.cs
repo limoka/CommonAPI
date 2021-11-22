@@ -1,9 +1,9 @@
 ﻿namespace CommonAPI.Systems
 {
     /// <summary>
-    /// Defines a system, which has one instance per star.
+    /// Defines a extension, which has one instance per star.
     /// </summary>
-    public interface IStarSystem : ISerializeState
+    public interface IStarExtension : ISerializeState
     {
         void Init(StarData star);
     }
