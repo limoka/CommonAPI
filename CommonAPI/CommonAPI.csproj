@@ -1,3 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk" />
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>A modding library for Dyson Sphere Program. Provides multiple features to make adding custom content to DSP easier.</Description>
+    <PackageProjectUrl>https://github.com/kremnev8/CommonAPI</PackageProjectUrl>
+    <PackageId>DysonSphereProgram.Modding.CommonAPI</PackageId>
+    <Title>DSP Common API</Title>
+	<PackageOutputDir>$(MSBuildThisFileDirectory)/Nuget/</PackageOutputDir>
+  </PropertyGroup>
+</Project>
 

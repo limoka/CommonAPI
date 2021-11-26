@@ -46,7 +46,7 @@
 
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>$(DumpedAssembliesDir)Assembly-CSharp.dll</HintPath>
+      <HintPath>$(DumpedAssembliesDir)Assembly-CSharp.dll</HintPath>   
     </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>$(DSPAssemblyDir)UnityEngine.CoreModule.dll</HintPath>

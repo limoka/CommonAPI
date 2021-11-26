@@ -17,7 +17,7 @@ namespace CommonAPI.Patches
     {
         [HarmonyPatch(typeof(EntityData), "SetNull")]
         [HarmonyPostfix]
-        public static void SetNull(EntityData __instance)
+        public static void SetNull(ref EntityData __instance)
         {
             __instance.customId = 0;
             __instance.customType = -1;

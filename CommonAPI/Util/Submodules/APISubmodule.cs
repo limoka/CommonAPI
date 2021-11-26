@@ -127,12 +127,12 @@ namespace CommonAPI {
                     .ForEachTry(t => loadedModules.Add(t.Name));
             }
 
-            var scanRequest = new PluginScanner.AttributeScanRequest(attributeTypeFullName: typeof(CommonAPISubmoduleDependency).FullName,
-                attributeTargets: AttributeTargets.Assembly | AttributeTargets.Class,
-                CallWhenAssembliesAreScanned, oneMatchPerAssembly: false,
-                foundOnAssemblyAttributes: (assembly, arguments) =>
+            var scanRequest = new PluginScanner.AttributeScanRequest(typeof(CommonAPISubmoduleDependency).FullName,
+                AttributeTargets.Assembly | AttributeTargets.Class,
+                CallWhenAssembliesAreScanned, false,
+                (assembly, arguments) =>
                     AddModuleToSet(arguments),
-                foundOnAssemblyTypes: (type, arguments) =>
+                (type, arguments) =>
                     AddModuleToSet(arguments)
                 );
 

@@ -68,7 +68,7 @@ namespace CommonAPI.Patches
             }
         }
         
-        [HarmonyPatch(typeof(UIGame), "get_isAnyFunctionWindowActive")]
+        [HarmonyPatch(typeof(UIGame), "isAnyFunctionWindowActive", MethodType.Getter)]
         [HarmonyPostfix]
         public static void IsAnyActive(ref bool __result)
         {

@@ -4,6 +4,7 @@ using CommonAPI.Systems;
 using HarmonyLib;
 using UnityEngine;
 using xiaoye97;
+// ReSharper disable Harmony003
 
 namespace CommonAPI.Patches
 {
@@ -32,7 +33,7 @@ namespace CommonAPI.Patches
 
         [HarmonyPatch(typeof(LDBTool), "StringBind")]
         [HarmonyPrefix]
-        public static bool FixStringBinding(ProtoType protoType, Proto proto)
+        public static bool FixStringBinding(ref ProtoType protoType, Proto proto)
         {
             if (!(proto is StringProto))
                 return false;

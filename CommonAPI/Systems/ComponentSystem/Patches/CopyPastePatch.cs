@@ -3,6 +3,7 @@ using System.IO;
 using CommonAPI.Systems;
 using HarmonyLib;
 using UnityEngine;
+// ReSharper disable Harmony003
 
 // ReSharper disable InconsistentNaming
 
@@ -76,7 +77,7 @@ namespace CommonAPI.Patches
 
         [HarmonyPatch(typeof(BuildingParameters), "PasteToFactoryObject")]
         [HarmonyPrefix]
-        public static bool Paste(BuildingParameters __instance, int objectId, PlanetFactory factory, ref bool __result)
+        public static bool Paste(ref BuildingParameters __instance, int objectId, PlanetFactory factory, ref bool __result)
         {
             if (objectId <= 0 || __instance.type != BuildingType.Other || __instance.parameters == null) return true;
             if (__instance.parameters.Length <= 2) return true;
@@ -119,7 +120,7 @@ namespace CommonAPI.Patches
 
         [HarmonyPatch(typeof(BuildingParameters), "CopiedTipText")]
         [HarmonyPrefix]
-        public static bool CopyTipText(BuildingParameters __instance, ref string __result)
+        public static bool CopyTipText(ref BuildingParameters __instance, ref string __result)
         {
             if (__instance.type == BuildingType.Other && __instance.parameters != null)
             {
@@ -145,7 +146,7 @@ namespace CommonAPI.Patches
         
         [HarmonyPatch(typeof(BuildingParameters), "PastedTipText")]
         [HarmonyPrefix]
-        public static bool PasteTipText(BuildingParameters __instance, ref string __result)
+        public static bool PasteTipText(ref BuildingParameters __instance, ref string __result)
         {
             if (__instance.type == BuildingType.Other && __instance.parameters != null)
             {

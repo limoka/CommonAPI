@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using CommonAPI.Systems;
@@ -26,7 +27,7 @@ namespace CommonAPI.Patches
                     ItemProto itemProto = LDB.items.Select(window.factory.entityPool[entityId].protoId);
                     ERecipeType assemblerRecipeType = itemProto.prefabDesc.assemblerRecipeType;
                     int customRecipeType = itemProto.prefabDesc.GetProperty<int>(ExtendedAssemberDesc.RECIPE_TYPE_NAME);
-                    
+
                     return proto =>
                     {
                         if (proto.Type != assemblerRecipeType) return false;

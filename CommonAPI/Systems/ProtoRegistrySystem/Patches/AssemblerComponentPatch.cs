@@ -8,13 +8,14 @@ namespace CommonAPI.Patches
     {
         [HarmonyPatch(typeof(AssemblerComponent), "SetRecipe")]
         [HarmonyPrefix]
-        public static bool CheckRecipe(AssemblerComponent __instance, int recpId, SignData[] signPool)
+        public static bool CheckRecipe(ref AssemblerComponent __instance, int recpId, SignData[] signPool)
         {
             if (recpId > 0)
             {
                 RecipeProto recipeProto = LDB.recipes.Select(recpId);
                 if (recipeProto.Type == ERecipeType.Custom)
                 {
+                    // ReSharper disable once Harmony003
                     int protoId = GameMain.localPlanet.factory.entityPool[__instance.entityId].protoId;
                     int recipeType = LDB.items.Select(protoId).prefabDesc.GetProperty<int>(ExtendedAssemberDesc.RECIPE_TYPE_NAME);
                     if (!recipeProto.BelongsToType(recipeType))
