@@ -11,6 +11,7 @@ namespace CommonAPI.Systems
     public class UIItemPickerExtension
     {
         public static Func<ItemProto, bool> currentFilter;
+        public static bool showLocked = false;
 
         public static IItemPickerExtension currentExtension;
         
@@ -31,12 +32,13 @@ namespace CommonAPI.Systems
 
             return itemPicker;
         }
-
-        public static void Popup(Vector2 pos, Action<ItemProto> _onReturn, Func<ItemProto, bool> filter)
+        
+        public static void Popup(Vector2 pos, Action<ItemProto> _onReturn, bool showLockedItems, Func<ItemProto, bool> filter)
         {
             PickerExtensionsSystem.ThrowIfNotLoaded();
             try
             {
+                showLocked = showLockedItems;
                 currentExtension = null;
                 UIItemPicker itemPicker = PreparePicker();
                 if (itemPicker == null)
@@ -56,11 +58,18 @@ namespace CommonAPI.Systems
             }
         }
 
+        public static void Popup(Vector2 pos, Action<ItemProto> _onReturn, Func<ItemProto, bool> filter)
+        {
+            Popup(pos, _onReturn, false, filter);
+        }
+
         public static void Popup(Vector2 pos, IItemPickerExtension extension)
         {
             PickerExtensionsSystem.ThrowIfNotLoaded();
             try
             {
+                // ReSharper disable once SuspiciousTypeConversion.Global
+                showLocked = extension is ShowLocked;
                 currentExtension = extension;
                 UIItemPicker itemPicker = PreparePicker();
 

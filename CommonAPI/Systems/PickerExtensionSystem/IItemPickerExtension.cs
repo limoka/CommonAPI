@@ -9,4 +9,9 @@
         void OnPopup(UIItemPicker picker);
         void PostPopup(UIItemPicker picker);
     }
+
+    public interface ShowLocked
+    {
+        
+    }
 }

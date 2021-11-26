@@ -29,7 +29,19 @@ namespace CommonAPI.Patches
                 .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_3))
                 .InsertAndAdvance(new CodeInstruction(OpCodes.Ldelem_Ref));
 
+            matcher.MatchForward(true,
+                    new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(Proto), nameof(Proto.ID))),
+                    new CodeMatch(OpCodes.Callvirt))
+                .SetInstruction(Transpilers.EmitDelegate<Func<GameHistoryData, int, bool>>(CheckItem));
+
+
             return matcher.InstructionEnumeration();
+        }
+
+        public static bool CheckItem(GameHistoryData history,int itemId)
+        {
+            if (UIItemPickerExtension.showLocked) return true;
+            return history.ItemUnlocked(itemId);
         }
 
         [HarmonyPatch(typeof(UIItemPicker), "Popup", typeof(Vector2), typeof(Action<ItemProto>))]
@@ -38,6 +50,7 @@ namespace CommonAPI.Patches
         {
             UIItemPickerExtension.currentFilter = null;
             UIItemPickerExtension.currentExtension = null;
+            UIItemPickerExtension.showLocked = false;
         }
 
         [HarmonyPatch(typeof(UIItemPicker), "OnBoxMouseDown")]

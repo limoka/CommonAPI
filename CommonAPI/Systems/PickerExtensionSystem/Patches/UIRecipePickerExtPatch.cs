@@ -28,8 +28,19 @@ namespace CommonAPI.Patches
                 .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_1))
                 .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_3))
                 .InsertAndAdvance(new CodeInstruction(OpCodes.Ldelem_Ref));
+            
+            matcher.MatchForward(true,
+                    new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(Proto), nameof(Proto.ID))),
+                    new CodeMatch(OpCodes.Callvirt))
+                .SetInstruction(Transpilers.EmitDelegate<Func<GameHistoryData, int, bool>>(CheckRecipe));
 
             return matcher.InstructionEnumeration();
+        }
+        
+        public static bool CheckRecipe(GameHistoryData history, int recipeId)
+        {
+            if (UIRecipePickerExtension.showLocked) return true;
+            return history.RecipeUnlocked(recipeId);
         }
 
         [HarmonyPatch(typeof(UIRecipePicker), "Popup", typeof(Vector2), typeof(Action<RecipeProto>))]
@@ -38,6 +49,7 @@ namespace CommonAPI.Patches
         public static void IgnoreFilter(UIRecipePicker __instance)
         {
             UIRecipePickerExtension.currentFilter = null;
+            UIRecipePickerExtension.showLocked = false;
         }
     }
 }
