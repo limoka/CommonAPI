@@ -1,4 +1,5 @@
-﻿using CommonAPI.ShotScene.Patches;
+﻿using System.Globalization;
+using CommonAPI.ShotScene.Patches;
 using UnityEngine;
 using UnityEngine.PostProcessing;
 using UnityEngine.UI;
@@ -21,11 +22,17 @@ namespace CommonAPI.ShotScene
         public TPCameraController cameraController;
         public TPCameraController lightController;
         public Light light;
+        
         public InputField lightColorField;
         public Slider lightColorSlider;
         public bool ignoreLightEvents;
         
         
+        public InputField cameraFovField;
+        public Slider cameraFovSlider;
+        public bool ignoreCameraEvents;
+
+
         public RuntimeIconGenerator generator;
         public Transform center;
         public Canvas canvas;
@@ -48,6 +55,31 @@ namespace CommonAPI.ShotScene
             {
                 cameraController.cameraOffset.y = -value + 2;
                 cameraController.RecalculatePosition();
+            }
+        }
+
+        public void OnCamersFOVSliderChanged(float value)
+        {
+            if (ignoreCameraEvents) return;
+            if (cameraController != null)
+            {
+                cameraController.camera.fieldOfView = value;
+                ignoreCameraEvents = true;
+                cameraFovField.text = value.ToString(CultureInfo.InvariantCulture);
+                ignoreCameraEvents = false;
+            }
+        }
+
+        public void OnCameraFOVFieldValueEntered(string value)
+        {
+            if (ignoreCameraEvents) return;
+            if (cameraController != null)
+            {
+                float fov = float.Parse(value);
+                cameraController.camera.fieldOfView = fov;
+                ignoreCameraEvents = true;
+                cameraFovSlider.value = fov;
+                ignoreCameraEvents = false;
             }
         }
 
@@ -125,7 +157,7 @@ namespace CommonAPI.ShotScene
                 GameCamera.instance.enabled = false;
                 GameCamera.instance.gameObject.SetActive(false);
                 GameCamera.main.backgroundColor = Color.clear;
-                GameCamera.main.fieldOfView = 30;
+                GameCamera.main.fieldOfView = 15;
                 GameObject prefab = CommonAPIPlugin.resource.bundle.LoadAsset<GameObject>("Assets/CommonAPI/IconShotPrefab.prefab");
                 shotGenerator = Instantiate(prefab).GetComponent<GeneratorSceneController>();
                 shotGenerator.lightController.enabled = false;
@@ -138,10 +170,12 @@ namespace CommonAPI.ShotScene
                 shotGenerator.canvas.planeDistance = 20;
 
                 postEffectController = shotGenerator.cameraController.GetComponent<PostEffectController>();
+                postEffectController.enabled = false;
+                postEffectController.postScript.profile = postEffectController.inst;
                 BloomModel.Settings bloomSettings = postEffectController.menuProfile.bloom.settings;
                 bloomSettings.lensDirt.intensity = 0;
-                bloomSettings.bloom.intensity = 0.05f;
-                bloomSettings.bloom.radius = 0;
+                //bloomSettings.bloom.intensity = 0.05f;
+                //bloomSettings.bloom.radius = 0;
                 postEffectController.menuProfile.bloom.settings = bloomSettings;
                 postEffectController.menuProfile.antialiasing.enabled = false;
             }
@@ -158,6 +192,7 @@ namespace CommonAPI.ShotScene
                 bloomSettings.bloom.radius = 4;
                 postEffectController.menuProfile.bloom.settings = bloomSettings;
                 postEffectController.menuProfile.antialiasing.enabled = true;
+                postEffectController.enabled = true;
                 Destroy(shotGenerator.cameraController);
                 Destroy(shotGenerator.gameObject);
                 shotGenerator = null;

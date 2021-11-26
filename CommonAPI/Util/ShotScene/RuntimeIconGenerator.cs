@@ -29,6 +29,8 @@ namespace CommonAPI.ShotScene
         public Text outputText;
         public GameObject renderWindow;
         public GameObject background;
+
+        public Image overlayIconImage;
         
         public InputField pathInputField;
         public string defaultPrefix = "ItemIcons";
@@ -75,6 +77,11 @@ namespace CommonAPI.ShotScene
         {
             savingPath = itemDefaultPath;
             pathInputField.text = savingPath;
+        }
+
+        public void SetOverlayEnabled(bool value)
+        {
+            overlayIconImage.enabled = value;
         }
         
         public void PressCapture()
@@ -335,6 +342,7 @@ namespace CommonAPI.ShotScene
                         savingPath = itemDefaultPath;
                         pathInputField.text = savingPath;
                         outputText.text = "";
+                        overlayIconImage.sprite = newItem.iconSprite;
                     }
                 }
 

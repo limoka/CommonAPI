@@ -5,13 +5,14 @@ namespace CommonAPI.ShotScene
     public class TPCameraController : MonoBehaviour
     {
         public Transform lookAt;
+        public Camera camera;
 
         private float currentX = 70;
         private float currentY = 40;
 
         public float yAngleMin = 10f;
         public float yAngleMax = 85f;
-        public float cameraDistance = 20f;
+        public float cameraDistance = 100f;
         public float minCameraDistance = 1f;
         public float scrollSensitivity = 20f;
         public float sensitivity = 3;
@@ -23,7 +24,8 @@ namespace CommonAPI.ShotScene
         private void Start()
         {
             currentY = Mathf.Clamp(currentY, yAngleMin, yAngleMax);
-            currentDistance = cameraDistance;
+            currentDistance = 10;
+            camera = GetComponent<Camera>();
 
         }
 

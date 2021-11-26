@@ -36,7 +36,7 @@ namespace CommonAPI
         public const string LDB_TOOL_GUID = "me.xiaoye97.plugin.Dyson.LDBTool";
         public const string DSP_MOD_SAVE_GUID = "crecheng.DSPModSave";
         
-        public const string VERSION = "1.0.1";
+        public const string VERSION = "1.1.0";
 
         internal static HashSet<string> LoadedSubmodules;
         internal static Harmony harmony;
