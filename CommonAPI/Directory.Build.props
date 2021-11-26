@@ -38,7 +38,7 @@
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
 
-    <PackageVersion>1.0.2</PackageVersion>
+    <PackageVersion>$(AssemblyVersion)</PackageVersion>
   </PropertyGroup>
 
 

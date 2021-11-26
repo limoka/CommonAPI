@@ -12,6 +12,7 @@ A modding library for Dyson Sphere Program. Provides multiple features to make a
 - Picker Extension tool allows to extend behavior of Item and Recipe pickers. For example use any filter defined by a function.
 - Support translation for at least for English, Chinese and Franch by using String Protos
 
+Full list of modules and other utilities can be found [here](https://github.com/kremnev8/CommonAPI/wiki).
 More will come in the future. If want write your own module and add it to the list you can open a Pull Request. Contrubitions are welcome.
 
 # Installation
@@ -42,9 +43,9 @@ All features are written as self-contained modules (Inspired by [R2API](https://
 
 ## How to setup development environment
 1. Download and install [CommonAPI](https://dsp.thunderstore.io/package/CommonAPI/CommonAPI/) and its dependencies
-3. Create development environment. You can find how to do that [here](https://docs.bepinex.dev/master/articles/dev_guide/plugin_tutorial/index.html#sidetoggle)
-4. Add LDBTool and CommonAPI assemblies to your references.
-5. You also likely will need a Unity Project. You can find instructions on setting that up [here](https://github.com/kremnev8/DSP-Mods/wiki/Setting-up-development-environment)
+2. Create development environment. You can find how to do that [here](https://docs.bepinex.dev/master/articles/dev_guide/plugin_tutorial/index.html#sidetoggle)
+3. Add LDBTool, DSPModSave and CommonAPI assemblies to your references. You can use NuGet to get them. You can find them by typing `DysonSphereProgram.Modding` into nuget package search.
+4. You also likely will need a Unity Project. You can find instructions on setting that up [here](https://github.com/kremnev8/DSP-Mods/wiki/Setting-up-development-environment)
 
 ### Usage Example
 ```csharp
@@ -68,6 +69,11 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.1.0
+- Renamed CustomPlanetSystem to PlanetExtensionSystem
+- Renamed CustomStarSystem to StarExtensionSystem
+- Add show locked item and recipes feature to PickerExtensionModule
+- Improved Icon Generator
 ### v1.0.1
 - Fix issues selecting recipes in Assembler UI
 ### v1.0.0
