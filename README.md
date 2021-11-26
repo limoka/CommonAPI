@@ -12,6 +12,7 @@ A modding library for Dyson Sphere Program. Provides multiple features to make a
 - Picker Extension tool allows to extend behavior of Item and Recipe pickers. For example use any filter defined by a function.
 - Support translation for at least for English, Chinese and Franch by using String Protos
 
+Full list of modules and other utilities can be found [here](https://github.com/kremnev8/CommonAPI/wiki).
 More will come in the future. If want write your own module and add it to the list you can open a Pull Request. Contrubitions are welcome.
 
 # Installation
