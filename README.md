@@ -26,6 +26,7 @@ Then just click **Start modded**, and the game will run with the mod installed.
 ### Manually
 Install BepInEx from [here](https://dsp.thunderstore.io/package/xiaoye97/BepInEx/)<br/>
 Install LDBTool from [here](https://dsp.thunderstore.io/package/xiaoye97/LDBTool/)<br/>
+Install DSPModSave from [here](https://dsp.thunderstore.io/package/crecheng/DSPModSave/)<br/>
 
 Unzip folder `patchers` into `Dyson Sphere Program/BepInEx/patchers/CommonAPI/` (Create folder named `CommonAPI`)<br/>
 Unzip folder `plugins` into `Dyson Sphere Program/BepInEx/plugins/CommonAPI/`. (Create folder named `CommonAPI`)<br/>
@@ -38,9 +39,9 @@ All features are written as self-contained modules (Inspired by [R2API](https://
 
 ## How to setup development environment
 1. Download and install [CommonAPI](https://dsp.thunderstore.io/package/CommonAPI/CommonAPI/) and its dependencies
-3. Create development environment. You can find how to do that [here](https://docs.bepinex.dev/master/articles/dev_guide/plugin_tutorial/index.html#sidetoggle)
-4. Add LDBTool and CommonAPI assemblies to your references.
-5. You also likely will need a Unity Project. You can find instructions on setting that up [here](https://github.com/kremnev8/DSP-Mods/wiki/Setting-up-development-environment)
+2. Create development environment. You can find how to do that [here](https://docs.bepinex.dev/master/articles/dev_guide/plugin_tutorial/index.html#sidetoggle)
+3. Add LDBTool, DSPModSave and CommonAPI assemblies to your references. You can use NuGet to get them. You can find them by typing `DysonSphereProgram.Modding` into nuget package search.
+4. You also likely will need a Unity Project. You can find instructions on setting that up [here](https://github.com/kremnev8/DSP-Mods/wiki/Setting-up-development-environment)
 
 ### Usage Example
 ```csharp
