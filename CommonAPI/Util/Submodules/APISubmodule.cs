@@ -80,6 +80,32 @@ namespace CommonAPI {
         /// <param name="submodule">nameof the submodule</param>
         public static bool IsLoaded(string submodule) => loadedModules.Contains(submodule);
 
+        /// <summary>
+        /// Load submodule
+        /// </summary>
+        /// <param name="moduleType">Module type</param>
+        /// <returns>Is loading successful?</returns>
+        public bool RequestModuleLoad(Type moduleType)
+        {
+            if (IsLoaded(moduleType.Name)) return true;
+            
+            CommonAPIPlugin.logger.LogInfo($"Enabling CommonAPI Submodule: {moduleType.Name}");
+
+            try
+            {
+                InvokeStage(moduleType, InitStage.SetHooks, null);
+                InvokeStage(moduleType, InitStage.Load, null);
+                moduleType.SetFieldValue("_loaded", true);
+                loadedModules.Add(moduleType.Name);
+                return true;
+            }
+            catch (Exception e)
+            {
+                logger.Log(LogLevel.Error, $"{moduleType.Name} could not be initialized and has been disabled:\n\n{e.Message}");
+            }
+            return false;
+        }
+        
         internal HashSet<string> LoadRequested(PluginScanner pluginScanner) {
 
             void AddModuleToSet(IEnumerable<CustomAttributeArgument> arguments) {
@@ -174,7 +200,7 @@ namespace CommonAPI {
             return true;
         }
 
-        private void InvokeStage(Type type, InitStage stage, object[]? parameters) {
+        internal void InvokeStage(Type type, InitStage stage, object[]? parameters) {
             var method = type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
                 .Where(m => m.GetCustomAttributes(typeof(CommonAPISubmoduleInit))
                 .Any(a => ((CommonAPISubmoduleInit)a).Stage.HasFlag(stage))).ToList();

@@ -7,6 +7,7 @@
     <PackageId>DysonSphereProgram.Modding.CommonAPI</PackageId>
     <Title>DSP Common API</Title>
 	<PackageOutputDir>$(MSBuildThisFileDirectory)/Nuget/</PackageOutputDir>
+	<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
   </PropertyGroup>
 </Project>
 

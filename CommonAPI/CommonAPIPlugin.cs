@@ -43,9 +43,10 @@ namespace CommonAPI
         internal static ManualLogSource logger;
         internal static ResourceData resource;
         internal static Action onIntoOtherSave;
+        internal static APISubmoduleHandler submoduleHandler;
         
         public static Dictionary<string, Registry> registries = new Dictionary<string, Registry>();
-        public static readonly Version buildFor = GameVersionUtil.GetVersion(0, 8, 23, 9808);
+        public static readonly Version buildFor = GameVersionUtil.GetVersion(0, 8, 23, 9989);
 
         public static bool iconShotMenuEnabled;
         public static KeyCode openIconShotMenuButton;
@@ -66,10 +67,9 @@ namespace CommonAPI
             resource.LoadAssetBundle("commonapi");
             
             harmony = new Harmony(GUID);
-            harmony.PatchAll(typeof(DSPModSavePatch));
             
             var pluginScanner = new PluginScanner();
-            var submoduleHandler = new APISubmoduleHandler(buildFor, Logger);
+            submoduleHandler = new APISubmoduleHandler(buildFor, Logger);
             LoadedSubmodules = submoduleHandler.LoadRequested(pluginScanner);
             pluginScanner.ScanPlugins();
 
@@ -108,6 +108,17 @@ namespace CommonAPI
                 return false;
             }
             return LoadedSubmodules.Contains(submodule);
+        }
+
+        /// <summary>
+        /// Try load specified module manually. This is useful if you are using ScriptEngine and can't request using attributes.
+        /// Do not use unless you can't make use of <see cref="CommonAPISubmoduleDependency"/>.
+        /// </summary>
+        /// <param name="moduleType">Type of needed module</param>
+        /// <returns>Is loading successful?</returns>
+        public static bool TryLoadModule(Type moduleType)
+        {
+            return submoduleHandler.RequestModuleLoad(moduleType);
         }
 
         public void Import(BinaryReader r)

@@ -1,11 +1,11 @@
 {
   "name": "CommonAPI",
   "description": "A modding library for Dyson Sphere Program. Currently is under development.",
-  "version_number": "1.1.0",
+  "version_number": "1.2.0",
   "dependencies": [
     "xiaoye97-BepInEx-5.4.11",
     "xiaoye97-LDBTool-1.8.0",
-    "crecheng-DSPModSave-1.0.2"
+    "CommonAPI-DSPModSave-1.1.0"
   ],
   "website_url": "https://github.com/kremnev8/CommonAPI"
 }
