@@ -33,8 +33,6 @@ namespace CommonAPI.Systems
 
         internal static Dictionary<int, RecipeProto> recipes = new Dictionary<int, RecipeProto>();
         internal static Dictionary<int, RecipeProto> recipeReplace = new Dictionary<int, RecipeProto>();
-
-        internal static Dictionary<int, StringProto> strings = new Dictionary<int, StringProto>();
         internal static int lastStringId = 1000;
 
         internal static Dictionary<int, TechProto> techs = new Dictionary<int, TechProto>();
@@ -71,9 +69,6 @@ namespace CommonAPI.Systems
         [CommonAPISubmoduleInit(Stage = InitStage.SetHooks)]
         internal static void SetHooks()
         {
-            
-            CommonAPIPlugin.harmony.PatchAll(typeof(LDBToolPatch));
-            CommonAPIPlugin.harmony.PatchAll(typeof(LDBToolPatch2));
             CommonAPIPlugin.harmony.PatchAll(typeof(ResourcesPatch));
             CommonAPIPlugin.harmony.PatchAll(typeof(StorageComponentPatch));
             CommonAPIPlugin.harmony.PatchAll(typeof(UIBuildMenuPatch));
@@ -260,47 +255,6 @@ namespace CommonAPI.Systems
                     recipeProto.Preload(recipeProto.index);
                 }
             }
-        }
-
-        internal static bool HasStringIdRegisted(int id)
-        {
-            if (LDB.strings.dataIndices.ContainsKey(id))
-            {
-                return true;
-            }
-
-            if (strings.ContainsKey(id))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-
-        internal static int FindAvailableStringID()
-        {
-            int id = lastStringId + 1;
-
-            while (true)
-            {
-                if (!HasStringIdRegisted(id))
-                {
-                    break;
-                }
-
-                if (id > 12000)
-                {
-                    CommonAPIPlugin.logger.LogError("Failed to find free index!");
-                    throw new ArgumentException("No free indices available!");
-                }
-
-                id++;
-            }
-
-            lastStringId = id;
-
-            return id;
         }
 
         /// <summary>
