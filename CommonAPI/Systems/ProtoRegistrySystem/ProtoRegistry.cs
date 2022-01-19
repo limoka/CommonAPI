@@ -43,6 +43,8 @@ namespace CommonAPI.Systems
         internal static Dictionary<int, ModelProto> models = new Dictionary<int, ModelProto>();
         internal static Dictionary<string, LodMaterials> modelMats = new Dictionary<string, LodMaterials>();
 
+        internal static Dictionary<int, AudioProto> audios = new Dictionary<int, AudioProto>();
+
         internal static List<ResourceData> modResources = new List<ResourceData>();
 
         public static Registry recipeTypes = new Registry();
@@ -53,6 +55,7 @@ namespace CommonAPI.Systems
 
         internal static int[] textureNames;
         internal static string[] spriteFileExtensions;
+        internal static string[] audioClipFileExtensions;
         
         /// <summary>
         /// Return true if the submodule is loaded.
@@ -101,6 +104,7 @@ namespace CommonAPI.Systems
 
             textureNames = new[] {mainTex, normalTex, msTex, emissionTex, emissionJitterTex};
             spriteFileExtensions = new[] {".jpg", ".png", ".tif"};
+            audioClipFileExtensions = new[] {".mp3", ".ogg", ".waw", ".aif"};
 
             recipeTypeLists.Add(null);
 
@@ -209,6 +213,13 @@ namespace CommonAPI.Systems
             {
                 TechProto oldTech = LDB.techs.Select(kv.Key);
                 oldTech.postTechArray = oldTech.postTechArray.AddToArray(kv.Value);
+            }
+
+            foreach (var kv in audios)
+            {
+                kv.Value.Preload();
+                int index = LDB.audios.dataIndices[kv.Value.ID];
+                LDB.audios.nameIndices.Add(kv.Value.Name, index);
             }
 
             onLoadingFinished?.Invoke();
@@ -1130,5 +1141,60 @@ namespace CommonAPI.Systems
 
             LDBTool.PreAddProto(ProtoType.String, proto);
         }
+
+        
+        public static AudioProto RegisterInstrumentAudio(int id, string audioClipPath, float volume)
+        {
+            return RegisterAudio(id, audioClipPath, 32, volume, 1, 0, 1, false, false, false);
+        }
+
+        public static AudioProto RegisterLocalizedAudio(int id, string audioClipPath, float volume)
+        {
+            return RegisterAudio(id, audioClipPath, 1, volume, 1, 0, 0, false, true, true);
+        }
+
+        public static AudioProto RegisterAudio(int id, string audioClipPath, float volume, float spatialBlend, bool loop)
+        {
+            return RegisterAudio(id, audioClipPath, 1, volume, 1, 0, spatialBlend, loop, false, false);
+        }
+
+        public static AudioProto RegisterAudio(int id, string audioClipPath, int clipCount, float volume, float pitch, float pitchRandomness, float spatialBlend, bool loop, bool localized, bool bypassEffect)
+        {
+            ThrowIfNotLoaded();
+            string name = audioClipPath.Split('/', '\\').Last();
+
+            AudioProto proto = new AudioProto()
+            {
+                ID = id,
+                Name = name,
+                ClipPath = audioClipPath,
+                ClipCount = clipCount,
+                Pitch = pitch,
+                Volume = volume,
+                PitchRandomness = pitchRandomness,
+                SpatialBlend = spatialBlend,
+                Loop = loop,
+                Localized = localized,
+                BypassEffect = bypassEffect
+            };
+
+            audios.Add(id, proto);
+            LDBTool.PreAddProto(ProtoType.Audio, proto);
+
+            return proto;
+        }
+
+        public static void EditAudio(int id, string newAudioClipPath, float volume, float pitch, float pitchRandomness, float spatialBlend)
+        {
+            ThrowIfNotLoaded();
+            AudioProto proto = LDB.audios.Select(id);
+
+            proto.ClipPath = newAudioClipPath;
+            proto.Volume = volume;
+            proto.Pitch = pitch;
+            proto.PitchRandomness = pitchRandomness;
+            proto.SpatialBlend = spatialBlend;
+        }
+        
     }
 }

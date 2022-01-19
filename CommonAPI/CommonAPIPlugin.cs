@@ -62,16 +62,17 @@ namespace CommonAPI
 
             openIconShotMenuButton = Config.Bind("General", "OpenIconShotMenuButton", KeyCode.F6, "Button used to open special Icon shot menu. It is useful for mod developers, because it allows to create consistent icons.").Value;
             
-            string pluginfolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            resource = new ResourceData(ID, "CommonAPI", pluginfolder);
-            resource.LoadAssetBundle("commonapi");
-            
             harmony = new Harmony(GUID);
             
             var pluginScanner = new PluginScanner();
             submoduleHandler = new APISubmoduleHandler(buildFor, Logger);
             LoadedSubmodules = submoduleHandler.LoadRequested(pluginScanner);
             pluginScanner.ScanPlugins();
+            
+            string pluginfolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            resource = new ResourceData(ID, "CommonAPI", pluginfolder);
+            resource.LoadAssetBundle("commonapi");
+            ProtoRegistry.AddResource(resource);
 
             LoadSaveOnLoad.Init();
             harmony.PatchAll(typeof(VFPreloadPatch));

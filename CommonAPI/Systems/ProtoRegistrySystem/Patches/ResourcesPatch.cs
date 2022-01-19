@@ -60,6 +60,18 @@ namespace CommonAPI.Patches
                     __result = mySprite;
                     return false;
                 }
+                
+                foreach (string extension in ProtoRegistry.audioClipFileExtensions)
+                {
+                    if (!resource.bundle.Contains(path + extension)) continue;
+
+                    Object myAudioClip = resource.bundle.LoadAsset(path + extension, systemTypeInstance);
+                    
+                    CommonAPIPlugin.logger.LogDebug($"Loading registered asset {path}: {(myAudioClip != null ? "Success" : "Failure")}");
+
+                    __result = myAudioClip;
+                    return false;
+                }
             }
 
             return true;

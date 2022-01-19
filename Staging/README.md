@@ -69,6 +69,12 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.2.2
+- Added plugin catergories on Thunderstore page.
+### v1.2.1
+- Added ability to load modules manually. Useful for testing with ScriptEngine.
+### v1.2.0
+- Migrated to CommonAPI-DSPModSave package.
 ### v1.1.0
 - Renamed CustomPlanetSystem to PlanetExtensionSystem
 - Renamed CustomStarSystem to StarExtensionSystem
