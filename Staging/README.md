@@ -69,6 +69,9 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.3.0
+- Add ability to register Audio using ProtoRegistry
+- Updated LDBTool to 2.0.1. Please make sure you are using 2.0.0 or higher.
 ### v1.2.2
 - Added plugin catergories on Thunderstore page.
 ### v1.2.1
