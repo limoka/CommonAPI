@@ -22,7 +22,7 @@ namespace CommonAPI.Systems
     public static class ProtoRegistry
     {
         public const string UNKNOWN_MOD = "Unknown";
-        private static string currentMod = "";
+        internal static string currentMod = "";
         
         //Local proto dictionaries
         internal static Dictionary<int, ItemProto> items = new Dictionary<int, ItemProto>();
@@ -126,38 +126,21 @@ namespace CommonAPI.Systems
         }
 
         /// <summary>
-        /// Inform CommonAPI that your mod is starting to add it's items. Make sure to call <see cref="EndModLoad"/> after you are done.
+        /// Inform CommonAPI that your mod is starting to add it's items.
         /// </summary>
         /// <param name="modGUID">Your mod GUID</param>
         /// <exception cref="ArgumentException">If a mod is trying to interrupt other mods loading phase</exception>
-        public static void StartModLoad(string modGUID)
+        public static IDisposable StartModLoad(string modGUID)
         {
             ThrowIfNotLoaded();
             if (currentMod.Equals(""))
             {
                 currentMod = modGUID;
+                return new ModLoadState(modGUID);
             }
             
             throw new ArgumentException(
                 $"Invalid request! Mod {modGUID} is trying to start it's loading phase, while {currentMod} is still loading. Please report this to {modGUID} author!");
-        }
-
-        /// <summary>
-        /// End your mod loading phase
-        /// </summary>
-        /// <param name="modGUID">Your mod GUID</param>
-        /// <exception cref="ArgumentException">If mod tries to end other mod loading phase</exception>
-        public static void EndModLoad(string modGUID)
-        {
-            ThrowIfNotLoaded();
-            if (currentMod.Equals(modGUID))
-            {
-                currentMod = "";
-                return;
-            }
-
-            throw new ArgumentException(
-                $"Invalid request! Mod {modGUID} is trying to end mod {currentMod} loading phase. Please report this to {modGUID} author!");
         }
 
         /// <summary>
@@ -647,8 +630,15 @@ namespace CommonAPI.Systems
             {
                 item.Upgrades = new int[0];
             }
-            
-            ModProtoHistory.AddModMachine(UNKNOWN_MOD, item.ID);
+
+            if (currentMod.Equals(""))
+            {
+                ModProtoHistory.AddModMachine(UNKNOWN_MOD, item.ID); 
+            }
+            else
+            {
+                ModProtoHistory.AddModMachine(currentMod, item.ID);
+            }
         }
 
         /// <summary>
