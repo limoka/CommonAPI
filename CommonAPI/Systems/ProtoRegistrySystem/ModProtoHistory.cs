@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using CommonAPI.Patches;
 
 namespace CommonAPI.Systems
 {
@@ -138,6 +139,7 @@ namespace CommonAPI.Systems
         internal static void Import(BinaryReader r)
         {
             removedMachines.Clear();
+            ProtoSet_Patch.isEnabled = false;
             
             int ver = r.ReadByte();
             bool wasLoaded = r.ReadBoolean();
@@ -171,6 +173,7 @@ namespace CommonAPI.Systems
                 }
             }
 
+            ProtoSet_Patch.isEnabled = true;
             CheckMissingMachines();
         }
 

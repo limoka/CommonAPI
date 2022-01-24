@@ -74,6 +74,8 @@ namespace CommonAPI.Systems
 
             CommonAPIPlugin.harmony.PatchAll(typeof(IconSetPatch));
             CommonAPIPlugin.harmony.PatchAll(typeof(GameMain_Patch));
+            
+            CommonAPIPlugin.harmony.PatchAll(typeof(ProtoSet_Patch));
         }
 
 
