@@ -26,7 +26,7 @@ Then just click **Start modded**, and the game will run with the mod installed.
 ### Manually
 Install BepInEx from [here](https://dsp.thunderstore.io/package/xiaoye97/BepInEx/)<br/>
 Install LDBTool from [here](https://dsp.thunderstore.io/package/xiaoye97/LDBTool/)<br/>
-Install DSPModSave from [here](https://dsp.thunderstore.io/package/crecheng/DSPModSave/)<br/>
+Install DSPModSave from [here](https://dsp.thunderstore.io/package/CommonAPI/DSPModSave/)<br/>
 
 Unzip folder `patchers` into `Dyson Sphere Program/BepInEx/patchers/CommonAPI/` (Create folder named `CommonAPI`)<br/>
 Unzip folder `plugins` into `Dyson Sphere Program/BepInEx/plugins/CommonAPI/`. (Create folder named `CommonAPI`)<br/>
