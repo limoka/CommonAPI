@@ -1132,21 +1132,57 @@ namespace CommonAPI.Systems
         }
 
         
+        /// <summary>
+        /// Register new audio 
+        /// </summary>
+        /// <param name="id">UNIQUE id of your sound</param>
+        /// <param name="audioClipPath">Path to your audio clip. Clip name is taken from file name</param>
+        /// <returns>New Audio Proto</returns>
         public static AudioProto RegisterInstrument(int id, string audioClipPath, int startPitch)
         {
             return RegisterAudio(id, audioClipPath, 32, 1, 1, 0, 1, false, false, false);
         }
 
+        /// <summary>
+        /// Register new audio that is localized
+        /// </summary>
+        /// <param name="id">UNIQUE id of your sound</param>
+        /// <param name="audioClipPath">Path to your audio clip. Clip name is taken from file name</param>
+        /// <param name="volume">Volume of your audio, range 0-1</param>
+        /// <returns>New Audio Proto</returns>
         public static AudioProto RegisterLocalizedAudio(int id, string audioClipPath, float volume)
         {
             return RegisterAudio(id, audioClipPath, 1, volume, 1, 0, 0, false, true, true);
         }
 
+        /// <summary>
+        /// Register new audio 
+        /// </summary>
+        /// <param name="id">UNIQUE id of your sound</param>
+        /// <param name="audioClipPath">Path to your audio clip. Clip name is taken from file name</param>
+        /// <param name="volume">Volume of your audio, range 0-1</param>
+        /// <param name="spatialBlend">Sets how much this audio is affected by 3D spatialisation calculations (attenuation, doppler etc). 0.0 makes the sound full 2D, 1.0 makes it full 3D.</param>
+        /// <param name="loop">Should sound be played in a loop</param>
+        /// <returns>New Audio Proto</returns>
         public static AudioProto RegisterAudio(int id, string audioClipPath, float volume, float spatialBlend, bool loop)
         {
             return RegisterAudio(id, audioClipPath, 1, volume, 1, 0, spatialBlend, loop, false, false);
         }
 
+        /// <summary>
+        /// Register new audio 
+        /// </summary>
+        /// <param name="id">UNIQUE id of your sound</param>
+        /// <param name="audioClipPath">Path to your audio clip. Clip name is taken from file name</param>
+        /// <param name="clipCount">How many clips do you have? A number is appended to the end of the name like this name-5</param>
+        /// <param name="volume">Volume of your audio, range 0-1</param>
+        /// <param name="pitch">Pitch of your audio</param>
+        /// <param name="pitchRandomness">How random is pitch, from 0 to 1</param>
+        /// <param name="spatialBlend">Sets how much this audio is affected by 3D spatialisation calculations (attenuation, doppler etc). 0.0 makes the sound full 2D, 1.0 makes it full 3D.</param>
+        /// <param name="loop">Should sound be played in a loop</param>
+        /// <param name="localized">Does this audio have localization. Language name is appended to the end. For example: name-en. Language postfix is always last</param>
+        /// <param name="bypassEffect">Bypass effects (Applied from filter components or global listener filters).</param>
+        /// <returns>New Audio Proto</returns>
         public static AudioProto RegisterAudio(int id, string audioClipPath, int clipCount, float volume, float pitch, float pitchRandomness, float spatialBlend, bool loop, bool localized, bool bypassEffect)
         {
             ThrowIfNotLoaded();
@@ -1172,7 +1208,16 @@ namespace CommonAPI.Systems
 
             return proto;
         }
-
+        
+        /// <summary>
+        /// Edit existing audio proto
+        /// </summary>
+        /// <param name="id">ID of target AudioProto</param>
+        /// <param name="newAudioClipPath">New clip path. </param>
+        /// <param name="volume">New volume. Volume of your audio, range 0-1</param>
+        /// <param name="pitch">New pitch. Pitch of your audio</param>
+        /// <param name="pitchRandomness">New pitch randomness. How random is pitch, from 0 to 1</param>
+        /// <param name="spatialBlend">New spatial blend. Sets how much this audio is affected by 3D spatialisation calculations (attenuation, doppler etc). 0.0 makes the sound full 2D, 1.0 makes it full 3D.</param>
         public static void EditAudio(int id, string newAudioClipPath, float volume, float pitch, float pitchRandomness, float spatialBlend)
         {
             ThrowIfNotLoaded();
