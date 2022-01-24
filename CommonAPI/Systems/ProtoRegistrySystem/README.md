@@ -16,12 +16,19 @@ Usage of the tool is fairly simple with an example listed below. In order to uti
 If you intent on using custom assets, create and import them to a empty unity project. Make sure that path to assets **contains** your **keyword**. Then create asset bundle containing these resources. You can use [this useful tool](https://github.com/kremnev8/DSP-Mods/blob/master/Unity/Editor/ExportAssetBundles.cs) to do this. 
 Additional info on creating custom buildings can be found [here](https://github.com/kremnev8/DSP-Mods/wiki/Creating-prefabs-to-for-machines)
 
+Also it is highly recomended that you use `StartModLoad()` to tell CommonAPI when your mod is adding content. This information is used by CommonAPI later when players remove your mod.
+
 ## Example
 ```csharp
 //put this code in your BepInEx plugin class:
 public static ResourceData resources;
 
 //Put this code in your awake function
+
+// Let CommonAPI know that your mod is loading
+using (ProtoRegistry.StartModLoad(GUID))
+{
+
 //Initilize new instance of ResourceData class.
 string pluginfolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 resources = new ResourceData(GUID, "<Your Keyword here>", pluginfolder); // Make sure that the keyword you are using is not used by other mod authors.
@@ -46,6 +53,7 @@ RecipeProto recipe = ProtoRegistry.RegisterRecipe(5002, ERecipeType.Assemble, 60
 //Registers a new technology using set parameters and loads it into the game
 TechProto tech = ProtoRegistry.RegisterTech(1500, "copperWireName", "copperWireDesc", "copperWireConc", "assets/example/copper_wire", new[] {1},
                 new[] {1202}, new[] {30}, 1200, new [] {recipe.ID}, new Vector2(9, -3));
+}
 
 ```
 
