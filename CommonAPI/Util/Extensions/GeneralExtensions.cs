@@ -18,5 +18,12 @@ namespace CommonAPI
             int digitGroups = (int) (Math.Log10(number) / Math.Log10(1000));
             return $"{(sign ? "-" : "")}{number / Math.Pow(1000, digitGroups):0.#}" + units[digitGroups];
         }
+
+        public static bool IsModInstalled(this string modGUID)
+        {
+            if (BepInEx.Bootstrap.Chainloader.PluginInfos == null) return false;
+            
+            return BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(modGUID);
+        }
     }
 }

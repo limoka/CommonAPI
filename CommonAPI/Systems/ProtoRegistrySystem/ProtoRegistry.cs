@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using BepInEx.Configuration;
 using CommonAPI.Patches;
 using HarmonyLib;
-using JetBrains.Annotations;
 using UnityEngine;
 using xiaoye97;
-using Object = UnityEngine.Object;
 
 // ReSharper disable InconsistentNaming
 
@@ -26,6 +21,9 @@ namespace CommonAPI.Systems
     [CommonAPISubmodule]
     public static class ProtoRegistry
     {
+        public const string UNKNOWN_MOD = "Unknown";
+        private static string currentMod = "";
+        
         //Local proto dictionaries
         internal static Dictionary<int, ItemProto> items = new Dictionary<int, ItemProto>();
         internal static Dictionary<int, IconToolNew.IconDesc> itemIconDescs = new Dictionary<int, IconToolNew.IconDesc>();
@@ -33,7 +31,6 @@ namespace CommonAPI.Systems
 
         internal static Dictionary<int, RecipeProto> recipes = new Dictionary<int, RecipeProto>();
         internal static Dictionary<int, RecipeProto> recipeReplace = new Dictionary<int, RecipeProto>();
-        internal static int lastStringId = 1000;
 
         internal static Dictionary<int, TechProto> techs = new Dictionary<int, TechProto>();
         internal static Dictionary<int, TechProto> techUpdateList = new Dictionary<int, TechProto>();
@@ -75,6 +72,7 @@ namespace CommonAPI.Systems
             CommonAPIPlugin.harmony.PatchAll(typeof(VertaBufferPatch));
 
             CommonAPIPlugin.harmony.PatchAll(typeof(IconSetPatch));
+            CommonAPIPlugin.harmony.PatchAll(typeof(GameMain_Patch));
         }
 
 
@@ -124,6 +122,41 @@ namespace CommonAPI.Systems
         {
             ThrowIfNotLoaded();
             modResources.Add(resource);
+        }
+
+        /// <summary>
+        /// Inform CommonAPI that your mod is starting to add it's items. Make sure to call <see cref="EndModLoad"/> after you are done.
+        /// </summary>
+        /// <param name="modGUID">Your mod GUID</param>
+        /// <exception cref="ArgumentException">If a mod is trying to interrupt other mods loading phase</exception>
+        public static void StartModLoad(string modGUID)
+        {
+            ThrowIfNotLoaded();
+            if (currentMod.Equals(""))
+            {
+                currentMod = modGUID;
+            }
+            
+            throw new ArgumentException(
+                $"Invalid request! Mod {modGUID} is trying to start it's loading phase, while {currentMod} is still loading. Please report this to {modGUID} author!");
+        }
+
+        /// <summary>
+        /// End your mod loading phase
+        /// </summary>
+        /// <param name="modGUID">Your mod GUID</param>
+        /// <exception cref="ArgumentException">If mod tries to end other mod loading phase</exception>
+        public static void EndModLoad(string modGUID)
+        {
+            ThrowIfNotLoaded();
+            if (currentMod.Equals(modGUID))
+            {
+                currentMod = "";
+                return;
+            }
+
+            throw new ArgumentException(
+                $"Invalid request! Mod {modGUID} is trying to end mod {currentMod} loading phase. Please report this to {modGUID} author!");
         }
 
         /// <summary>
@@ -458,7 +491,7 @@ namespace CommonAPI.Systems
                 RendererType = rendererType
             };
 
-            LDBTool.PreAddProto(ProtoType.Model, model);
+            LDBTool.PreAddProto(model);
             models.Add(model.ID, model);
 
             if (mats != null)
@@ -526,7 +559,7 @@ namespace CommonAPI.Systems
 
             AddModelToItemProto(model, proto, descFields, buildIndex, grade, upgradesIDs);
 
-            LDBTool.PreAddProto(ProtoType.Model, model);
+            LDBTool.PreAddProto(model);
             models.Add(model.ID, model);
 
             if (mats != null)
@@ -608,6 +641,8 @@ namespace CommonAPI.Systems
             {
                 item.Upgrades = new int[0];
             }
+            
+            ModProtoHistory.AddModMachine(UNKNOWN_MOD, item.ID);
         }
 
         /// <summary>
@@ -687,7 +722,7 @@ namespace CommonAPI.Systems
                 ID = id
             };
 
-            LDBTool.PreAddProto(ProtoType.Item, proto);
+            LDBTool.PreAddProto(proto);
 
             items.Add(proto.ID, proto);
             itemIconDescs.Add(proto.ID, beltItemDesc);
@@ -842,7 +877,7 @@ namespace CommonAPI.Systems
             ThrowIfNotLoaded();
             RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex);
 
-            LDBTool.PreAddProto(ProtoType.Recipe, proto);
+            LDBTool.PreAddProto(proto);
             recipes.Add(id, proto);
 
             return proto;
@@ -998,7 +1033,7 @@ namespace CommonAPI.Systems
                 techUpdateList.Add(tech, proto);
             }
 
-            LDBTool.PreAddProto(ProtoType.Tech, proto);
+            LDBTool.PreAddProto(proto);
             techs.Add(id, proto);
 
             return proto;
@@ -1093,13 +1128,13 @@ namespace CommonAPI.Systems
                 ID = -1
             };
 
-            LDBTool.PreAddProto(ProtoType.String, proto);
+            LDBTool.PreAddProto(proto);
         }
 
         
-        public static AudioProto RegisterInstrumentAudio(int id, string audioClipPath, float volume)
+        public static AudioProto RegisterInstrument(int id, string audioClipPath, int startPitch)
         {
-            return RegisterAudio(id, audioClipPath, 32, volume, 1, 0, 1, false, false, false);
+            return RegisterAudio(id, audioClipPath, 32, 1, 1, 0, 1, false, false, false);
         }
 
         public static AudioProto RegisterLocalizedAudio(int id, string audioClipPath, float volume)
@@ -1133,7 +1168,7 @@ namespace CommonAPI.Systems
             };
 
             audios.Add(id, proto);
-            LDBTool.PreAddProto(ProtoType.Audio, proto);
+            LDBTool.PreAddProto(proto);
 
             return proto;
         }

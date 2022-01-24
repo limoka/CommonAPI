@@ -130,7 +130,7 @@ namespace CommonAPI
         public void Import(BinaryReader r)
         {
             
-            r.ReadInt32();
+            int ver = r.ReadInt32();
             
             while (true)
             {
@@ -155,11 +155,17 @@ namespace CommonAPI
 
             PlanetExtensionSystem.InitOnLoad();
             PlanetExtensionSystem.Import(r);
+
+            if (ver > 0)
+            {
+                ModProtoHistory.Import(r);
+                
+            }
         }
 
         public void Export(BinaryWriter w)
         {
-            w.Write(0);
+            w.Write(1);
 
             foreach (var kv in registries)
             {
@@ -176,6 +182,7 @@ namespace CommonAPI
             
             StarExtensionSystem.Export(w);
             PlanetExtensionSystem.Export(w);
+            ModProtoHistory.Export(w);
         }
 
         public void IntoOtherSave()
