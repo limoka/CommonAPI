@@ -69,6 +69,9 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.3.1
+- Now Machines added by mods will be automatically removed from save game if mod is uninstalled.
+- Corrected Game version CommonAPI is built for.
 ### v1.3.0
 - Add ability to register Audio using ProtoRegistry
 - Updated LDBTool to 2.0.1. Please make sure you are using 2.0.0 or higher.
