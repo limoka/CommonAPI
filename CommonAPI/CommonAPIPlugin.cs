@@ -46,7 +46,7 @@ namespace CommonAPI
         internal static APISubmoduleHandler submoduleHandler;
         
         public static Dictionary<string, Registry> registries = new Dictionary<string, Registry>();
-        public static readonly Version buildFor = GameVersionUtil.GetVersion(0, 8, 23, 9989);
+        public static readonly Version buildFor = GameVersionUtil.GetVersion(0, 9, 24, 11209);
 
         public static bool iconShotMenuEnabled;
         public static KeyCode openIconShotMenuButton;
@@ -72,7 +72,12 @@ namespace CommonAPI
             string pluginfolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             resource = new ResourceData(ID, "CommonAPI", pluginfolder);
             resource.LoadAssetBundle("commonapi");
-            ProtoRegistry.AddResource(resource);
+
+            if (ProtoRegistry.Loaded)
+            {
+                ProtoRegistry.RegisterString("ModItemMissingWarnTitle", "Missing mod machines");
+                ProtoRegistry.RegisterString("ModItemMissingWarnDesc", "Following mods had missing machines that were removed from your save:");
+            }
 
             LoadSaveOnLoad.Init();
             harmony.PatchAll(typeof(VFPreloadPatch));
