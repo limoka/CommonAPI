@@ -39,7 +39,8 @@ namespace CommonAPI.Systems
         internal static Dictionary<string, LodMaterials> modelMats = new Dictionary<string, LodMaterials>();
 
         internal static Dictionary<int, AudioProto> audios = new Dictionary<int, AudioProto>();
-
+        internal static Dictionary<int, MIDIProto> midiProtos = new Dictionary<int, MIDIProto>();
+        
         internal static List<ResourceData> modResources = new List<ResourceData>();
 
         public static Registry recipeTypes = new Registry();
@@ -248,6 +249,11 @@ namespace CommonAPI.Systems
                 kv.Value.Preload();
                 int index = LDB.audios.dataIndices[kv.Value.ID];
                 LDB.audios.nameIndices.Add(kv.Value.Name, index);
+            }
+
+            foreach (var midiProto in midiProtos)
+            {
+                midiProto.Value.Preload();
             }
 
             onLoadingFinished?.Invoke();
@@ -1131,16 +1137,22 @@ namespace CommonAPI.Systems
             LDBTool.PreAddProto(proto);
         }
 
-        
+
         /// <summary>
-        /// Register new audio 
+        /// Register new MIDI instrument
         /// </summary>
         /// <param name="id">UNIQUE id of your sound</param>
         /// <param name="audioClipPath">Path to your audio clip. Clip name is taken from file name</param>
+        /// <param name="volume">Default volume of MIDI instrument</param>
+        /// <param name="length">Audio clip length</param>
+        /// <param name="fadeIn">Audio fade in</param>
+        /// <param name="fadeOut">Audio fade out</param>
         /// <returns>New Audio Proto</returns>
-        public static AudioProto RegisterInstrument(int id, string audioClipPath, int startPitch)
+        public static AudioProto RegisterInstrument(int id, string audioClipPath, int volume, float length, float fadeIn, float fadeOut)
         {
-            return RegisterAudio(id, audioClipPath, 32, 1, 1, 0, 1, false, false, false);
+            AudioProto audio = RegisterAudio(id, audioClipPath, 32, 1, 1, 0, 1, false, false, false);
+            AddMIDIInstrument(id, audio, volume, length, fadeIn, fadeOut);
+            return audio;
         }
 
         /// <summary>
@@ -1202,9 +1214,9 @@ namespace CommonAPI.Systems
                 Localized = localized,
                 BypassEffect = bypassEffect
             };
-
-            audios.Add(id, proto);
+            
             LDBTool.PreAddProto(proto);
+            audios.Add(id, proto);
 
             return proto;
         }
@@ -1228,6 +1240,35 @@ namespace CommonAPI.Systems
             proto.Pitch = pitch;
             proto.PitchRandomness = pitchRandomness;
             proto.SpatialBlend = spatialBlend;
+        }
+
+        internal static void AddMIDIInstrument(int id, AudioProto audio, int volume, float length, float fadeIn, float fadeOut)
+        {
+            List<int> keys = new List<int>();
+            List<Vector2> ranges = new List<Vector2>();
+            for (int i = 7; i <= 100; i += 3)
+            {
+                keys.Add(i);
+                ranges.Add(new Vector2(i-1, i+1));
+            }
+
+            MIDIProto proto = new MIDIProto()
+            {
+                ID = id,
+                Instrument = true,
+                StandardKey = 58,
+                PitchRange = new[] {6, 101},
+                Key = keys.ToArray(),
+                KeyRange = ranges.ToArray(),
+                Volume = volume,
+                Length = length,
+                FadeInDuration = fadeIn,
+                FadeOutDuration = fadeOut,
+                Name = audio.Name
+            };
+            
+            LDBTool.PreAddProto(proto);
+            midiProtos.Add(proto.ID, proto);
         }
         
     }
