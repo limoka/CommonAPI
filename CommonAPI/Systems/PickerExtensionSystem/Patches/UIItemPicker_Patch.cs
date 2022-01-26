@@ -9,7 +9,7 @@ namespace CommonAPI.Patches
 {
 
     [HarmonyPatch]
-    public class UIItemPickerExtPatches
+    public class UIItemPicker_Patch
     {
         [HarmonyPatch(typeof(UIItemPicker), "RefreshIcons")]
         [HarmonyTranspiler]
@@ -59,7 +59,11 @@ namespace CommonAPI.Patches
         {
             if (UIItemPickerExtension.currentExtension == null) return true;
 
-            return UIItemPickerExtension.currentExtension.OnBoxMouseDown(__instance);
+            if (UIItemPickerExtension.currentExtension is IMouseHandlerExtension<UIItemPicker> mouseHandler)
+            {
+                return mouseHandler.OnBoxMouseDown(__instance);
+            }
+            return true;
         }
 
         [HarmonyPatch(typeof(UIItemPicker), "TestMouseIndex")]
@@ -68,7 +72,10 @@ namespace CommonAPI.Patches
         {
             if (UIItemPickerExtension.currentExtension == null) return;
 
-            UIItemPickerExtension.currentExtension.TestMouseIndex(__instance);
+            if (UIItemPickerExtension.currentExtension is IMouseHandlerExtension<UIItemPicker> mouseHandler)
+            {
+                mouseHandler.TestMouseIndex(__instance);
+            }
         }
 
         [HarmonyPatch(typeof(UIItemPicker), "_OnOpen")]
@@ -86,6 +93,18 @@ namespace CommonAPI.Patches
         {
             if (UIItemPickerExtension.currentExtension == null) return;
             UIItemPickerExtension.currentExtension.Close(__instance);
+        }
+        
+        [HarmonyPatch(typeof(UIItemPicker), "_OnUpdate")]
+        [HarmonyPostfix]
+        public static void Update(UIItemPicker __instance)
+        {
+            if (UIItemPickerExtension.currentExtension == null) return;
+            
+            if (UIItemPickerExtension.currentExtension is IUpdatePickerExtension<UIItemPicker> mouseHandler)
+            {
+                mouseHandler.OnUpdate(__instance);
+            }
         }
     }
 }

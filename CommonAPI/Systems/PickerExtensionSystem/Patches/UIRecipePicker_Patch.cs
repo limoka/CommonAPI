@@ -8,7 +8,7 @@ using UnityEngine;
 namespace CommonAPI.Patches
 {
     [HarmonyPatch]
-    public class UIRecipePickerExtPatch
+    public class UIRecipePicker_Patch
     {
 
         [HarmonyPatch(typeof(UIRecipePicker), "RefreshIcons")]
@@ -50,6 +50,61 @@ namespace CommonAPI.Patches
         {
             UIRecipePickerExtension.currentFilter = null;
             UIRecipePickerExtension.showLocked = false;
+            UIRecipePickerExtension.currentExtension = null;
+        }
+
+        [HarmonyPatch(typeof(UIRecipePicker), "OnBoxMouseDown")]
+        [HarmonyPrefix]
+        public static bool OnBoxMouseDown(UIRecipePicker __instance)
+        {
+            if (UIRecipePickerExtension.currentExtension == null) return true;
+
+            if (UIRecipePickerExtension.currentExtension is IMouseHandlerExtension<UIRecipePicker> mouseHandler)
+            {
+                return mouseHandler.OnBoxMouseDown(__instance);
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(UIRecipePicker), "TestMouseIndex")]
+        [HarmonyPostfix]
+        public static void TestMouseIndex(UIRecipePicker __instance)
+        {
+            if (UIRecipePickerExtension.currentExtension == null) return;
+
+            if (UIRecipePickerExtension.currentExtension is IMouseHandlerExtension<UIRecipePicker> mouseHandler)
+            {
+                mouseHandler.TestMouseIndex(__instance);
+            }
+        }
+
+        [HarmonyPatch(typeof(UIRecipePicker), "_OnOpen")]
+        [HarmonyPostfix]
+        public static void Open(UIRecipePicker __instance)
+        {
+            if (UIRecipePickerExtension.currentExtension == null) return;
+
+            UIRecipePickerExtension.currentExtension.Open(__instance);
+        }
+
+        [HarmonyPatch(typeof(UIRecipePicker), "_OnClose")]
+        [HarmonyPostfix]
+        public static void Close(UIRecipePicker __instance)
+        {
+            if (UIRecipePickerExtension.currentExtension == null) return;
+            UIRecipePickerExtension.currentExtension.Close(__instance);
+        }
+        
+        [HarmonyPatch(typeof(UIRecipePicker), "_OnUpdate")]
+        [HarmonyPostfix]
+        public static void Update(UIRecipePicker __instance)
+        {
+            if (UIRecipePickerExtension.currentExtension == null) return;
+            
+            if (UIRecipePickerExtension.currentExtension is IUpdatePickerExtension<UIRecipePicker> mouseHandler)
+            {
+                mouseHandler.OnUpdate(__instance);
+            }
         }
     }
 }

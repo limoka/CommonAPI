@@ -13,7 +13,7 @@ namespace CommonAPI.Systems
         public static Func<ItemProto, bool> currentFilter;
         public static bool showLocked = false;
 
-        public static IItemPickerExtension currentExtension;
+        public static IPickerExtension<UIItemPicker> currentExtension;
         
         
         public static UIItemPicker PreparePicker()
@@ -63,7 +63,7 @@ namespace CommonAPI.Systems
             Popup(pos, _onReturn, false, filter);
         }
 
-        public static void Popup(Vector2 pos, IItemPickerExtension extension)
+        public static void Popup(Vector2 pos, IPickerExtension<UIItemPicker> extension)
         {
             PickerExtensionsSystem.ThrowIfNotLoaded();
             try
