@@ -63,8 +63,8 @@ Usage of all functions can be found in [code](https://github.com/kremnev8/Common
 I have added assets, but nothing works.
 - Make sure you don't try to use ProtoRegistry while loading from something like ScriptEngine. All assets must be registered BEFORE game finishes loading. If you want to reload your code, split you mod into two parts, one that's loaded only once on load, and one being reloaded.
 - Make sure that path to assets **contains** your **keyword**: <br>
-Valid Path: `assets/customwarp/audio/slowdown.mp3`<br>
-Invalid path: `assets/audio/slowdown.mp3`
+Valid Path: `assets/customwarp/audio/slowdown`<br>
+Invalid path: `assets/audio/slowdown`
 - Make sure you have registerd your asset bundle to ProtoRegistry: ``` ProtoRegistry.AddResource(resources); ```
 
 ## Contributing
