@@ -20,9 +20,10 @@ namespace CommonAPI {
     internal enum InitStage {
         SetHooks = 1 << 0,
         Load = 1 << 1,
-        Unload = 1 << 2,
-        UnsetHooks = 1 << 3,
-        LoadCheck = 1 << 4,
+        PostLoad = 1 << 2,
+        Unload = 1 << 3,
+        UnsetHooks = 1 << 4,
+        LoadCheck = 1 << 5,
     }
 
     // ReSharper disable once InconsistentNaming
@@ -30,6 +31,7 @@ namespace CommonAPI {
     [AttributeUsage(AttributeTargets.Class)]
     internal class CommonAPISubmodule : Attribute {
         public Version Build;
+        public Type[]? Dependencies;
     }
 
     // ReSharper disable once InconsistentNaming
@@ -60,8 +62,11 @@ namespace CommonAPI {
     public class APISubmoduleHandler {
         private readonly Version _build;
         private readonly ManualLogSource logger;
+        
         private readonly HashSet<string> moduleSet;
         private static readonly HashSet<string> loadedModules;
+
+        private List<Type> allModules;
 
         static APISubmoduleHandler()
         {
@@ -72,6 +77,8 @@ namespace CommonAPI {
             _build = build;
             this.logger = logger;
             moduleSet = new HashSet<string>();
+            
+            allModules = GetSubmodules(true);
         }
 
         /// <summary>
@@ -97,6 +104,7 @@ namespace CommonAPI {
                 InvokeStage(moduleType, InitStage.Load, null);
                 moduleType.SetFieldValue("_loaded", true);
                 loadedModules.Add(moduleType.Name);
+                InvokeStage(moduleType, InitStage.PostLoad, null);
                 return true;
             }
             catch (Exception e)
@@ -110,26 +118,32 @@ namespace CommonAPI {
 
             void AddModuleToSet(IEnumerable<CustomAttributeArgument> arguments) {
                 foreach (var arg in arguments) {
-                    foreach (var stringElement in (CustomAttributeArgument[])arg.Value) {
-                        moduleSet.Add((string)stringElement.Value);
+                    foreach (var stringElement in (CustomAttributeArgument[])arg.Value)
+                    {
+                        string moduleName = (string) stringElement.Value;
+                        Type moduleType = allModules.First(type => type.Name.Equals(moduleName));
+                        
+                        IEnumerable<string> modulesToAdd = moduleType.GetDependants(type =>
+                            {
+                                CommonAPISubmodule attr = type.GetCustomAttribute<CommonAPISubmodule>();
+                                return attr.Dependencies ?? Array.Empty<Type>();
+                            }, (start, end) => 
+                            {
+                                CommonAPIPlugin.logger.LogWarning($"Found Submodule circular dependency! Submodule {start.FullName} depends on {end.FullName}, which depends on {start.FullName}! Submodule {start.FullName} and all of its dependencies will not be loaded.");
+                            })
+                            .Select(type => type.Name);
+
+                        foreach (string module in modulesToAdd)
+                        {
+                            moduleSet.Add(module);
+                        }
                     }
                 }
             }
 
             void CallWhenAssembliesAreScanned()
             {
-                Type[] types;
-                try
-                {
-                    types = Assembly.GetExecutingAssembly().GetTypes();
-                }
-                catch (ReflectionTypeLoadException e)
-                {
-                    types = e.Types;
-                }
-
-
-                var moduleTypes = types.Where(APISubmoduleFilter).ToList();
+                var moduleTypes = GetSubmodules();
 
                 foreach (var moduleType in moduleTypes) {
                     CommonAPIPlugin.logger.LogInfo($"Enabling CommonAPI Submodule: {moduleType.Name}");
@@ -137,20 +151,23 @@ namespace CommonAPI {
 
                 var faults = new Dictionary<Type, Exception>();
 
-                moduleTypes
-                    .ForEachTry<Type>(t => InvokeStage(t, InitStage.SetHooks, null), faults);
+                moduleTypes.ForEachTry(t => InvokeStage(t, InitStage.SetHooks, null), faults);
+                
                 moduleTypes.Where(t => !faults.ContainsKey(t))
                     .ForEachTry(t => InvokeStage(t, InitStage.Load, null), faults);
+                
+                moduleTypes.Where(t => !faults.ContainsKey(t))
+                    .ForEachTry(t => t.SetFieldValue("_loaded", true));
+                moduleTypes.Where(t => !faults.ContainsKey(t))
+                    .ForEachTry(t => loadedModules.Add(t.Name));
+                
+                moduleTypes.Where(t => !faults.ContainsKey(t))
+                    .ForEachTry(t => InvokeStage(t, InitStage.PostLoad, null), faults);
 
                 faults.Keys.ForEachTry(t => {
                     logger.Log(LogLevel.Error, $"{t.Name} could not be initialized and has been disabled:\n\n{faults[t]}");
                     InvokeStage(t, InitStage.UnsetHooks, null);
                 });
-
-                moduleTypes.Where(t => !faults.ContainsKey(t))
-                    .ForEachTry(t => t.SetFieldValue("_loaded", true));
-                moduleTypes.Where(t => !faults.ContainsKey(t))
-                    .ForEachTry(t => loadedModules.Add(t.Name));
             }
 
             var scanRequest = new PluginScanner.AttributeScanRequest(typeof(CommonAPISubmoduleDependency).FullName,
@@ -167,8 +184,24 @@ namespace CommonAPI {
             return loadedModules;
         }
 
+        private List<Type> GetSubmodules(bool allSubmodules = false)
+        {
+            Type[] types;
+            try
+            {
+                types = Assembly.GetExecutingAssembly().GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                types = e.Types;
+            }
+            
+            var moduleTypes = types.Where(type => APISubmoduleFilter(type, allSubmodules)).ToList();
+            return moduleTypes;
+        }
+
         // ReSharper disable once InconsistentNaming
-        private bool APISubmoduleFilter(Type type)
+        private bool APISubmoduleFilter(Type type, bool allSubmodules = false)
         {
             if (type == null) return false;
             var attr = type.GetCustomAttribute<CommonAPISubmodule>();
@@ -176,9 +209,9 @@ namespace CommonAPI {
             if (attr == null)
                 return false;
 
-            /*if (R2API.DebugMode) {
+            if (allSubmodules) {
                 return true;
-            }*/
+            }
 
             // Comment this out if you want to try every submodules working (or not) state
             if (!moduleSet.Contains(type.Name)) {
