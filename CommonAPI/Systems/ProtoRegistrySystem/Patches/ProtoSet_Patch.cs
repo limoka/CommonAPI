@@ -11,6 +11,7 @@ namespace CommonAPI.Patches
         public static bool isEnabled = true;
 
         private static Sprite icon;
+        private static ItemProto missingItem;
         
         static MethodBase TargetMethod()
         {
@@ -21,6 +22,7 @@ namespace CommonAPI.Patches
         public static void ChangeSelectDefault(object __instance, int id, ref object __result)
         {
             if (!isEnabled) return;
+            if (id <= 0) return;
             
             if (__instance is ProtoSet<ItemProto>)
             {
@@ -30,29 +32,34 @@ namespace CommonAPI.Patches
                     {
                         icon = CommonAPIPlugin.resource.bundle.LoadAsset<Sprite>("Assets/CommonAPI/Textures/Icons/missing-icon.png");
                     }
-                    
-                    __result = new ItemProto()
+
+                    if (missingItem == null)
                     {
-                        ID = id,
-                        Name = "Unknown Item",
-                        name = "Unknown Item",
-                        Type = EItemType.Material,
-                        StackSize = 500,
-                        FuelType = 0,
-                        IconPath = "",
-                        Description = "Unknown Item",
-                        description = "Unknown Item",
-                        produceFrom = "None",
-                        GridIndex = 0,
-                        DescFields = new int[0],
-                        prefabDesc = PrefabDesc.none,
-                        Upgrades = new int[0],
-                        recipes = new List<RecipeProto>(),
-                        handcrafts = new List<RecipeProto>(),
-                        makes = new List<RecipeProto>(),
-                        rawMats = new List<IDCNT>(),
-                        _iconSprite = icon
-                    };
+                        missingItem = new ItemProto()
+                        {
+                            ID = id,
+                            Name = "Unknown Item",
+                            name = "Unknown Item",
+                            Type = EItemType.Material,
+                            StackSize = 500,
+                            FuelType = 0,
+                            IconPath = "",
+                            Description = "Unknown Item",
+                            description = "Unknown Item",
+                            produceFrom = "None",
+                            GridIndex = 0,
+                            DescFields = new int[0],
+                            prefabDesc = PrefabDesc.none,
+                            Upgrades = new int[0],
+                            recipes = new List<RecipeProto>(),
+                            handcrafts = new List<RecipeProto>(),
+                            makes = new List<RecipeProto>(),
+                            rawMats = new List<IDCNT>(),
+                            _iconSprite = icon
+                        };
+                    }
+
+                    __result = missingItem;
                 }
             }
         }
