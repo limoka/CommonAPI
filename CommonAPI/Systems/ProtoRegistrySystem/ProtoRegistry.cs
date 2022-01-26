@@ -41,6 +41,8 @@ namespace CommonAPI.Systems
         internal static Dictionary<int, AudioProto> audios = new Dictionary<int, AudioProto>();
         internal static Dictionary<int, MIDIProto> midiProtos = new Dictionary<int, MIDIProto>();
         
+        internal static Dictionary<int, SignalProto> signals = new Dictionary<int, SignalProto>();
+
         internal static List<ResourceData> modResources = new List<ResourceData>();
 
         public static Registry recipeTypes = new Registry();
@@ -239,6 +241,12 @@ namespace CommonAPI.Systems
             foreach (var midiProto in midiProtos)
             {
                 midiProto.Value.Preload();
+            }
+
+            foreach (var kv in signals)
+            {
+                kv.Value.Preload();
+                kv.Value.description = kv.Value.description.Translate();
             }
 
             onLoadingFinished?.Invoke();
@@ -1262,6 +1270,48 @@ namespace CommonAPI.Systems
             LDBTool.PreAddProto(proto);
             midiProtos.Add(proto.ID, proto);
         }
-        
+
+        /// <summary>
+        /// Register new signal
+        /// </summary>
+        /// <param name="id">UNIQUE id of new signal</param>
+        /// <param name="iconPath">Path to icon, starting from assets folder of your unity project</param>
+        /// <param name="gridIndex">Index in picker menu, format : PYXX, P - page (should be 3)</param>
+        /// <param name="name">LocalizedKey of name of the signal</param>
+        /// <param name="desc">LocalizedKey of description of the signal</param>
+        /// <returns>New Signal Proto</returns>
+        public static SignalProto RegisterSignal(int id, string iconPath, int gridIndex, string name, string desc)
+        {
+            ThrowIfNotLoaded();
+            SignalProto proto = new SignalProto()
+            {
+                ID = id,
+                IconPath = iconPath,
+                Name = name,
+                GridIndex = gridIndex,
+                description = desc
+            };
+            
+            LDBTool.PreAddProto(proto);
+            signals.Add(proto.ID, proto);
+            return proto;
+        }
+
+        /// <summary>
+        /// Modify existing signal
+        /// </summary>
+        /// <param name="id">ID of target signal</param>
+        /// <param name="iconPath">New path to icon, starting from assets folder of your unity project</param>
+        /// <param name="gridIndex">New grid index in picker menu, format : PYXX, P - page (should be 3)</param>
+        /// <param name="name">New localizedKey of name of the signal</param>
+        public static void EditSignal(int id, string iconPath, int gridIndex, string name)
+        {
+            ThrowIfNotLoaded();
+            SignalProto proto = LDB.signals.Select(id);
+
+            if (!iconPath.Equals("")) proto.IconPath = iconPath;
+            proto.GridIndex = gridIndex;
+            proto.Name = name;
+        }
     }
 }
