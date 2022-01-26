@@ -13,7 +13,12 @@ Usage of the tool is fairly simple with an example listed below. In order to uti
 
 (The process is similiar for creating new technologies, models and so on forth)
 
-If you intent on using custom assets, create and import them to a empty unity project. Make sure that path to assets **contains** your **keyword**. Then create asset bundle containing these resources. You can use [this useful tool](https://github.com/kremnev8/DSP-Mods/blob/master/Unity/Editor/ExportAssetBundles.cs) to do this. 
+If you intent on using custom assets, create and import them to a empty unity project. Make sure that path to assets **contains** your **keyword**. 
+### Example
+Valid Path: `assets/customwarp/audio/slowdown.mp3`<br>
+Invalid path: `assets/audio/slowdown.mp3`
+
+Then create asset bundle containing these resources. You can use [this useful tool](https://github.com/kremnev8/DSP-Mods/blob/master/Unity/Editor/ExportAssetBundles.cs) to do this. 
 Additional info on creating custom buildings can be found [here](https://github.com/kremnev8/DSP-Mods/wiki/Creating-prefabs-to-for-machines)
 
 Also it is highly recomended that you use `StartModLoad()` to tell CommonAPI when your mod is adding content. This information is used by CommonAPI later when players remove your mod.
