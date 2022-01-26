@@ -26,7 +26,7 @@ Then just click **Start modded**, and the game will run with the mod installed.
 ### Manually
 Install BepInEx from [here](https://dsp.thunderstore.io/package/xiaoye97/BepInEx/)<br/>
 Install LDBTool from [here](https://dsp.thunderstore.io/package/xiaoye97/LDBTool/)<br/>
-Install DSPModSave from [here](https://dsp.thunderstore.io/package/crecheng/DSPModSave/)<br/>
+Install DSPModSave from [here](https://dsp.thunderstore.io/package/CommonAPI/DSPModSave/)<br/>
 
 Unzip folder `patchers` into `Dyson Sphere Program/BepInEx/patchers/CommonAPI/` (Create folder named `CommonAPI`)<br/>
 Unzip folder `plugins` into `Dyson Sphere Program/BepInEx/plugins/CommonAPI/`. (Create folder named `CommonAPI`)<br/>
@@ -69,6 +69,18 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.4.0
+- Fix lava ocean type being displayed as missing item
+- Allow submodules have dependencies
+- Add AssemblerRecipeSystem
+- Refactor PickerExtensionSystem
+- Allow adding Signal Proto using ProtoRegistry
+### v1.3.4
+- Fix missing items appearing instead of no item id 0
+### v1.3.3
+- Fix missing items being broken. Also make it possible to delete them
+### v1.3.2
+- Change StartModLoad function behavior
 ### v1.3.1
 - Now Machines added by mods will be automatically removed from save game if mod is uninstalled.
 - Corrected Game version CommonAPI is built for.
