@@ -6,7 +6,7 @@ using CommonAPI.Systems;
 
 namespace CommonAPI.Systems
 {
-    [CommonAPISubmodule]
+    [CommonAPISubmodule(Dependencies = new []{typeof(ProtoRegistry)})]
     public class TabSystem
     {
         internal static InstanceRegistry<TabData> tabsRegistry = new InstanceRegistry<TabData>(3);

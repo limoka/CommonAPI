@@ -18,7 +18,7 @@ namespace CommonAPI.Systems
         public LoadException(string message) : base(message) { }
     }
 
-    [CommonAPISubmodule]
+    [CommonAPISubmodule(Dependencies = new []{typeof(PickerExtensionsSystem)})]
     public static class ProtoRegistry
     {
         public const string UNKNOWN_MOD = "Unknown";
@@ -45,9 +45,6 @@ namespace CommonAPI.Systems
 
         internal static List<ResourceData> modResources = new List<ResourceData>();
 
-        public static Registry recipeTypes = new Registry();
-        public static List<List<int>> recipeTypeLists = new List<List<int>>();
-        
         public static event Action onLoadingFinished;
 
 
@@ -84,16 +81,7 @@ namespace CommonAPI.Systems
         [CommonAPISubmoduleInit(Stage = InitStage.Load)]
         internal static void load()
         {
-            if (CommonAPIPlugin.IsSubmoduleLoaded(nameof(PickerExtensionsSystem)) &&
-                CommonAPIPlugin.IsSubmoduleLoaded(nameof(CustomDescSystem)))
-            {
-                CommonAPIPlugin.harmony.PatchAll(typeof(AssemblerComponentPatch));
-                CommonAPIPlugin.harmony.PatchAll(typeof(UIAssemblerWindowPatch));
-            }
-            
-            
-            CommonAPIPlugin.registries.Add($"{ CommonAPIPlugin.ID}:RecipeTypeRegistry", recipeTypes);
-            
+
             int mainTex = Shader.PropertyToID("_MainTex");
             int normalTex = Shader.PropertyToID("_NormalTex");
             int msTex = Shader.PropertyToID("_MS_Tex");
@@ -104,10 +92,15 @@ namespace CommonAPI.Systems
             spriteFileExtensions = new[] {".jpg", ".png", ".tif"};
             audioClipFileExtensions = new[] {".mp3", ".ogg", ".waw", ".aif"};
 
-            recipeTypeLists.Add(null);
-
             LDBTool.PostAddDataAction += OnPostAdd;
             LDBTool.EditDataAction += EditProto;
+        }
+
+        [CommonAPISubmoduleInit(Stage = InitStage.PostLoad)]
+        internal static void PostLoad()
+        {
+            RegisterString("ModItemMissingWarnTitle", "Missing mod machines");
+            RegisterString("ModItemMissingWarnDesc", "Following mods had missing machines that were removed from your save:");
         }
         
         internal static void ThrowIfNotLoaded()
@@ -145,38 +138,6 @@ namespace CommonAPI.Systems
             
             throw new ArgumentException(
                 $"Invalid request! Mod {modGUID} is trying to start it's loading phase, while {currentMod} is still loading. Please report this to {modGUID} author!");
-        }
-
-        /// <summary>
-        /// Register new recipe type. This can be used to create new machine types independent of vanilla machines.
-        /// </summary>
-        /// <param name="typeId">Unique string ID</param>
-        /// <returns>Assigned integer ID</returns>
-        public static int RegisterRecipeType(string typeId)
-        {
-            ThrowIfNotLoaded();
-            int id = recipeTypes.Register(typeId);
-            if (id >= recipeTypeLists.Capacity)
-            {
-                recipeTypeLists.Capacity *= 2;
-            }
-
-            recipeTypeLists.Add(new List<int>());
-            return id;
-        }
-
-        /// <summary>
-        /// Checks if provided <see cref="RecipeProto"/> belongs to recipe type
-        /// </summary>
-        /// <param name="proto">Recipe</param>
-        /// <param name="typeId">Integer ID</param>
-        /// <returns></returns>
-        public static bool BelongsToType(this RecipeProto proto, int typeId)
-        {
-            ThrowIfNotLoaded();
-            if (typeId >= recipeTypeLists.Count) return false;
-
-            return recipeTypeLists[typeId].BinarySearch(proto.ID) >= 0;
         }
 
         //Post register fixups
@@ -800,7 +761,7 @@ namespace CommonAPI.Systems
         }
 
         /// <summary>
-        /// Registers a RecipeProto with a custom type
+        /// Registers a RecipeProto with a custom type. <see cref="AssemblerRecipeSystem"/> must be loaded to use this method!
         /// </summary>
         /// <param name="id">UNIQUE id of your recipe</param>
         /// <param name="type">Recipe type in string form</param>
@@ -816,14 +777,15 @@ namespace CommonAPI.Systems
             int[] outCounts, string description, int techID, int gridIndex)
         {
             ThrowIfNotLoaded();
-            if (type >= recipeTypeLists.Count) throw new ArgumentException($"Recipe Type: {type} is not registered!");
+            if (AssemblerRecipeSystem.IsRecipeTypeRegistered(type))
+            {
+                RecipeProto recipe = RegisterRecipe(id, ERecipeType.Custom, time, input, inCounts, output, outCounts, description, techID, gridIndex);
+                
+                AssemblerRecipeSystem.BindRecipeToType(recipe, type);
+                return recipe;
+            }
 
-            RecipeProto recipe = RegisterRecipe(id, ERecipeType.Custom, time, input, inCounts, output, outCounts, description, techID, gridIndex);
-
-            recipeTypeLists[type].Add(recipe.ID);
-            Algorithms.ListSortedAdd(recipeTypeLists[type], recipe.ID);
-
-            return recipe;
+            throw new ArgumentException($"Recipe Type: {type} is not registered!");
         }
 
         /// <summary>

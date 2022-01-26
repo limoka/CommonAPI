@@ -4,7 +4,7 @@ using CommonAPI.Patches;
 
 namespace CommonAPI.Systems
 {
-    [CommonAPISubmodule]
+    [CommonAPISubmodule(Dependencies = new []{typeof(CustomDescSystem)})]
     public class ComponentExtension : IPlanetExtension, IUpdateMultithread, IPowerUpdateMultithread, IComponentStateListener
     {
         public static readonly string systemID = $"{CommonAPIPlugin.ID}:ComponentSystem";

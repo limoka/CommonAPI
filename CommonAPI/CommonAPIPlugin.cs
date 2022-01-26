@@ -73,12 +73,6 @@ namespace CommonAPI
             resource = new ResourceData(ID, "CommonAPI", pluginfolder);
             resource.LoadAssetBundle("commonapi");
 
-            if (ProtoRegistry.Loaded)
-            {
-                ProtoRegistry.RegisterString("ModItemMissingWarnTitle", "Missing mod machines");
-                ProtoRegistry.RegisterString("ModItemMissingWarnDesc", "Following mods had missing machines that were removed from your save:");
-            }
-
             LoadSaveOnLoad.Init();
             harmony.PatchAll(typeof(VFPreloadPatch));
             
