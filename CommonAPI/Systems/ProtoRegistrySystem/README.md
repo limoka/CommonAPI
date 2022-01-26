@@ -62,10 +62,16 @@ Usage of all functions can be found in [code](https://github.com/kremnev8/Common
 ## Troubleshooting
 I have added assets, but nothing works.
 - Make sure you don't try to use ProtoRegistry while loading from something like ScriptEngine. All assets must be registered BEFORE game finishes loading. If you want to reload your code, split you mod into two parts, one that's loaded only once on load, and one being reloaded.
-- Make sure that path to assets **contains** your **keyword**: <br>
+- Make sure that path to assets **contains** your **keyword**. Also make sure to not specity file extension <br>
 Valid Path: `assets/customwarp/audio/slowdown`<br>
-Invalid path: `assets/audio/slowdown`
+Invalid path: `assets/audio/slowdown`<br>
+Invalid Path: `assets/customwarp/audio/slowdown.mp3`<br>
 - Make sure you have registerd your asset bundle to ProtoRegistry: ``` ProtoRegistry.AddResource(resources); ```
+- Make sure your ID's did not collide with other protos from the same set.
+
+I have added an Item, but it's icon is white and does not display in inventory.
+- Make sure your icon has: size of 80x80 pixes, uses RGBA 32 bit, with read/write flag enabled. Here you can see recomended settings
+![изображение](https://user-images.githubusercontent.com/12484618/151116615-a8119bc4-5bf3-44d6-aa60-20186e304d27.png)
 
 ## Contributing
 Pull requests are welcome. Please make sure to test changes before opening pull request.
