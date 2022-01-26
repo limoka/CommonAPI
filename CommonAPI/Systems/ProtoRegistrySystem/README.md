@@ -13,12 +13,7 @@ Usage of the tool is fairly simple with an example listed below. In order to uti
 
 (The process is similiar for creating new technologies, models and so on forth)
 
-If you intent on using custom assets, create and import them to a empty unity project. Make sure that path to assets **contains** your **keyword**. 
-### Example
-Valid Path: `assets/customwarp/audio/slowdown.mp3`<br>
-Invalid path: `assets/audio/slowdown.mp3`
-
-Then create asset bundle containing these resources. You can use [this useful tool](https://github.com/kremnev8/DSP-Mods/blob/master/Unity/Editor/ExportAssetBundles.cs) to do this. 
+If you intent on using custom assets, create and import them to a empty unity project. Make sure that path to assets **contains** your **keyword**. Then create asset bundle containing these resources. You can use [this useful tool](https://thunderkit.thunderstore.io/package/CommonAPI/DSPEditorKit/) to do this. 
 Additional info on creating custom buildings can be found [here](https://github.com/kremnev8/DSP-Mods/wiki/Creating-prefabs-to-for-machines)
 
 Also it is highly recomended that you use `StartModLoad()` to tell CommonAPI when your mod is adding content. This information is used by CommonAPI later when players remove your mod.
@@ -63,6 +58,14 @@ TechProto tech = ProtoRegistry.RegisterTech(1500, "copperWireName", "copperWireD
 ```
 
 Usage of all functions can be found in [code](https://github.com/kremnev8/CommonAPI/blob/master/CommonAPI/Systems/ProtoRegistrySystem/ProtoRegistry.cs)
+
+## Troubleshooting
+I have added assets, but nothing works.
+- Make sure you don't try to use ProtoRegistry while loading from something like ScriptEngine. All assets must be registered BEFORE game finishes loading. If you want to reload your code, split you mod into two parts, one that's loaded only once on load, and one being reloaded.
+- Make sure that path to assets **contains** your **keyword**: <br>
+Valid Path: `assets/customwarp/audio/slowdown.mp3`<br>
+Invalid path: `assets/audio/slowdown.mp3`
+- Make sure you have registerd your asset bundle to ProtoRegistry: ``` ProtoRegistry.AddResource(resources); ```
 
 ## Contributing
 Pull requests are welcome. Please make sure to test changes before opening pull request.
