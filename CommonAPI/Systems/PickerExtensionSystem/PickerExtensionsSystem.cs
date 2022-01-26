@@ -50,6 +50,18 @@ namespace CommonAPI.Systems
                 {
                     ProtoRegistry.RegisterString($"SIGNAL-60{i}", $"Signal {i}");
                 }
+
+                ProtoRegistry.onLoadingFinished += () =>
+                {
+                    for (int i = 4; i <= 6; i++)
+                    {
+                        for (int j = 0; j <= 10; j++)
+                        {
+                            SignalProto proto = LDB.signals.Select(i*100+j);
+                            proto?.Preload();
+                        }
+                    }
+                };
             }
         }
 
