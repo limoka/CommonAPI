@@ -46,9 +46,9 @@ ProtoRegistry.RegisterString("copperWireName", "Copper Wire", "铜线/铜线", "
 
 
 //Registers a new item using set parameters and loads it into the game
-ItemProto wire = ProtoRegistry.RegisterItem(5001, "copperWireName", "copperWireDesc", "assets/example/copper_wire", 1711);
+ItemProto wire = ProtoRegistry.RegisterItem(4500, "copperWireName", "copperWireDesc", "assets/example/copper_wire", 1711);
 //Registers a new recipe using set parameters and loads it into the game
-RecipeProto recipe = ProtoRegistry.RegisterRecipe(5002, ERecipeType.Assemble, 60, new[] { 1104 }, new[] { 2 }, new[] { wire.ID }, new[] { 1 }, "copperWireDesc"); 
+RecipeProto recipe = ProtoRegistry.RegisterRecipe(4501, ERecipeType.Assemble, 60, new[] { 1104 }, new[] { 2 }, new[] { wire.ID }, new[] { 1 }, "copperWireDesc"); 
 
 //Registers a new technology using set parameters and loads it into the game
 TechProto tech = ProtoRegistry.RegisterTech(1500, "copperWireName", "copperWireDesc", "copperWireConc", "assets/example/copper_wire", new[] {1},
