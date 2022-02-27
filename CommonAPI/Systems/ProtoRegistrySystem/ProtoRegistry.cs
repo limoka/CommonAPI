@@ -998,7 +998,8 @@ namespace CommonAPI.Systems
             foreach (int tech in preTechs)
             {
                 //Do not do LDB.techs.Select here, proto could be not added yet.
-                techUpdateList.Add(tech, proto);
+                if(!techUpdateList.ContainsKey(tech))
+                    techUpdateList.Add(tech, proto);
             }
 
             LDBTool.PreAddProto(proto);
