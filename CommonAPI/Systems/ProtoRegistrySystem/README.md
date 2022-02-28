@@ -66,6 +66,7 @@ I have added assets, but nothing works.
 Valid Path: `assets/customwarp/audio/slowdown`<br>
 Invalid path: `assets/audio/slowdown`<br>
 Invalid Path: `assets/customwarp/audio/slowdown.mp3`<br>
+Invalid Path: `assets/customwarp_slowdown.mp3`. Although this might work, I don't recommend it.<br>
 - Make sure you have registerd your asset bundle to ProtoRegistry: ``` ProtoRegistry.AddResource(resources); ```
 - Make sure your ID's did not collide with other protos from the same set.
 
