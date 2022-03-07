@@ -46,9 +46,9 @@ ProtoRegistry.RegisterString("copperWireName", "Copper Wire", "铜线/铜线", "
 
 
 //Registers a new item using set parameters and loads it into the game
-ItemProto wire = ProtoRegistry.RegisterItem(5001, "copperWireName", "copperWireDesc", "assets/example/copper_wire", 1711);
+ItemProto wire = ProtoRegistry.RegisterItem(4500, "copperWireName", "copperWireDesc", "assets/example/copper_wire", 1711);
 //Registers a new recipe using set parameters and loads it into the game
-RecipeProto recipe = ProtoRegistry.RegisterRecipe(5002, ERecipeType.Assemble, 60, new[] { 1104 }, new[] { 2 }, new[] { wire.ID }, new[] { 1 }, "copperWireDesc"); 
+RecipeProto recipe = ProtoRegistry.RegisterRecipe(4501, ERecipeType.Assemble, 60, new[] { 1104 }, new[] { 2 }, new[] { wire.ID }, new[] { 1 }, "copperWireDesc"); 
 
 //Registers a new technology using set parameters and loads it into the game
 TechProto tech = ProtoRegistry.RegisterTech(1500, "copperWireName", "copperWireDesc", "copperWireConc", "assets/example/copper_wire", new[] {1},
@@ -66,6 +66,7 @@ I have added assets, but nothing works.
 Valid Path: `assets/customwarp/audio/slowdown`<br>
 Invalid path: `assets/audio/slowdown`<br>
 Invalid Path: `assets/customwarp/audio/slowdown.mp3`<br>
+Invalid Path: `assets/customwarp_slowdown.mp3`. Although this might work, I don't recommend it.<br>
 - Make sure you have registerd your asset bundle to ProtoRegistry: ``` ProtoRegistry.AddResource(resources); ```
 - Make sure your ID's did not collide with other protos from the same set.
 
