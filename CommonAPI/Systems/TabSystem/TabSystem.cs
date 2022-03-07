@@ -7,7 +7,7 @@ using CommonAPI.Systems;
 namespace CommonAPI.Systems
 {
     [CommonAPISubmodule(Dependencies = new []{typeof(ProtoRegistry)})]
-    public class TabSystem
+    public static class TabSystem
     {
         internal static InstanceRegistry<TabData> tabsRegistry = new InstanceRegistry<TabData>(3);
 
@@ -50,7 +50,7 @@ namespace CommonAPI.Systems
             return tabsRegistry.Register(tabId, tab);
         }
         
-        public int GetTabId(string tabId)
+        public static int GetTabId(string tabId)
         {
             ThrowIfNotLoaded();
             return tabsRegistry.GetUniqueId(tabId);

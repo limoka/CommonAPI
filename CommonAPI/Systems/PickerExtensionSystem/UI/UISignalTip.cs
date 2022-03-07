@@ -25,7 +25,7 @@ namespace CommonAPI.Systems.UI
         {
             if (prefab == null)
             {
-                prefab = CommonAPIPlugin.resource.bundle.LoadAsset<GameObject>("Assets/CommonAPI/Prefab/item-tooltip.prefab");
+                prefab = CommonAPIPlugin.resource.bundle.LoadAsset<GameObject>("Assets/CommonAPI/UI/item-tooltip.prefab");
             }
             
             GameObject instance = Instantiate(prefab, parent);

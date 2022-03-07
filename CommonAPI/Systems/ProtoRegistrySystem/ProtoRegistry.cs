@@ -759,7 +759,7 @@ namespace CommonAPI.Systems
         {
             return RegisterRecipe(id, type, time, input, inCounts, output, outCounts, description, 0, 0);
         }
-
+        
         /// <summary>
         /// Registers a RecipeProto with a custom type. <see cref="AssemblerRecipeSystem"/> must be loaded to use this method!
         /// </summary>
@@ -777,9 +777,51 @@ namespace CommonAPI.Systems
             int[] outCounts, string description, int techID, int gridIndex)
         {
             ThrowIfNotLoaded();
+
+            return RegisterRecipe(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex, "", "");
+        }
+
+        /// <summary>
+        /// Registers a RecipeProto with a custom type. <see cref="AssemblerRecipeSystem"/> must be loaded to use this method!
+        /// </summary>
+        /// <param name="id">UNIQUE id of your recipe</param>
+        /// <param name="type">Recipe type in string form</param>
+        /// <param name="time">Time in ingame ticks. How long item is being made</param>
+        /// <param name="input">Array of input IDs</param>
+        /// <param name="inCounts">Array of input COUNTS</param>
+        /// <param name="output">Array of output IDs</param>
+        /// <param name="outCounts">Array of output COUNTS</param>
+        /// <param name="description">LocalizedKey of description of this item</param>
+        /// <param name="techID">Tech id, which unlock this recipe</param>
+        public static RecipeProto RegisterRecipe(int id, int type, int time, int[] input, int[] inCounts,
+            int[] output,
+            int[] outCounts, string description, int techID, int gridIndex, string iconPath)
+        {
+            ThrowIfNotLoaded();
+
+            return RegisterRecipe(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex, "", iconPath);
+        }
+
+        /// <summary>
+        /// Registers a RecipeProto with a custom type. <see cref="AssemblerRecipeSystem"/> must be loaded to use this method!
+        /// </summary>
+        /// <param name="id">UNIQUE id of your recipe</param>
+        /// <param name="type">Recipe type in string form</param>
+        /// <param name="time">Time in ingame ticks. How long item is being made</param>
+        /// <param name="input">Array of input IDs</param>
+        /// <param name="inCounts">Array of input COUNTS</param>
+        /// <param name="output">Array of output IDs</param>
+        /// <param name="outCounts">Array of output COUNTS</param>
+        /// <param name="description">LocalizedKey of description of this item</param>
+        /// <param name="techID">Tech id, which unlock this recipe</param>
+        public static RecipeProto RegisterRecipe(int id, int type, int time, int[] input, int[] inCounts,
+            int[] output,
+            int[] outCounts, string description, int techID, int gridIndex, string name, string iconPath)
+        {
+            ThrowIfNotLoaded();
             if (AssemblerRecipeSystem.IsRecipeTypeRegistered(type))
             {
-                RecipeProto recipe = RegisterRecipe(id, ERecipeType.Custom, time, input, inCounts, output, outCounts, description, techID, gridIndex);
+                RecipeProto recipe = RegisterRecipe(id, ERecipeType.Custom, time, input, inCounts, output, outCounts, description, techID, gridIndex, name, iconPath);
                 
                 AssemblerRecipeSystem.BindRecipeToType(recipe, type);
                 return recipe;
@@ -843,7 +885,57 @@ namespace CommonAPI.Systems
             int[] outCounts, string description, int techID, int gridIndex)
         {
             ThrowIfNotLoaded();
-            RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex);
+            RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex, "", "");
+
+            LDBTool.PreAddProto(proto);
+            recipes.Add(id, proto);
+
+            return proto;
+        }
+        
+        /// <summary>
+        /// Registers a RecipeProto with vanilla types
+        /// </summary>
+        /// <param name="id">UNIQUE id of your recipe</param>
+        /// <param name="type">Recipe type</param>
+        /// <param name="time">Time in ingame ticks. How long item is being made</param>
+        /// <param name="input">Array of input IDs</param>
+        /// <param name="inCounts">Array of input COUNTS</param>
+        /// <param name="output">Array of output IDs</param>
+        /// <param name="outCounts">Array of output COUNTS</param>
+        /// <param name="description">LocalizedKey of description of this item</param>
+        /// <param name="techID">Tech id, which unlock this recipe</param>
+        public static RecipeProto RegisterRecipe(int id, ERecipeType type, int time, int[] input, int[] inCounts,
+            int[] output,
+            int[] outCounts, string description, int techID, int gridIndex, string iconPath)
+        {
+            ThrowIfNotLoaded();
+            RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex, "", iconPath);
+
+            LDBTool.PreAddProto(proto);
+            recipes.Add(id, proto);
+
+            return proto;
+        }
+        
+        /// <summary>
+        /// Registers a RecipeProto with vanilla types
+        /// </summary>
+        /// <param name="id">UNIQUE id of your recipe</param>
+        /// <param name="type">Recipe type</param>
+        /// <param name="time">Time in ingame ticks. How long item is being made</param>
+        /// <param name="input">Array of input IDs</param>
+        /// <param name="inCounts">Array of input COUNTS</param>
+        /// <param name="output">Array of output IDs</param>
+        /// <param name="outCounts">Array of output COUNTS</param>
+        /// <param name="description">LocalizedKey of description of this item</param>
+        /// <param name="techID">Tech id, which unlock this recipe</param>
+        public static RecipeProto RegisterRecipe(int id, ERecipeType type, int time, int[] input, int[] inCounts,
+            int[] output,
+            int[] outCounts, string description, int techID, int gridIndex, string name, string iconPath)
+        {
+            ThrowIfNotLoaded();
+            RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex, name, iconPath);
 
             LDBTool.PreAddProto(proto);
             recipes.Add(id, proto);
@@ -853,13 +945,17 @@ namespace CommonAPI.Systems
 
         private static RecipeProto NewRecipeProto(int id, ERecipeType type, int time, int[] input, int[] inCounts, int[] output, int[] outCounts,
             string description,
-            int techID, int gridIndex)
+            int techID, int gridIndex, string name, string iconPath)
         {
             ThrowIfNotLoaded();
             if (output.Length > 0)
             {
-                ItemProto first = items.ContainsKey(output[0]) ? items[output[0]] : LDB.items.Select(output[0]);
-
+                ItemProto first = null;
+                if (name.Equals("") || iconPath.Equals(""))
+                {
+                    first = items.ContainsKey(output[0]) ? items[output[0]] : LDB.items.Select(output[0]);
+                }
+                
                 TechProto tech = null;
                 if (techID != 0 && LDB.techs.Exist(techID))
                 {
@@ -877,8 +973,8 @@ namespace CommonAPI.Systems
                     ResultCounts = outCounts,
                     Description = description,
                     GridIndex = gridIndex == 0 ? first.GridIndex : gridIndex,
-                    IconPath = first.IconPath,
-                    Name = first.Name + "Recipe",
+                    IconPath = iconPath.Equals("") ? first.IconPath : iconPath,
+                    Name = name.Equals("") ? first.Name + "Recipe" : name,
                     preTech = tech,
                     ID = id
                 };
@@ -926,7 +1022,7 @@ namespace CommonAPI.Systems
         {
             EditRecipe(id, type, time, input, inCounts, output, outCounts, description, 0, 0);
         }
-
+        
         /// <summary>
         /// Entirely replace recipe proto with specified ID
         /// </summary>
@@ -943,8 +1039,27 @@ namespace CommonAPI.Systems
             int[] output,
             int[] outCounts, string description, int techID, int gridIndex)
         {
+            EditRecipe(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex, "");
+        }
+
+        /// <summary>
+        /// Entirely replace recipe proto with specified ID
+        /// </summary>
+        /// <param name="id">ID of target recipe</param>
+        /// <param name="type">Recipe type</param>
+        /// <param name="time">Time in ingame ticks. How long item is being made</param>
+        /// <param name="input">Array of input IDs</param>
+        /// <param name="inCounts">Array of input COUNTS</param>
+        /// <param name="output">Array of output IDs</param>
+        /// <param name="outCounts">Array of output COUNTS</param>
+        /// <param name="description">LocalizedKey of description of this item</param>
+        /// <param name="techID">Tech id, which unlock this recipe</param>
+        public static void EditRecipe(int id, ERecipeType type, int time, int[] input, int[] inCounts,
+            int[] output,
+            int[] outCounts, string description, int techID, int gridIndex, string iconPath)
+        {
             ThrowIfNotLoaded();
-            RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex);
+            RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex, "", iconPath);
             recipeReplace.Add(proto.ID, proto);
         }
 

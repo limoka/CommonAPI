@@ -9,7 +9,7 @@
   <PropertyGroup Label="Game Install Properties">
     <DSPGameDir Condition="!Exists('$(DevEnvLoc)')">C:\Program Files (x86)\Steam\steamapps\common\Dyson Sphere Program\</DSPGameDir>
     <DSPGameDir>$([MSBuild]::EnsureTrailingSlash('$(DSPGameDir)'))</DSPGameDir>
-	<DumpedAssembliesDir>$(DSPGameDir)BepInEx\DumpedAssemblies\</DumpedAssembliesDir>
+	<DumpedAssembliesDir>$(DSPGameDir)BepInEx\DumpedAssemblies\DSPGAME\</DumpedAssembliesDir>
     <ProjectDir>$(MSBuildThisFileDirectory)\</ProjectDir>
   </PropertyGroup>
 

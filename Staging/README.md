@@ -69,6 +69,16 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.4.4
+- Add extension methods for customId and customType fields on EntityData class
+### v1.4.3
+- Fixed `GetTabId` being impossible to call
+- Improved appearance of mod created tabs
+### v1.4.2
+- Fix NRE in UISingalTip
+### v1.4.1
+- Added UIWindowResize class, made by Raptor
+- Added ability to specify iconPath and name for recipes manually
 ### v1.4.0
 - Fix lava ocean type being displayed as missing item
 - Allow submodules have dependencies
