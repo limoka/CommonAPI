@@ -69,6 +69,10 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.4.5
+- Fix issues adding multiple techologies with the same pretech
+- KeyBinds now dynamically assign ID's. To all modders using Custom KeyBinds: please stop assigning ID's when calling `RegisterKeyBind()`
+- FactoryComponent now has a method `UpdateNeeds()` that allows to set entityNeeds. 
 ### v1.4.4
 - Add extension methods for customId and customType fields on EntityData class
 ### v1.4.3
