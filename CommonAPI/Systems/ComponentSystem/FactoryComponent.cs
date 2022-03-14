@@ -57,5 +57,10 @@ namespace CommonAPI.Systems
         }
 
         public virtual void UpdatePowerState(ref PowerConsumerComponent component) { }
+
+        public virtual int[] UpdateNeeds()
+        {
+            return System.Array.Empty<int>();
+        }
     }
 }

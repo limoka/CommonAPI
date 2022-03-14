@@ -74,6 +74,7 @@ namespace CommonAPI.Systems
             float[] networkServes = powerSystem.networkServes;
             AnimData[] entityAnimPool = factory.entityAnimPool;
             SignData[] entitySignPool = factory.entitySignPool;
+            int[][] entityNeeds = factory.entityNeeds;
 
             return item =>
             {
@@ -85,6 +86,7 @@ namespace CommonAPI.Systems
                 item.UpdateAnimation(ref entityAnimPool[entityId], animationDelta, power);
                 entityAnimPool[entityId].power = power;
                 item.UpdateSigns(ref entitySignPool[entityId], animationDelta, power, factory);
+                entityNeeds[entityId] = item.UpdateNeeds();
             };
         }
         
