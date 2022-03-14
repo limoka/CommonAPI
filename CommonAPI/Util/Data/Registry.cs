@@ -91,6 +91,11 @@ namespace CommonAPI
             return 0;
         }
 
+        public void ManualIdMap(int oldId, int newId)
+        {
+            migrationMap.Add(oldId, newId);
+        }
+
         public void Free()
         {
         }

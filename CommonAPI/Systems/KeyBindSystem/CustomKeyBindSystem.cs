@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BepInEx.Bootstrap;
 using CommonAPI.Patches;
 using HarmonyLib;
 using UnityEngine;
@@ -17,6 +18,7 @@ namespace CommonAPI.Systems
     {
 
         internal static Dictionary<string, PressKeyBind> customKeys = new Dictionary<string, PressKeyBind>();
+        internal static Registry keyRegistry;
         
         /// <summary>
         /// Return true if the submodule is loaded.
@@ -33,6 +35,13 @@ namespace CommonAPI.Systems
         internal static void SetHooks()
         {
             CommonAPIPlugin.harmony.PatchAll(typeof(KeyBindPatches));
+            CommonAPIPlugin.harmony.PatchAll(typeof(Chainloader_Patch));
+        }
+        
+        [CommonAPISubmoduleInit(Stage = InitStage.Load)]
+        internal static void Load()
+        {
+            keyRegistry = new Registry(100);
         }
         
         internal static void ThrowIfNotLoaded()
@@ -52,9 +61,20 @@ namespace CommonAPI.Systems
         public static void RegisterKeyBind<T>(BuiltinKey key) where T : PressKeyBind, new()
         {
             ThrowIfNotLoaded();
+            
+            string id = "KEY" + key.name;
+            int index = keyRegistry.Register(id);
+            if (key.id > 0)
+            {
+                keyRegistry.ManualIdMap(key.id, index);
+            }
+            
+            key.id = index;
+            
             T keyBind = new T();
             keyBind.Init(key);
-            customKeys.Add("KEY" + key.name, keyBind);
+
+            customKeys.Add(id, keyBind);
         }
 
         /// <summary>
