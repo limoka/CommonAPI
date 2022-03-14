@@ -33,7 +33,7 @@ namespace CommonAPI.Systems
         internal static Dictionary<int, RecipeProto> recipeReplace = new Dictionary<int, RecipeProto>();
 
         internal static Dictionary<int, TechProto> techs = new Dictionary<int, TechProto>();
-        internal static Dictionary<int, TechProto> techUpdateList = new Dictionary<int, TechProto>();
+        internal static Dictionary<int, List<TechProto>> techUpdateList = new Dictionary<int, List<TechProto>>();
 
         internal static Dictionary<int, ModelProto> models = new Dictionary<int, ModelProto>();
         internal static Dictionary<string, LodMaterials> modelMats = new Dictionary<string, LodMaterials>();
@@ -189,7 +189,7 @@ namespace CommonAPI.Systems
             foreach (var kv in techUpdateList)
             {
                 TechProto oldTech = LDB.techs.Select(kv.Key);
-                oldTech.postTechArray = oldTech.postTechArray.AddToArray(kv.Value);
+                oldTech.postTechArray = oldTech.postTechArray.AddRangeToArray(kv.Value.ToArray());
             }
 
             foreach (var kv in audios)
@@ -1112,8 +1112,14 @@ namespace CommonAPI.Systems
 
             foreach (int tech in preTechs)
             {
-                //Do not do LDB.techs.Select here, proto could be not added yet.
-                techUpdateList.Add(tech, proto);
+                if (techUpdateList.ContainsKey(tech))
+                {
+                    techUpdateList[tech].Add(proto);
+                }
+                else
+                {
+                    techUpdateList.Add(tech, new List<TechProto>(new[]{proto}));
+                }
             }
 
             LDBTool.PreAddProto(proto);
