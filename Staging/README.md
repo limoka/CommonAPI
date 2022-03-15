@@ -34,10 +34,6 @@ Unzip folder `plugins` into `Dyson Sphere Program/BepInEx/plugins/CommonAPI/`. (
 ## Feedback and Bug Report
 Feel free to contact me via Discord (Kremnev8#3756) for any feedback, bug-reports or suggestions.
 
-## How can I support this mod
-If you like what I do and would like to support me you can [donate](https://paypal.me/kremnev8). <br/>
-If you want other means to support me, you can [message](#feedback-and-bug-report) me on discord about it.
-
 # How develop mods using CommonAPI
 All features are written as self-contained modules (Inspired by [R2API](https://github.com/risk-of-thunder/R2API)). By default NO modules are loaded. To use a module at the top of your BepInEx plugin class add an attribute `CommonAPISubmoduleDependency`. That will ensure that specified modules are loaded. Make sure you don't ask to load modules that you are not using.
 
