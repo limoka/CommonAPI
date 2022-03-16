@@ -65,6 +65,8 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.4.6
+- Fix dynamic KeyBind ID assignment and migration being broken. Playes might lose some of previously rebound keybinds.
 ### v1.4.5
 - Fix issues adding multiple techologies with the same pretech
 - KeyBinds now dynamically assign ID's. To all modders using Custom KeyBinds: please stop assigning ID's when calling `RegisterKeyBind()`

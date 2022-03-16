@@ -64,11 +64,6 @@ namespace CommonAPI.Systems
             
             string id = "KEY" + key.name;
             int index = keyRegistry.Register(id);
-            if (key.id > 0)
-            {
-                keyRegistry.ManualIdMap(key.id, index);
-            }
-            
             key.id = index;
             
             T keyBind = new T();

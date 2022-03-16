@@ -12,7 +12,8 @@ namespace CommonAPI
         public Dictionary<string, int> idMap = new Dictionary<string, int>();
         
         public Dictionary<int, int> migrationMap = new Dictionary<int, int>();
-        public List<string> removedIds = new List<string>();
+        public HashSet<string> removedIds = new HashSet<string>();
+        public HashSet<int> removedIntIds = new HashSet<int>();
 
         protected int lastId;
 
@@ -91,11 +92,6 @@ namespace CommonAPI
             return 0;
         }
 
-        public void ManualIdMap(int oldId, int newId)
-        {
-            migrationMap.Add(oldId, newId);
-        }
-
         public void Free()
         {
         }
@@ -136,6 +132,7 @@ namespace CommonAPI
                 catch (ArgumentException)
                 {
                     removedIds.Add(key);
+                    removedIntIds.Add(oldId);
                 }
             }
         }
