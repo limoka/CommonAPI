@@ -12,24 +12,25 @@ namespace CommonAPI.Patches
     [HarmonyPatch]
     public static class UIReplicatorPatch
     {
-        private static UITabButton[] tabs;
+        private static List<UITabButton> tabs;
 
         [HarmonyPatch(typeof(UIReplicatorWindow), "_OnCreate")]
         [HarmonyPostfix]
         public static void Create(UIReplicatorWindow __instance)
         {
-            tabs = new UITabButton[TabSystem.tabsRegistry.idMap.Count];
+            var datas = TabSystem.GetAllTabs();
+            tabs = new List<UITabButton>(datas.Length - 3);
             
-            for (int i = 0; i < TabSystem.tabsRegistry.idMap.Count; i++)
+            foreach (TabData tab in datas)
             {
-                TabData data = TabSystem.tabsRegistry.data[i + 3];
-                GameObject buttonPrefab = CommonAPIPlugin.resource.bundle.LoadAsset<GameObject>("Assets/CommonAPI/UI/tab-button.prefab");
-                GameObject button = Object.Instantiate(buttonPrefab, __instance.recipeGroup, false);
-                ((RectTransform)button.transform).anchoredPosition = new Vector2(115 + 70 * i, 50);
+                if (tab == null) continue;
+                
+                GameObject button = Object.Instantiate(TabSystem.GetTabPrefab(), __instance.recipeGroup, false);
+                ((RectTransform)button.transform).anchoredPosition = new Vector2( 70 * tab.tabIndex - 95, 50); 
                 UITabButton tabButton = button.GetComponent<UITabButton>();
-                Sprite sprite = Resources.Load<Sprite>(data.tabIconPath);
-                tabButton.Init(sprite, data.tabName, i + 3, __instance.OnTypeButtonClick);
-                tabs[i] = tabButton;
+                Sprite sprite = Resources.Load<Sprite>(tab.tabIconPath);
+                tabButton.Init(sprite, tab.tabName, tab.tabIndex, __instance.OnTypeButtonClick);
+                tabs.Add(tabButton);
             }
         }
         

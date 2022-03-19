@@ -5,8 +5,9 @@ namespace CommonAPI.Systems
     [UsedImplicitly]
     public class TabData
     {
-        public string tabName;
-        public string tabIconPath;
+        public int tabIndex;
+        public readonly string tabName;
+        public readonly string tabIconPath;
         
         public TabData(string tabName, string tabIconPath)
         {

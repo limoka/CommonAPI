@@ -11,24 +11,25 @@ namespace CommonAPI.Patches
     [HarmonyPatch]
     public class UIRecipePickerPatch
     {
-        private static UITabButton[] tabs;
+        private static List<UITabButton> tabs;
 
         [HarmonyPatch(typeof(UIRecipePicker), "_OnCreate")]
         [HarmonyPostfix]
         public static void Create(UIRecipePicker __instance)
         {
-            tabs = new UITabButton[TabSystem.tabsRegistry.idMap.Count];
+            var datas = TabSystem.GetAllTabs();
+            tabs = new List<UITabButton>(datas.Length - 3);
             
-            for (int i = 0; i < TabSystem.tabsRegistry.idMap.Count; i++)
+            foreach (TabData tab in datas)
             {
-                TabData data = TabSystem.tabsRegistry.data[i + 3];
-                GameObject buttonPrefab = CommonAPIPlugin.resource.bundle.LoadAsset<GameObject>("Assets/CommonAPI/UI/tab-button.prefab");
-                GameObject button = Object.Instantiate(buttonPrefab, __instance.pickerTrans, false);
-                ((RectTransform)button.transform).anchoredPosition = new Vector2(156 + 70 * i, -75);
+                if (tab == null) continue;
+                
+                GameObject button = Object.Instantiate(TabSystem.GetTabPrefab(), __instance.pickerTrans, false);
+                ((RectTransform)button.transform).anchoredPosition = new Vector2(70 * tab.tabIndex - 54, -75);
                 UITabButton tabButton = button.GetComponent<UITabButton>();
-                Sprite sprite = Resources.Load<Sprite>(data.tabIconPath);
-                tabButton.Init(sprite, data.tabName, i + 3, __instance.OnTypeButtonClick);
-                tabs[i] = tabButton;
+                Sprite sprite = Resources.Load<Sprite>(tab.tabIconPath);
+                tabButton.Init(sprite, tab.tabName, tab.tabIndex, __instance.OnTypeButtonClick);
+                tabs.Add(tabButton);
             }
         }
 

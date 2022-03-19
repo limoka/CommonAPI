@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using CommonAPI.Patches;
 using CommonAPI.Systems;
+using UnityEngine;
 
 namespace CommonAPI.Systems
 {
@@ -10,7 +11,8 @@ namespace CommonAPI.Systems
     public static class TabSystem
     {
         internal static InstanceRegistry<TabData> tabsRegistry = new InstanceRegistry<TabData>(3);
-
+        private static GameObject tabPrefab;
+        
         /// <summary>
         /// Return true if the submodule is loaded.
         /// </summary>
@@ -47,13 +49,31 @@ namespace CommonAPI.Systems
         public static int RegisterTab(string tabId, TabData tab)
         {
             ThrowIfNotLoaded();
-            return tabsRegistry.Register(tabId, tab);
+            int tabIndex = tabsRegistry.Register(tabId, tab);
+            tab.tabIndex = tabIndex;
+            
+            return tabIndex;
         }
         
         public static int GetTabId(string tabId)
         {
             ThrowIfNotLoaded();
             return tabsRegistry.GetUniqueId(tabId);
+        }
+
+        public static TabData[] GetAllTabs()
+        {
+            return tabsRegistry.data.ToArray();
+        }
+
+        public static GameObject GetTabPrefab()
+        {
+            if (tabPrefab == null)
+            {
+                tabPrefab = CommonAPIPlugin.resource.bundle.LoadAsset<GameObject>("Assets/CommonAPI/UI/tab-button.prefab");
+            }
+
+            return tabPrefab;
         }
     }
 }
