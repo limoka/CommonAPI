@@ -14,7 +14,6 @@ Then you can call RegisterKeyBind method to register the keybind.
 ```cs
 CustomKeyBindSystem.RegisterKeyBind<HoldKeyBind>(new BuiltinKey
 {
-    id = 101, //Unique ID of your KeyBind.
     key = key, // Default KeyBind
     conflictGroup = 2052, // Conflict group is a bitfield. Each bit corresponds to a key group 
     name = "ForceBPPlace", // Name of your KeyBind. 
