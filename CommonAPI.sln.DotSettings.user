@@ -35,6 +35,7 @@
 	
 	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=CommonAPITests_003B_002A_003B_002A_003B_002A/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/Environment/Hierarchy/Build/SolutionBuilderNext/OutputVerbosityLevel/@EntryValue">Normal</s:String>
+	<s:String x:Key="/Default/Environment/Highlighting/HighlightingSourceSnapshotLocation/@EntryValue">C:\Users\ILYA\AppData\Local\JetBrains\Rider2020.3\resharper-host\temp\Rider\vAny\CoverageData\_CommonAPI.-1697178602\Snapshot\snapshot.utdcvr</s:String>
 	
 	
 	

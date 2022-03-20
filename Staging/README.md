@@ -65,6 +65,11 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.4.8
+- Add checks to container export. Any mod issues should be logged and contained.
+- Fix Registry exporting data of empty items
+### v1.4.7
+- Add public method to make other mods compatibility easier. Internal refactor.
 ### v1.4.6
 - Fix dynamic KeyBind ID assignment and migration being broken. Playes might lose some of previously rebound keybinds.
 ### v1.4.5
