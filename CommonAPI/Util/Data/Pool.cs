@@ -53,7 +53,7 @@ namespace CommonAPI
         {
             foreach (T item in pool)
             {
-                if (item != null)
+                if (item != null && item.GetId() != 0)
                 {
                     item.Free();
                 }
@@ -103,7 +103,7 @@ namespace CommonAPI
             w.Write(recycleCursor);
             for (int i = 1; i < poolCursor; i++)
             {
-                if (pool[i] != null)
+                if (pool[i] != null && pool[i].GetId() != 0)
                 {
                     w.Write((byte)1);
                     pool[i].Export(w);

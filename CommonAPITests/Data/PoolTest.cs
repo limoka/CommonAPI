@@ -27,6 +27,10 @@ namespace CommonAPITests
 
         public void Export(BinaryWriter w)
         {
+            if (id == 0)
+            {
+                throw new InvalidOperationException("Tried Exporting Item with id 0");
+            }
             w.Write(id);
             w.Write(data);
             w.Write(test);
@@ -221,12 +225,12 @@ namespace CommonAPITests
             {
                 PoolItem item = pool[i];
                 PoolItem item2 = pool2[i];
-                if (item == null)
+                if (item == null || item.id == 0)
                 {
                     IsNull(item2);
                     continue;
                 }
-                
+
                 AreEqual(item.id, item2.id);
                 AreEqual(item.data, item2.data);
                 AreEqual(item.test, item2.test);
