@@ -57,13 +57,24 @@ namespace CommonAPI
             {
                 int oldId = r.ReadInt32();
                 if (oldId == 0) break;
+                if (oldId == -1) continue;
+                
                 int newId = MigrateId(oldId);
 
                 if (newId != 0)
                 {
                     TCont pool = list[newId];
-                    r.ReadInt64();
-                    pool.Import(r);
+                    long len = r.ReadInt64();
+                    long startPos = r.BaseStream.Position;
+                    try
+                    {
+                        pool.Import(r);
+                    }
+                    catch (Exception e)
+                    {
+                        CommonLogger.logger.LogWarning($"Error importing container for type {typeof(TItem).FullName}, message: {e.Message}, Stacktrace:\n{e.StackTrace}");
+                        r.BaseStream.Position = startPos + len;
+                    }
                 }
                 else
                 {
@@ -83,11 +94,22 @@ namespace CommonAPI
         {
             for (int i = 1; i < list.Count; i++)
             {
-                w.Write(i);
                 MemoryStream stream = new MemoryStream();
                 BinaryWriter tw = new BinaryWriter(stream);
                 TCont storage = list[i];
-                storage.Export(tw);
+                try
+                {
+                    storage.Export(tw);
+                }
+                catch (Exception e)
+                {
+                    w.Write(-1);
+                    CommonLogger.logger.LogWarning($"Error exporting container for type {typeof(TItem).FullName}, message: {e.Message}, Stacktrace:\n{e.StackTrace}");
+                    continue;
+                }
+                
+                
+                w.Write(i);
                 w.Write(stream.Length);
                 w.Write(stream.ToArray());
             }

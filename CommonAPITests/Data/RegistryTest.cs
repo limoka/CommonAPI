@@ -24,14 +24,14 @@ namespace CommonAPITests
             updated = false;
         }
 
-        public void Export(BinaryWriter w)
+        public virtual void Export(BinaryWriter w)
         {
             w.Write(id);
             w.Write(data);
             w.Write(test);
         }
 
-        public void Import(BinaryReader r)
+        public virtual void Import(BinaryReader r)
         {
             id = r.ReadInt32();
             data = r.ReadInt32();
@@ -52,6 +52,14 @@ namespace CommonAPITests
     public class TestObject2 : TestObject
     {
         public int moreData;
+    }
+    
+    public class BadObject : TestObject
+    {
+        public override void Import(BinaryReader r)
+        {
+            throw new Exception("Boo, I'm broken!");
+        }
     }
     
     public class TestPool2 : Pool<TestObject>
@@ -91,6 +99,8 @@ namespace CommonAPITests
             registry3 = new Registry();
             objects = new List<TestPool2>();
             objects2 = new List<TestPool2>();
+            
+            CommonLogger.SetLogger(new FakeLogger());
         }
 
         [Test]
@@ -132,13 +142,16 @@ namespace CommonAPITests
         public void TestMigration()
         {
             registry.Register("Test:ID", typeof(TestObject));
+            registry.Register("Test:Bad", typeof(BadObject));
             registry.Register("Test:ID1", typeof(TestObject2));
             registry.Register("Test:ID2", typeof(TestObject));
             registry.Register("Test:ID3", typeof(TestObject2));
             
+            registry2.Register("Test:Bad", typeof(BadObject));
             registry2.Register("Test:ID", typeof(TestObject));
             registry2.Register("Test:ID1", typeof(TestObject2));
             registry2.Register("Test:ID3", typeof(TestObject2));
+            
             
             objects.Capacity = registry.data.Count + 1;
             objects.Add(null);
@@ -164,11 +177,14 @@ namespace CommonAPITests
             int id1 = registry.GetUniqueId("Test:ID1");
             int id2 = registry.GetUniqueId("Test:ID2");
             int id3 = registry.GetUniqueId("Test:ID3");
+            
+            int badId = registry.GetUniqueId("Test:Bad");
 
             objects[id].AddPoolItem(new object[0]);
             objects[id1].AddPoolItem(new object[0]);
             objects[id2].AddPoolItem(new object[0]);
             objects[id3].AddPoolItem(new object[0]);
+            objects[badId].AddPoolItem(new object[0]);
             
             Util.GetSerializationSetup(w =>
             {

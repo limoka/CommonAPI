@@ -40,7 +40,7 @@ namespace CommonAPI
 
         internal static HashSet<string> LoadedSubmodules;
         internal static Harmony harmony;
-        internal static ManualLogSource logger;
+        internal static ICommonLogger logger;
         internal static ResourceData resource;
         internal static Action onIntoOtherSave;
         internal static APISubmoduleHandler submoduleHandler;
@@ -54,7 +54,8 @@ namespace CommonAPI
 
         void Awake()
         {
-            logger = Logger;
+            logger = new LoggerWrapper(Logger);
+            CommonLogger.SetLogger(logger);
 
             UnityThread.initUnityThread();
 
@@ -78,6 +79,7 @@ namespace CommonAPI
             
             logger.LogInfo("Common API is initialized!");
         }
+
 
         private void Update()
         {
