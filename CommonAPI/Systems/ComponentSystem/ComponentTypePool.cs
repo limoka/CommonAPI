@@ -21,6 +21,8 @@ namespace CommonAPI.Systems
         {
             this.factory = factory;
             PoolTypeId = type;
+            this._cachedInitUpdate = _internalInitUpdate;
+            this._cachedInitPowerUpdate = _internalInitPowerUpdate;
         }
 
         public ComponentTypePool()
@@ -67,7 +69,9 @@ namespace CommonAPI.Systems
             base.RemovePoolItem(item);
         }
 
-        protected override Action<FactoryComponent> InitUpdate()
+        private Action<FactoryComponent> _cachedInitUpdate;
+        protected override Action<FactoryComponent> InitUpdate() => _cachedInitUpdate;
+        private void _internalInitUpdate(FactoryComponent item)
         {
             PowerSystem powerSystem = factory.powerSystem;
             PowerConsumerComponent[] consumerPool = powerSystem.consumerPool;
@@ -76,28 +80,22 @@ namespace CommonAPI.Systems
             SignData[] entitySignPool = factory.entitySignPool;
             int[][] entityNeeds = factory.entityNeeds;
 
-            return item =>
-            {
+            int entityId = item.entityId;
+            float power = networkServes[consumerPool[item.pcId].networkId];
 
-                int entityId = item.entityId;
-                float power = networkServes[consumerPool[item.pcId].networkId];
-
-                int animationDelta = item.InternalUpdate(power, factory);
-                item.UpdateAnimation(ref entityAnimPool[entityId], animationDelta, power);
-                entityAnimPool[entityId].power = power;
-                item.UpdateSigns(ref entitySignPool[entityId], animationDelta, power, factory);
-                entityNeeds[entityId] = item.UpdateNeeds();
-            };
+            int animationDelta = item.InternalUpdate(power, factory);
+            item.UpdateAnimation(ref entityAnimPool[entityId], animationDelta, power);
+            entityAnimPool[entityId].power = power;
+            item.UpdateSigns(ref entitySignPool[entityId], animationDelta, power, factory);
+            entityNeeds[entityId] = item.UpdateNeeds();
         }
-        
-        public Action<FactoryComponent> InitPowerUpdate()
+
+        private Action<FactoryComponent> _cachedInitPowerUpdate;
+        public Action<FactoryComponent> InitPowerUpdate() => _cachedInitPowerUpdate;
+        private void _internalInitPowerUpdate(FactoryComponent item)
         {
             PowerConsumerComponent[] consumerPool = factory.powerSystem.consumerPool;
-
-            return item =>
-            {
-                item.UpdatePowerState(ref consumerPool[item.pcId]);
-            };
+            item.UpdatePowerState(ref consumerPool[item.pcId]);
         }
 
         public int GetId()
