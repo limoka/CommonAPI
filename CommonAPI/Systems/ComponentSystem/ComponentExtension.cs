@@ -208,7 +208,7 @@ namespace CommonAPI.Systems
             for (int i = 1; i < componentRegistry.data.Count; i++)
             {
                 ComponentTypePool pool = pools[i];
-                pool.UpdatePool(pool.InitPowerUpdate);
+                pool.UpdatePool(pool.InitPowerUpdate());
             }
         }
 
@@ -217,7 +217,7 @@ namespace CommonAPI.Systems
             for (int i = 1; i < componentRegistry.data.Count; i++)
             {
                 ComponentTypePool pool = pools[i];
-                pool.UpdatePoolMultithread(usedThreadCount, currentThreadIdx, minimumCount, pool.InitPowerUpdate);
+                pool.UpdatePoolMultithread(usedThreadCount, currentThreadIdx, minimumCount, pool.InitPowerUpdate());
             }
         }
     }

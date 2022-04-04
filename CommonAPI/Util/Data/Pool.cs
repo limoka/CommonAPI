@@ -197,23 +197,22 @@ namespace CommonAPI
                 poolRecycle[recycleCursor++] = id;
             }
         }
+
+        private Action<T> _cachedInitUpdate = poolable => { };
         
         /// <summary>
         /// Define Update behavior here. Code in gets called only once. Returned lambda is called for each valid item
         /// </summary>
         /// <returns>Lambda that will be called for each valid item</returns>
-        protected virtual Action<T> InitUpdate()
-        {
-            return poolable => { };
-        }
+        protected virtual Action<T> InitUpdate() => _cachedInitUpdate;
         
         /// <summary>
         /// Update all pool items in single thread. Appropriate function will be called depending on player settings.
         /// </summary>
         /// <param name="initFunc">Optional Update logic function</param>
-        public void UpdatePool(Func<Action<T>> initFunc = null)
+        public void UpdatePool(Action<T> initFunc = null)
         {
-            Action<T> update = (initFunc ?? InitUpdate)();
+            Action<T> update = (initFunc ?? InitUpdate());
             
             for (int i = 1; i < poolCursor; i++)
             {
@@ -227,9 +226,9 @@ namespace CommonAPI
         /// Update all pool items using multithreading. Appropriate function will be called depending on player settings.
         /// </summary>
         /// <param name="initFunc">Optional Update logic function</param>
-        public void UpdatePoolMultithread(int usedThreadCount, int currentThreadIdx, int minimumCount, Func<Action<T>> initFunc = null)
+        public void UpdatePoolMultithread(int usedThreadCount, int currentThreadIdx, int minimumCount, Action<T> initFunc = null)
         {
-            Action<T> update = (initFunc ?? InitUpdate)();
+            Action<T> update = (initFunc ?? InitUpdate());
             if (WorkerThreadExecutor.CalculateMissionIndex(1, poolCursor - 1, usedThreadCount, currentThreadIdx, minimumCount, out int start, out int end))
             {
                 for (int i = start; i < end; i++)
