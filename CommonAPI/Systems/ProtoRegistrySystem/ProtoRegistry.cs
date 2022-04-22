@@ -143,76 +143,83 @@ namespace CommonAPI.Systems
         //Post register fixups
         private static void OnPostAdd()
         {
-            foreach (var kv in models)
+            try
             {
-                kv.Value.Preload();
-                PrefabDesc pdesc = kv.Value.prefabDesc;
-
-                if (!modelMats.ContainsKey(kv.Value.PrefabPath))
+                foreach (var kv in models)
                 {
-                    LDB.models.modelArray[kv.Value.ID] = kv.Value;
-                    continue;
-                }
+                    kv.Value.Preload();
+                    PrefabDesc pdesc = kv.Value.prefabDesc;
 
-                LodMaterials mats = modelMats[kv.Value.PrefabPath];
-
-                for (int i = 0; i < pdesc.lodCount; i++)
-                {
-                    for (int j = 0; j < pdesc.lodMaterials[i].Length; j++)
+                    if (!modelMats.ContainsKey(kv.Value.PrefabPath))
                     {
-                        if (mats.HasLod(i))
+                        LDB.models.modelArray[kv.Value.ID] = kv.Value;
+                        continue;
+                    }
+
+                    LodMaterials mats = modelMats[kv.Value.PrefabPath];
+
+                    for (int i = 0; i < pdesc.lodCount; i++)
+                    {
+                        for (int j = 0; j < pdesc.lodMaterials[i].Length; j++)
                         {
-                            pdesc.lodMaterials[i][j] = mats[i][j];
+                            if (mats.HasLod(i))
+                            {
+                                pdesc.lodMaterials[i][j] = mats[i][j];
+                            }
                         }
                     }
+
+                    LDB.models.modelArray[kv.Value.ID] = kv.Value;
                 }
 
-                LDB.models.modelArray[kv.Value.ID] = kv.Value;
-            }
+                foreach (var kv in items)
+                {
+                    kv.Value.Preload(kv.Value.index);
+                }
 
-            foreach (var kv in items)
+                foreach (var kv in recipes)
+                {
+                    kv.Value.Preload(kv.Value.index);
+                }
+
+                foreach (var kv in techs)
+                {
+                    kv.Value.Preload();
+                    kv.Value.Preload2();
+                }
+
+                foreach (var kv in techUpdateList)
+                {
+                    TechProto oldTech = LDB.techs.Select(kv.Key);
+                    oldTech.postTechArray = oldTech.postTechArray.AddRangeToArray(kv.Value.ToArray());
+                }
+
+                foreach (var kv in audios)
+                {
+                    kv.Value.Preload();
+                    int index = LDB.audios.dataIndices[kv.Value.ID];
+                    LDB.audios.nameIndices.Add(kv.Value.Name, index);
+                }
+
+                foreach (var midiProto in midiProtos)
+                {
+                    midiProto.Value.Preload();
+                }
+
+                foreach (var kv in signals)
+                {
+                    kv.Value.Preload();
+                    kv.Value.description = kv.Value.description.Translate();
+                }
+
+                onLoadingFinished?.Invoke();
+
+                CommonAPIPlugin.logger.LogInfo("Post loading is complete!");
+            }
+            catch (Exception e)
             {
-                kv.Value.Preload(kv.Value.index);
+                CommonAPIPlugin.logger.LogError($"Error initializing proto data!\n{e.Message}, stacktrace:\n{e.StackTrace}");
             }
-
-            foreach (var kv in recipes)
-            {
-                kv.Value.Preload(kv.Value.index);
-            }
-
-            foreach (var kv in techs)
-            {
-                kv.Value.Preload();
-                kv.Value.Preload2();
-            }
-
-            foreach (var kv in techUpdateList)
-            {
-                TechProto oldTech = LDB.techs.Select(kv.Key);
-                oldTech.postTechArray = oldTech.postTechArray.AddRangeToArray(kv.Value.ToArray());
-            }
-
-            foreach (var kv in audios)
-            {
-                kv.Value.Preload();
-                int index = LDB.audios.dataIndices[kv.Value.ID];
-                LDB.audios.nameIndices.Add(kv.Value.Name, index);
-            }
-
-            foreach (var midiProto in midiProtos)
-            {
-                midiProto.Value.Preload();
-            }
-
-            foreach (var kv in signals)
-            {
-                kv.Value.Preload();
-                kv.Value.description = kv.Value.description.Translate();
-            }
-
-            onLoadingFinished?.Invoke();
-
-            CommonAPIPlugin.logger.LogInfo("Post loading is complete!");
         }
 
         private static void EditProto(Proto proto)
@@ -1102,12 +1109,15 @@ namespace CommonAPI.Systems
                 ItemPoints = jelloRate,
                 HashNeeded = hashNeeded,
                 UnlockRecipes = unlockRecipes,
-                AddItems = new int[] { }, // what items to gift after research is done
-                AddItemCounts = new int[] { },
+                AddItems = Array.Empty<int>(), // what items to gift after research is done
+                AddItemCounts = Array.Empty<int>(),
                 Position = position,
-                PreTechsImplicit = new int[] { }, //Those funky implicit requirements
-                UnlockFunctions = new int[] { }, //Upgrades.
-                UnlockValues = new double[] { },
+                PreTechsImplicit = Array.Empty<int>(), //Those funky implicit requirements
+                UnlockFunctions = Array.Empty<int>(), //Upgrades.
+                UnlockValues = Array.Empty<double>(),
+                PropertyOverrideItems = Array.Empty<int>(),
+                PropertyItemCounts = Array.Empty<int>(),
+                PropertyOverrideItemArray = Array.Empty<IDCNT>()
             };
 
             foreach (int tech in preTechs)

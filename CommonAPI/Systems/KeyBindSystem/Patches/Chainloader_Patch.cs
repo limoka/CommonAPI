@@ -28,7 +28,7 @@ namespace CommonAPI.Patches
                 CustomKeyBindSystem.keyRegistry.Import(reader);
                 stream.Close();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 CommonAPIPlugin.logger.LogDebug("Error loading keybind file.");
             }

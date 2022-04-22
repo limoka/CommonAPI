@@ -1,7 +1,7 @@
 {
   "name": "CommonAPI",
   "description": "A modding library for Dyson Sphere Program. Currently is under development.",
-  "version_number": "1.4.8",
+  "version_number": "1.5.0",
   "dependencies": [
     "xiaoye97-BepInEx-5.4.17",
     "xiaoye97-LDBTool-2.0.1",

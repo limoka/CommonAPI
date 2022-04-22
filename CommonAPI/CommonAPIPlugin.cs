@@ -12,6 +12,7 @@ using CommonAPI.Systems;
 using crecheng.DSPModSave;
 using HarmonyLib;
 using UnityEngine;
+using xiaoye97;
 
 [module: UnverifiableCode]
 #pragma warning disable 618
@@ -24,18 +25,15 @@ namespace CommonAPI
     /// Plugin class of Common API. Entry point
     /// </summary>
     [BepInPlugin(GUID, DISPNAME, VERSION)]
-    [BepInDependency(LDB_TOOL_GUID)]
-    [BepInDependency(DSP_MOD_SAVE_GUID)]
+    [BepInDependency(LDBToolPlugin.MODGUID)]
+    [BepInDependency(DSPModSavePlugin.MODGUID)]
     [BepInProcess("DSPGAME.exe")]
     public class CommonAPIPlugin : BaseUnityPlugin, IModCanSave
     {
         public const string ID = "CommonAPI";
         public const string GUID = "dsp.common-api.CommonAPI";
         public const string DISPNAME = "DSP Common API";
-        
-        public const string LDB_TOOL_GUID = "me.xiaoye97.plugin.Dyson.LDBTool";
-        public const string DSP_MOD_SAVE_GUID = "crecheng.DSPModSave";
-        
+
         public const string VERSION = ThisAssembly.AssemblyVersion;
 
         internal static HashSet<string> LoadedSubmodules;
@@ -46,7 +44,7 @@ namespace CommonAPI
         internal static APISubmoduleHandler submoduleHandler;
         
         public static Dictionary<string, Registry> registries = new Dictionary<string, Registry>();
-        public static readonly Version buildFor = GameVersionUtil.GetVersion(0, 9, 24, 11209);
+        public static readonly Version buildFor = GameVersionUtil.GetVersion(0,9,25,11989);
 
         public static bool iconShotMenuEnabled;
         public static KeyCode openIconShotMenuButton;

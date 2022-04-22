@@ -8,8 +8,9 @@ namespace CommonAPI
 	/// </summary>
 	public class UIWindowResize : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 	{
-        [SerializeField] private EventTrigger resizeTrigger;
-        [SerializeField] private RectTransform resizeTrans;
+#pragma warning disable CS0649
+		[SerializeField] private EventTrigger resizeTrigger;
+		[SerializeField] private RectTransform resizeTrans;
 
         public int resizeThreshold = 4;
         public Vector2 minSize;

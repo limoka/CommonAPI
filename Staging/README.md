@@ -65,6 +65,10 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.5.0
+- Updated to work with game version 0.9.25.11985 or higher
+### v1.4.9
+- @Raptor: Prevent creation of delegates every tick using alternate logic for Pool, which should improve performance of Various Facility.
 ### v1.4.8
 - Add checks to container export. Any mod issues should be logged and contained.
 - Fix Registry exporting data of empty items

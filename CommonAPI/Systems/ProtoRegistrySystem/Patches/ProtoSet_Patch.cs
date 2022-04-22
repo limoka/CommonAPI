@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
@@ -48,13 +49,13 @@ namespace CommonAPI.Patches
                             description = "Unknown Item",
                             produceFrom = "None",
                             GridIndex = 0,
-                            DescFields = new int[0],
+                            DescFields = Array.Empty<int>(),
                             prefabDesc = PrefabDesc.none,
-                            Upgrades = new int[0],
+                            Upgrades = Array.Empty<int>(),
                             recipes = new List<RecipeProto>(),
                             handcrafts = new List<RecipeProto>(),
                             makes = new List<RecipeProto>(),
-                            rawMats = new List<IDCNT>(),
+                            rawMats = new List<IDCNTINC>(),
                             _iconSprite = icon
                         };
                     }
