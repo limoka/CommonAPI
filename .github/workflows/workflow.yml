@@ -13,7 +13,7 @@ jobs:
       BepInExRuntime : IL2CPP
       PluginName : CommonAPI-CommonAPI
       GithubRelease : true
-      ThunderstoreRelease: false
+      ThunderstoreRelease: true
       PublishNuget: true
     steps:
     - name: Checkout
