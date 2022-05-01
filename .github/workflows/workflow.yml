@@ -2,7 +2,6 @@ name: Publish Release
 
 on:
   workflow_dispatch:
-  create: { tags: [v*] }
 
 jobs:
   build:
@@ -95,6 +94,6 @@ jobs:
       
     - name: Publish to NuGet
       run: |
-        dotnet pack CommonAPI/CommonAPI.csproj -c Release -o "."
+        dotnet pack CommonAPI/CommonAPI.csproj /p:ReleaseMode=1 -c Release -o "."
         dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
       if: env.PublishNuget == 'true'
