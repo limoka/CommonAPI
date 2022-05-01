@@ -16,6 +16,12 @@ jobs:
       ThunderstoreRelease: true
       PublishNuget: false
     steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+        fetch-depth: 0 # can't shallowly clone due to git versioning
+        
     - name: Get version of the project
       id: get-version
       uses: 'euberdeveloper/ga-project-version@main'
