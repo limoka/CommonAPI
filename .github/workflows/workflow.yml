@@ -84,7 +84,7 @@ jobs:
         artifactErrorsFailBuild: true
         draft: true
         allowUpdates: true
-      if: env.GithubRelease == 'true'
+      if: env.GithubRelease == 'true' 
 
     - name: Publish to Thunderstore
       env:
