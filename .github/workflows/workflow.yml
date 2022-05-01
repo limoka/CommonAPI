@@ -64,7 +64,7 @@ jobs:
     - name: Publish to Github
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "build\${{env.PluginName}}-${{steps.get-version.outputs.version}}.zip"
+        artifacts: "build/${{env.PluginName}}-${{steps.get-version.outputs.version}}.zip"
         tag: ${{ steps.get-version.outputs.version }}
         commit: ${{ github.ref }}
         artifactErrorsFailBuild: true
