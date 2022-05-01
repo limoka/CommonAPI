@@ -54,7 +54,7 @@ jobs:
 
     - name: Build & zip
       run: |
-        dotnet.exe build .\CommonAPIPublish.sln -c Release /p:ReleaseMode=1
+        dotnet build .\CommonAPIPublish.sln -c Release /p:ReleaseMode=1
         cd out && zip -r ../${{env.PluginName}}-${{env.BepInExArch}}.zip * && cd ..
         mkdir dist
         cp -r ${{env.OutDir}}/* dist
