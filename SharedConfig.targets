@@ -11,6 +11,7 @@
     <DSPGameDir>$([MSBuild]::EnsureTrailingSlash('$(DSPGameDir)'))</DSPGameDir>
 	<DumpedAssembliesDir>$(DSPGameDir)BepInEx\DumpedAssemblies\DSPGAME\</DumpedAssembliesDir>
     <ProjectDir>$(MSBuildThisFileDirectory)\</ProjectDir>
+    <UnityBundle>$([MSBuild]::EnsureTrailingSlash('$(UnityProject)'))Assets\StreamingAssets\AssetBundles\commonapi</UnityBundle>
   </PropertyGroup>
 
   <Target Name="MaybeCopyDevEnv"
@@ -42,7 +43,13 @@
   </Target> 
 		  
   <Target Name="PublicizeAssembly" Condition="Exists('$(DumpedAssembliesDir)Assembly-CSharp.dll') And !Exists('$(ProjectDir)Libs\Assembly-CSharp.dll')" > 
-    <Exec WorkingDirectory="$(DumpedAssembliesDir)" Command="$(ProjectDir)AssemblyPublicizer.exe Assembly-CSharp.dll $(ProjectDir)Libs\Assembly-CSharp.dll"/>  
-	
-  </Target> 
+    <Exec WorkingDirectory="$(DumpedAssembliesDir)" Command="$(ProjectDir)AssemblyPublicizer.exe Assembly-CSharp.dll $(ProjectDir)Libs\Assembly-CSharp.dll"/>
+  </Target>
+
+  <Target Name="BeforeBuild">
+    <Copy
+            Condition="Exists('$(UnityBundle)')"
+            SourceFiles="$(UnityBundle)"
+            DestinationFolder="../Staging/plugins/" />
+  </Target>
 </Project>

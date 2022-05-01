@@ -5,7 +5,7 @@
     <SteamDir>C:\Program Files (x86)\Steam\</SteamDir>
     <!--Replace the path to your Dyson Sphere Program installation folder-->
     <DSPGameDir>C:\Program Files (x86)\Steam\steamapps\common\Dyson Sphere Program\</DSPGameDir>
-	<!--Replace the path to your Dyson Sphere Program installation folder-->
-    <NebulaSolDir></NebulaSolDir>
+	<!--Replace the path to your Unity project folder-->
+    <UnityProject></UnityProject>
   </PropertyGroup>
 </Project>

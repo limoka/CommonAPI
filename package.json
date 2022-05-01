@@ -1,5 +1,0 @@
-{
-  "dependencies": {
-    "archiver": "git+https://github.com/kremnev8/node-archiver.git"
-  }
-}

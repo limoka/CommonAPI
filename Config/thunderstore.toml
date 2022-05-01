@@ -1,0 +1,25 @@
+[config]
+schemaVersion = "0.0.1"
+
+[package]
+namespace = "CommonAPI"
+name = "CommonAPI"
+description = "A modding library for Dyson Sphere Program. Currently is under development."
+websiteUrl = "https://github.com/kremnev8/CommonAPI"
+containsNsfwContent = false
+
+  [package.dependencies]
+
+[build]
+icon = "./icon.png"
+readme = "./README.md"
+outdir = "./../Build"
+
+  [[build.copy]]
+  source = "./../Staging"
+  target = "./"
+
+[publish]
+repository = "https://thunderstore.dev"
+communities = [ "riskofrain2" ]
+categories = [ ]

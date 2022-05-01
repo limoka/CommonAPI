@@ -6,7 +6,7 @@
 # Common API specific files
 DevEnv.targets
 dist
-Libs/Assembly-CSharp.dll
+
 
 # User-specific files
 *.rsuser

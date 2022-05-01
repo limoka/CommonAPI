@@ -1,0 +1,93 @@
+name: Publish Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      BundleBepInEx : false
+      BepInExVersion : 5
+      BepInExArch : x64
+      BepInExRuntime : IL2CPP
+      PluginName : CommonAPI-CommonAPI
+      GithubRelease : false
+      ThunderstoreRelease: true
+      PublishNuget: false
+    steps:
+    - name: Get version of the project
+      id: get-version
+      uses: 'euberdeveloper/ga-project-version@main'
+      with:
+        path: 'version.json'
+    
+    - name: Check Tag
+      id: check-tag
+      uses: actions-ecosystem/action-regex-match@v2
+      with:
+        text: ${{ steps.get-version.outputs.version }}
+        regex: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+
+    - name: Fail if invalid
+      if: steps.check-tag.outputs.match == ''
+      uses: Actions/github-script@v3
+      with:
+        script: |
+          core.setFailed('Invalid tag')
+
+    - uses: actions/checkout@v2
+    - uses: actions/setup-dotnet@v1
+
+    - name: BepInEx 6
+      run: |
+        bepinexurl = $(curl -vs https://builds.bepinex.dev/projects/bepinex_be 2>&1 | grep -Po '(?<=href=")(\/projects\/bepinex_be\/(.*)\/BepInEx_Unity${{env.BepInExRuntime}}_${{env.BepInExArch}}(.*))(?=")' | head -1)"
+        wget $bepinexurl > bepinex.zip
+      if: env.BundleBepInEx == 'true' && env.BepInExVersion == '6'
+
+    - name: BepInEx 5
+      shell: pwsh
+      run: |
+        $webData = Invoke-WebRequest -Uri "https://api.github.com/repos/BepInEx/BepInEx/releases/latest"
+        $release = ConvertFrom-Json $webData.content
+        $bepinexurl = $release.assets.browser_download_url -match '${{env.BepInExArch}}'
+        wget $bepinexurl > bepinex.zip
+      if: env.BundleBepInEx == 'true' && env.BepInExVersion == '5'
+
+    - name: Extract BepInEx
+      run: | 
+        mkdir out;
+        unzip BepInEx* -d out;
+      if: env.BundleBepInEx == 'true'
+
+    - name: Build & zip
+      run: |
+        dotnet.exe build .\CommonAPIPublish.sln -c Release /p:ReleaseMode=1
+        cd out && zip -r ../${{env.PluginName}}-${{env.BepInExArch}}.zip * && cd ..
+        mkdir dist
+        cp -r ${{env.OutDir}}/* dist
+
+    - name: Publish to Github
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "${{env.PluginName}}-${{env.BepInExArch}}.zip"
+        tag: ${{ steps.get-version.outputs.version }}
+        commit: ${{ github.ref }}
+        artifactErrorsFailBuild: true
+        draft: true
+        allowUpdates: true
+      if: env.GithubRelease == 'true'
+
+    - name: Publish to Thunderstore
+      env:
+        TCLI_AUTH_TOKEN: ${{ secrets.TCLI_AUTH_TOKEN }}
+      run: |
+        dotnet tool install -g tcli
+        tcli publish --package-version ${{ steps.get-version.outputs.version }}
+      if: env.ThunderstoreRelease == 'true'
+      
+    - name: Publish to NuGet
+      run: |
+        dotnet pack .\CommonAPI\CommonAPI.csproj -c Release -o "."
+        dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
+      if: env.PublishNuget == 'true'
