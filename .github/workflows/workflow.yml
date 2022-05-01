@@ -35,12 +35,12 @@ jobs:
         text: ${{ steps.get-version.outputs.version }}
         regex: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
 
-      - name: Fail if invalid
-        if: steps.check-tag.outputs.match == ''
-        uses: Actions/github-script@v3
-        with:
-          script: |
-            core.setFailed('Invalid tag')
+    - name: Fail if invalid
+      if: steps.check-tag.outputs.match == ''
+      uses: Actions/github-script@v3
+      with:
+        script: |
+         core.setFailed('Invalid tag')
 
     - uses: actions/setup-dotnet@v1
 
