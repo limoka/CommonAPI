@@ -51,18 +51,20 @@ jobs:
         mkdir out;
         unzip BepInEx* -d out;
       if: env.BundleBepInEx == 'true'
-
+      
+    - name: Setup Thunderstore CLI
+      run: |
+        dotnet tool install -g tcli
+    
     - name: Build & zip
       run: |
-        dotnet build .\CommonAPIPublish.sln -c Release /p:ReleaseMode=1
-        cd out && zip -r ../${{env.PluginName}}-${{env.BepInExArch}}.zip * && cd ..
-        mkdir dist
-        cp -r ${{env.OutDir}}/* dist
+        dotnet build CommonAPIPublish.sln -c Release /p:ReleaseMode=1
+        tcli build --config-path Config\thunderstore.toml --package-version ${{ steps.get-version.outputs.version }}
 
     - name: Publish to Github
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "${{env.PluginName}}-${{env.BepInExArch}}.zip"
+        artifacts: "build\${{env.PluginName}}-${{steps.get-version.outputs.version}}.zip"
         tag: ${{ steps.get-version.outputs.version }}
         commit: ${{ github.ref }}
         artifactErrorsFailBuild: true
@@ -74,12 +76,11 @@ jobs:
       env:
         TCLI_AUTH_TOKEN: ${{ secrets.TCLI_AUTH_TOKEN }}
       run: |
-        dotnet tool install -g tcli
-        tcli publish --package-version ${{ steps.get-version.outputs.version }}
+        tcli publish --config-path Config\thunderstore.toml --package-version ${{ steps.get-version.outputs.version }}
       if: env.ThunderstoreRelease == 'true'
       
     - name: Publish to NuGet
       run: |
-        dotnet pack .\CommonAPI\CommonAPI.csproj -c Release -o "."
+        dotnet pack CommonAPI\CommonAPI.csproj -c Release -o "."
         dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
       if: env.PublishNuget == 'true'
