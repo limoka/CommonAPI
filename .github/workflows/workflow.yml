@@ -14,7 +14,7 @@ jobs:
       BepInExRuntime : IL2CPP
       PluginName : CommonAPI-CommonAPI
       GithubRelease : true
-      ThunderstoreRelease: true
+      ThunderstoreRelease: false
       PublishNuget: true
     steps:
     - name: Checkout
@@ -74,10 +74,7 @@ jobs:
       run: |
         dotnet build CommonAPIPublish.sln -c Release /p:ReleaseMode=1
         tcli build --config-path Config/thunderstore.toml --package-version ${{ steps.get-version.outputs.version }}
-    - name: Test
-      run: |
-        ls Build
-        file Build/*.zip
+        
     - name: Publish to Github
       uses: ncipollo/release-action@v1
       with:
@@ -98,6 +95,6 @@ jobs:
       
     - name: Publish to NuGet
       run: |
-        dotnet pack CommonAPI\CommonAPI.csproj -c Release -o "."
+        dotnet pack CommonAPI/CommonAPI.csproj -c Release -o "."
         dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
       if: env.PublishNuget == 'true'
