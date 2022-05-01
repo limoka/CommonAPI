@@ -26,7 +26,7 @@ jobs:
       id: get-version
       uses: 'euberdeveloper/ga-project-version@main'
       with:
-        path: '../version.json'
+        path: 'version.json'
 
     - uses: actions/checkout@v2
     - uses: actions/setup-dotnet@v1
