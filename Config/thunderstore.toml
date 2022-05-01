@@ -9,6 +9,9 @@ websiteUrl = "https://github.com/kremnev8/CommonAPI"
 containsNsfwContent = false
 
   [package.dependencies]
+  xiaoye97-BepInEx = "5.4.17"
+  xiaoye97-LDBTool = "2.0.5"
+  CommonAPI-DSPModSave = "1.1.4"
 
 [build]
 icon = "./icon.png"
@@ -20,6 +23,6 @@ outdir = "./../Build"
   target = "./"
 
 [publish]
-repository = "https://thunderstore.dev"
-communities = [ "riskofrain2" ]
-categories = [ ]
+repository = "https://dsp.thunderstore.io"
+communities = [ "dyson-sphere-program" ]
+categories = [ ]	

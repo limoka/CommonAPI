@@ -12,9 +12,9 @@ jobs:
       BepInExArch : x64
       BepInExRuntime : IL2CPP
       PluginName : CommonAPI-CommonAPI
-      GithubRelease : false
+      GithubRelease : true
       ThunderstoreRelease: true
-      PublishNuget: false
+      PublishNuget: true
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -28,7 +28,20 @@ jobs:
       with:
         path: 'version.json'
 
-    - uses: actions/checkout@v2
+    - name: Check Tag
+      id: check-tag
+      uses: actions-ecosystem/action-regex-match@v2
+      with:
+        text: ${{ steps.get-version.outputs.version }}
+        regex: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+
+      - name: Fail if invalid
+        if: steps.check-tag.outputs.match == ''
+        uses: Actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Invalid tag')
+
     - uses: actions/setup-dotnet@v1
 
     - name: BepInEx 6

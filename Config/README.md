@@ -65,6 +65,8 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.5.1
+- Testing release, no changes
 ### v1.5.0
 - Updated to work with game version 0.9.25.11985 or higher
 ### v1.4.9
