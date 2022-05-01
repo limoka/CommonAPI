@@ -59,7 +59,7 @@ jobs:
     - name: Build & zip
       run: |
         dotnet build CommonAPIPublish.sln -c Release /p:ReleaseMode=1
-        tcli build --config-path Config\thunderstore.toml --package-version ${{ steps.get-version.outputs.version }}
+        tcli build --config-path Config/thunderstore.toml --package-version ${{ steps.get-version.outputs.version }}
 
     - name: Publish to Github
       uses: ncipollo/release-action@v1
@@ -76,7 +76,7 @@ jobs:
       env:
         TCLI_AUTH_TOKEN: ${{ secrets.TCLI_AUTH_TOKEN }}
       run: |
-        tcli publish --config-path Config\thunderstore.toml --package-version ${{ steps.get-version.outputs.version }}
+        tcli publish --config-path Config/thunderstore.toml --package-version ${{ steps.get-version.outputs.version }}
       if: env.ThunderstoreRelease == 'true'
       
     - name: Publish to NuGet
