@@ -76,12 +76,12 @@ jobs:
         tcli build --config-path Config/thunderstore.toml --package-version ${{ steps.get-version.outputs.version }}
     - name: Test
       run: |
-        ls
-        file *.zip
+        ls build
+        file Build/*.zip
     - name: Publish to Github
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "build/*.zip"
+        artifacts: "Build/*.zip"
         tag: ${{ steps.get-version.outputs.version }}
         commit: ${{ github.ref }}
         artifactErrorsFailBuild: true
