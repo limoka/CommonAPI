@@ -12,12 +12,13 @@
 	<DumpedAssembliesDir>$(DSPGameDir)BepInEx\DumpedAssemblies\DSPGAME\</DumpedAssembliesDir>
     <ProjectDir>$(MSBuildThisFileDirectory)\</ProjectDir>
     <UnityBundle>$([MSBuild]::EnsureTrailingSlash('$(UnityProject)'))Assets\StreamingAssets\AssetBundles\commonapi</UnityBundle>
+    <ReleaseMode>0</ReleaseMode>
   </PropertyGroup>
 
   <Target Name="MaybeCopyDevEnv"
           Inputs="$(MSBuildAllProjects)"
           Outputs="$(DevEnvLoc)"
-          Condition="!Exists('$(DevEnvLoc)')">
+          Condition="!Exists('$(DevEnvLoc)') And '$(ReleaseMode)' == '0'">
 
     <Copy SourceFiles="$(DevEnvLoc).example"
           DestinationFiles="$(DevEnvLoc)"
@@ -26,7 +27,7 @@
   </Target>
 
   <Target Name="DevEnvInvalid"
-          Condition="Exists('$(DevEnvLoc)')">
+          Condition="Exists('$(DevEnvLoc)')  And '$(ReleaseMode)' == '0'">
     <!-- If the default path is overriden in DevEnv, and it doesn't exist -->
     <Error Text="Your Dyson Sphere Program installation folder has not been found at the path defined in '$(DevEnvLoc)'. Please set it correctly." />
   </Target>
@@ -38,7 +39,7 @@
           Condition="!Exists('$(DSPGameDir)')" />
 		  
   <Target Name="TestDumpedAssembly"
-          Condition="!Exists('$(DumpedAssembliesDir)Assembly-CSharp.dll')" >	   
+          Condition="!Exists('$(DumpedAssembliesDir)Assembly-CSharp.dll') And '$(ReleaseMode)' == '0'" >	   
     <Error Text="Can't find dumped Assembly-CSharp.dll! Please run game with preloader patch installed." />
   </Target> 
 		  
