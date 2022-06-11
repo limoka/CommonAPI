@@ -10,7 +10,7 @@ containsNsfwContent = false
 
   [package.dependencies]
   xiaoye97-BepInEx = "5.4.17"
-  xiaoye97-LDBTool = "2.0.5"
+  xiaoye97-LDBTool = "2.0.6"
   CommonAPI-DSPModSave = "1.1.4"
 
 [build]

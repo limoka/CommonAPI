@@ -50,6 +50,10 @@ namespace CommonAPI.Systems
                 {
                     ProtoRegistry.RegisterString($"SIGNAL-60{i}", $"Signal {i}");
                 }
+                
+                ProtoRegistry.RegisterString("setCountManually", "Select value");
+                ProtoRegistry.RegisterString("CountLabel", "Value");
+                ProtoRegistry.RegisterString("ConfirmButtonLabel", "Confirm");
 
                 ProtoRegistry.onLoadingFinished += () =>
                 {

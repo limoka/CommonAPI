@@ -65,6 +65,8 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.5.2
+- Added UINumberPickerExtension for picking signal together with a value. 
 ### v1.5.1
 - Testing release, no changes
 ### v1.5.0
