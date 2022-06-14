@@ -65,6 +65,8 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.5.3
+- Fix errors when model index is much bigger than maximum used by game.
 ### v1.5.2
 - Added UINumberPickerExtension for picking signal together with a value. 
 ### v1.5.1

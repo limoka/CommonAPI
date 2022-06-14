@@ -149,6 +149,11 @@ namespace CommonAPI.Systems
                 {
                     kv.Value.Preload();
                     PrefabDesc pdesc = kv.Value.prefabDesc;
+                    
+                    if (kv.Value.ID > LDB.models.modelArray.Length)
+                    {
+                        Array.Resize(ref LDB.models.modelArray, kv.Value.ID + 64);
+                    }
 
                     if (!modelMats.ContainsKey(kv.Value.PrefabPath))
                     {
