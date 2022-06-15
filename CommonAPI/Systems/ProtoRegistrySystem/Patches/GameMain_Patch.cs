@@ -10,6 +10,7 @@ namespace CommonAPI.Patches
         [HarmonyPostfix]
         public static void OnGameBegin()
         {
+            ModProtoHistory.CheckMissingMachines();
             ModProtoHistory.DisplayRemovedMessage();
         }
         

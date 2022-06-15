@@ -65,6 +65,8 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.5.4
+- Fixed errors when loading a save with one or more mods that add buildings (For example Better Machines) removed
 ### v1.5.3
 - Fix errors when model index is much bigger than maximum used by game.
 ### v1.5.2

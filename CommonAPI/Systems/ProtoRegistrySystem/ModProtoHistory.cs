@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using CommonAPI.Patches;
 
@@ -14,7 +15,7 @@ namespace CommonAPI.Systems
         public static readonly Dictionary<string, List<int>> missingMachines = new Dictionary<string, List<int>>();
 
         private static readonly Dictionary<string, int> removedMachines = new Dictionary<string, int>();
-        
+
         internal static void AddModMachine(string modGUID, int itemID)
         {
             if (modMachines.ContainsKey(modGUID))
@@ -24,10 +25,10 @@ namespace CommonAPI.Systems
             }
             else
             {
-                modMachines.Add(modGUID, new List<int> {itemID});
+                modMachines.Add(modGUID, new List<int> { itemID });
             }
         }
-        
+
         internal static void AddMissingMachine(string modGUID, int itemID)
         {
             if (missingMachines.ContainsKey(modGUID))
@@ -40,7 +41,7 @@ namespace CommonAPI.Systems
             }
             else
             {
-                missingMachines.Add(modGUID, new List<int> {itemID});
+                missingMachines.Add(modGUID, new List<int> { itemID });
                 CommonAPIPlugin.logger.LogInfo($"Machine from {modGUID} mod with proto ID {itemID} is missing!");
             }
         }
@@ -66,14 +67,13 @@ namespace CommonAPI.Systems
                     modGUID = modMacines.Key;
                     return true;
                 }
-                
             }
 
             modGUID = "";
             return false;
         }
 
-        private static void CheckMissingMachines()
+        internal static void CheckMissingMachines()
         {
             CommonAPIPlugin.logger.LogInfo("Checking missing machines!");
             for (int i = 0; i < GameMain.data.factoryCount; i++)
@@ -88,9 +88,16 @@ namespace CommonAPI.Systems
                     int protoId = factory.entityPool[j].protoId;
                     if (IsMachineMissing(protoId, out string modGuid))
                     {
-                        CommonAPIPlugin.logger.LogInfo($"Removing entity ID: {j}, proto ID: {protoId} from mod {modGuid}");
-                        factory.RemoveEntityWithComponents(j);
-                        IncrementRemoved(modGuid);
+                        try
+                        {
+                            CommonAPIPlugin.logger.LogInfo($"Removing entity ID: {j}, proto ID: {protoId} from mod {modGuid}");
+                            factory.RemoveEntityWithComponents(j);
+                            IncrementRemoved(modGuid);
+                        }
+                        catch (Exception e)
+                        {
+                            CommonAPIPlugin.logger.LogWarning($"Error while removing!\n{e}");
+                        }
                     }
                 }
             }
@@ -104,15 +111,14 @@ namespace CommonAPI.Systems
             foreach (var mod in removedMachines)
             {
                 if (mod.Value <= 0) continue;
-                
+
                 text = $"{text}\r\nRemoved {mod.Value} machines from {mod.Key} mod";
             }
-            
+
             if (text.Equals("")) return;
 
             UIMessageBox.Show("ModItemMissingWarnTitle".Translate(), "ModItemMissingWarnDesc".Translate() + text, "确定".Translate(), 0);
         }
-        
 
 
         internal static void Export(BinaryWriter w)
@@ -121,7 +127,7 @@ namespace CommonAPI.Systems
             w.Write(ProtoRegistry.Loaded);
 
             if (!ProtoRegistry.Loaded) return;
-            
+
             w.Write((byte)modMachines.Count);
             foreach (var machines in modMachines)
             {
@@ -133,19 +139,18 @@ namespace CommonAPI.Systems
                     w.Write(itemID);
                 }
             }
-
         }
 
         internal static void Import(BinaryReader r)
         {
             removedMachines.Clear();
             ProtoSet_Patch.isEnabled = false;
-            
+
             int ver = r.ReadByte();
             bool wasLoaded = r.ReadBoolean();
 
             if (!wasLoaded) return;
-            
+
             int mods = r.ReadByte();
             for (int i = 0; i < mods; i++)
             {
@@ -174,7 +179,6 @@ namespace CommonAPI.Systems
             }
 
             ProtoSet_Patch.isEnabled = true;
-            CheckMissingMachines();
         }
 
         internal static void InitOnLoad()
