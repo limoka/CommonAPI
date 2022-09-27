@@ -65,6 +65,8 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.5.5
+- Update for Dyson Sphere Program update
 ### v1.5.4
 - Fixed errors when loading a save with one or more mods that add buildings (For example Better Machines) removed
 ### v1.5.3

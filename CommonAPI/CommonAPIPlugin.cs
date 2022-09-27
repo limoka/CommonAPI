@@ -44,7 +44,7 @@ namespace CommonAPI
         internal static APISubmoduleHandler submoduleHandler;
         
         public static Dictionary<string, Registry> registries = new Dictionary<string, Registry>();
-        public static readonly Version buildFor = GameVersionUtil.GetVersion(0,9,26,12891);
+        public static readonly Version buildFor = GameVersionUtil.GetVersion(0,9,27,14546);
 
         public static bool iconShotMenuEnabled;
         public static KeyCode openIconShotMenuButton;

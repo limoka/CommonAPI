@@ -32,7 +32,8 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <DefaultItemExcludes>$(DefaultItemExcludes);*.binlog</DefaultItemExcludes>
-
+    <DefineConstants>_UNLOCK_DEBUG</DefineConstants>
+    
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
 
