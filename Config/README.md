@@ -65,6 +65,8 @@ public class MyPlugin : BaseUnityPlugin
 This library is still under development.
 
 ## Changelog
+### v1.5.6
+- Remove game exe name targeting
 ### v1.5.5
 - Update for Dyson Sphere Program update
 ### v1.5.4

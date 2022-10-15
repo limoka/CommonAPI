@@ -27,7 +27,6 @@ namespace CommonAPI
     [BepInPlugin(GUID, DISPNAME, VERSION)]
     [BepInDependency(LDBToolPlugin.MODGUID)]
     [BepInDependency(DSPModSavePlugin.MODGUID)]
-    [BepInProcess("DSPGAME.exe")]
     public class CommonAPIPlugin : BaseUnityPlugin, IModCanSave
     {
         public const string ID = "CommonAPI";
@@ -44,7 +43,7 @@ namespace CommonAPI
         internal static APISubmoduleHandler submoduleHandler;
         
         public static Dictionary<string, Registry> registries = new Dictionary<string, Registry>();
-        public static readonly Version buildFor = GameVersionUtil.GetVersion(0,9,27,14546);
+        public static readonly Version buildFor = GameVersionUtil.GetVersion(0,9,27,14659);
 
         public static bool iconShotMenuEnabled;
         public static KeyCode openIconShotMenuButton;
