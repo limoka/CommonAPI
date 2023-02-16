@@ -1,4 +1,4 @@
-﻿### v1.5.7
+### v1.5.7
 - Fix modded items not appearing on the production graphs.
 
 <details>
