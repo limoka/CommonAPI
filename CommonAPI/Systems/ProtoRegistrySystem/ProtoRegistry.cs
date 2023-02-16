@@ -216,6 +216,10 @@ namespace CommonAPI.Systems
                     kv.Value.Preload();
                     kv.Value.description = kv.Value.description.Translate();
                 }
+                ItemProto.InitFuelNeeds();
+                ItemProto.InitFluids();
+                ItemProto.InitItemIds();
+                ItemProto.InitItemIndices();
 
                 onLoadingFinished?.Invoke();
 
