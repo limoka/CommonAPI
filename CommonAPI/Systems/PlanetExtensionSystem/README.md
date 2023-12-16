@@ -3,6 +3,7 @@
 PlanetExtension is a module that makes implementing planet based logic easier. An example would be Component Extension module, Power System, or Cargo Traffic. Such a system always has one instance per planet, with or without update methods.
 
 ## Usage
+Make sure to add `[CommonAPISubmoduleDependency(nameof(PlanetExtensionSystem))]` to your plugin attributes. This will load the submodule.
 
 First create a new class with this template
 ```cs

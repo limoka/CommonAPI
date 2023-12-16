@@ -4,7 +4,8 @@ ComponentExtension is a module that makes adding new machine components easy. It
 
 ## Usage
 
-First make sure that you have requested this module to be loaded as shown [here](https://github.com/kremnev8/CommonAPI#usage-example)
+Make sure to add `[CommonAPISubmoduleDependency(nameof(ComponentExtensionModule))]` to your plugin attributes. This will load the submodule.
+
 Then make your component class as follows
 ```cs
 public class ComponentName : FactoryComponent

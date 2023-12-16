@@ -2,6 +2,8 @@
 Picker Extension system is a submodule that allows to extend behavior of Item and Recipe picker UI. The extension allows to filter which items/recipes will be shown to the player.
 
 ### Usage example:
+Make sure to add `[CommonAPISubmoduleDependency(nameof(PickerExtensionsSystem))]` to your plugin attributes. This will load the submodule.
+
 Show only buildings to which Assembler Mk.I can be upgraded
 ```cs
 int itemId = 2303; //Assembling machine Mk.I

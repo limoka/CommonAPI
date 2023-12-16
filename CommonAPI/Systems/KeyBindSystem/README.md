@@ -6,6 +6,8 @@ Custom KeyBind system allows to register new keybinds that:
 - Can be easily addressed in code without using static variables
 
 ### Example usage
+Make sure to add `[CommonAPISubmoduleDependency(nameof(CustomKeyBindSystem))]` to your plugin attributes. This will load the submodule.
+
 First you need to define default key user has to press. This is done using CombineKey class:
 ```cs
 CombineKey key = new CombineKey(int _keyCode, byte _modifier, ECombineKeyAction _action, bool _noneKey)
