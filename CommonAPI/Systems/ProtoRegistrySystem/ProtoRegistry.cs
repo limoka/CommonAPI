@@ -1135,6 +1135,7 @@ namespace CommonAPI.Systems
         /// <param name="enTrans">New English translation for this key</param>
         /// <param name="cnTrans">New Chinese translation for this key</param>
         /// <param name="frTrans">New French translation for this key</param>
+        [Obsolete("Use LocalizationModule.EditTranslation() instead!")]
         public static void EditString(string key, string enTrans)
         {
             EditString(key, enTrans, "", "");
@@ -1148,6 +1149,7 @@ namespace CommonAPI.Systems
         /// <param name="enTrans">New English translation for this key</param>
         /// <param name="cnTrans">New Chinese translation for this key</param>
         /// <param name="frTrans">New French translation for this key</param>
+        [Obsolete("Use LocalizationModule.EditTranslation() instead!")]
         public static void EditString(string key, string enTrans, string cnTrans)
         {
             EditString(key, enTrans, cnTrans, "");
@@ -1161,14 +1163,12 @@ namespace CommonAPI.Systems
         /// <param name="enTrans">New English translation for this key</param>
         /// <param name="cnTrans">New Chinese translation for this key</param>
         /// <param name="frTrans">New French translation for this key</param>
+        [Obsolete("Use LocalizationModule.EditTranslation() instead!")]
         public static void EditString(string key, string enTrans, string cnTrans, string frTrans)
         {
-            ThrowIfNotLoaded();
-            StringProto stringProto = LDB.strings[key];
-
-            stringProto.ENUS = enTrans;
-            stringProto.ZHCN = cnTrans.Equals("") ? stringProto.ZHCN : cnTrans;
-            stringProto.FRFR = frTrans.Equals("") ? stringProto.FRFR : frTrans;
+            Instance.ThrowIfNotLoaded();
+            
+            LocalizationModule.EditTranslation(key, enTrans, cnTrans, frTrans);
         }
 
 
@@ -1179,6 +1179,7 @@ namespace CommonAPI.Systems
         /// <param name="enTrans">English translation for this key</param>
         /// <param name="cnTrans">Chinese translation for this key</param>
         /// <param name="frTrans">French translation for this key</param>
+        [Obsolete("Use LocalizationModule.RegisterTranslation() instead!")]
         public static void RegisterString(string key, string enTrans, string cnTrans)
         {
             RegisterString(key, enTrans, cnTrans, "");
@@ -1191,6 +1192,7 @@ namespace CommonAPI.Systems
         /// <param name="enTrans">English translation for this key</param>
         /// <param name="cnTrans">Chinese translation for this key</param>
         /// <param name="frTrans">French translation for this key</param>
+        [Obsolete("Use LocalizationModule.RegisterTranslation() instead!")]
         public static void RegisterString(string key, string enTrans)
         {
             RegisterString(key, enTrans, "", "");
@@ -1203,20 +1205,12 @@ namespace CommonAPI.Systems
         /// <param name="enTrans">English translation for this key</param>
         /// <param name="cnTrans">Chinese translation for this key</param>
         /// <param name="frTrans">French translation for this key</param>
+        [Obsolete("Use LocalizationModule.RegisterTranslation() instead!")]
         public static void RegisterString(string key, string enTrans, string cnTrans, string frTrans)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
 
-            StringProto proto = new StringProto
-            {
-                Name = key,
-                ENUS = enTrans,
-                ZHCN = cnTrans.Equals("") ? enTrans : cnTrans,
-                FRFR = frTrans.Equals("") ? enTrans : frTrans,
-                ID = -1
-            };
-
-            LDBTool.PreAddProto(proto);
+            LocalizationModule.RegisterTranslation(key, enTrans, cnTrans, frTrans);
         }
 
 
