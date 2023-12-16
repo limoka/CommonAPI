@@ -1,9 +1,14 @@
-### v1.5.7
-- Fix modded items not appearing on the production graphs.
+### v1.6.0
+- Updated to work with game version 0.10.28.20729 or higher
+- Added Localization Module to support custom localizations.
+- ProtoRegistry methods related to StringProto are deprecated in favor of Localization Module
+- Internal restructure of the submodule system
 
 <details>
 <summary>Changelog</summary>
 
+### v1.5.7
+- Fix modded items not appearing on the production graphs.
 ### v1.5.6
 - Remove game exe name targeting
 ### v1.5.5

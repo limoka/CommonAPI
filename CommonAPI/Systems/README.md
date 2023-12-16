@@ -25,56 +25,38 @@ public class MyPlugin : BaseUnityPlugin
 ```
 
 ## Creating Submodules
-To create a new submodule you need to create a new folder with the name of the module. In it create a new static class with the same name. Your actual submodule code can use any patters you deem right. Here is a template of submodule class:
+To create a new submodule you need to create a new folder with the name of the module. In it create a new class with the same name. Here is a template of submodule class:
 ```cs
-[CommonAPISubmodule]
-public static class SubmoduleName
+public static class SubmoduleName : BaseSubmodule
 {
-    public static bool Loaded {
-        get => _loaded;
-        internal set => _loaded = value;
+
+    public static void SomeAPIMethod()
+    {
+        // Ensure that you call this method in ALL interface methods
+        // This ensures that if your module is not loaded, a error will be thrown
+        Instance.ThrowIfNotLoaded();
     }
-
-    private static bool _loaded;
-
-
-    [CommonAPISubmoduleInit(Stage = InitStage.SetHooks)]
-    internal static void SetHooks()
+    
+    internal static SubmoduleName Instance => CommonAPIPlugin.GetModuleInstance<SubmoduleName>();
+  
+    // To declare submodule dependency use this property
+    internal override Type[] Dependencies => new[] { typeof(LocalizationModule) };
+  
+    internal override void SetHooks()
     {
         // Register all patches needed for this submodule here
     }
 
-
-    [CommonAPISubmoduleInit(Stage = InitStage.Load)]
-    internal static void load()
+    internal override void load()
     {
         // Other actions not related to patches can be done here
     }
     
-    [CommonAPISubmoduleInit(Stage = InitStage.PostLoad)]
-    internal static void PostLoad()
+    internal override void PostLoad()
     {
         // This method will be called after all modules are loaded
         // Here you can use other modules functions.
     }
-    
-    // Ensure that you call this method in ALL interface methods
-    // This ensures that if your module is not loaded, a error will be thrown
-    internal static void ThrowIfNotLoaded()
-    {
-        if (!Loaded)
-        {
-            Type submoduleType = MethodBase.GetCurrentMethod().DeclaringType;
-            string message = $"{submoduleType.Name} is not loaded. Please use [{nameof(CommonAPISubmoduleDependency)}(nameof({submoduleType.Name})]";
-            throw new InvalidOperationException(message);
-        }
-    }
 }
 
-```
-
-### Submodule dependency
-Submodules can depend on other submodules. To do that change your `CommonAPISubmodule` attribute to specify that. Example:
-```cs
-[CommonAPISubmodule(Dependencies = new []{typeof(PickerExtensionsSystem)})]
 ```
