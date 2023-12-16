@@ -7,48 +7,25 @@ using UnityEngine;
 
 namespace CommonAPI.Systems
 {
-    [CommonAPISubmodule(Dependencies = new []{typeof(ProtoRegistry)})]
-    public static class TabSystem
+    public class TabSystem : BaseSubmodule
     {
         internal static InstanceRegistry<TabData> tabsRegistry = new InstanceRegistry<TabData>(3);
         private static GameObject tabPrefab;
-        
-        /// <summary>
-        /// Return true if the submodule is loaded.
-        /// </summary>
-        public static bool Loaded {
-            get => _loaded;
-            internal set => _loaded = value;
-        }
 
-        private static bool _loaded;
+        internal static TabSystem Instance => CommonAPIPlugin.GetModuleInstance<TabSystem>();
+        internal override Type[] Dependencies => new[] { typeof(ProtoRegistry) };
 
-
-        [CommonAPISubmoduleInit(Stage = InitStage.SetHooks)]
-        internal static void SetHooks()
+        internal override void SetHooks()
         {
             CommonAPIPlugin.harmony.PatchAll(typeof(UIItemPickerPatch));
             CommonAPIPlugin.harmony.PatchAll(typeof(UIRecipePickerPatch));
             CommonAPIPlugin.harmony.PatchAll(typeof(UIReplicatorPatch));
         }
 
-        [CommonAPISubmoduleInit(Stage = InitStage.Load)]
-        internal static void Load()
-        {
-        }
-
-        internal static void ThrowIfNotLoaded()
-        {
-            if (!Loaded)
-            {
-                throw new InvalidOperationException(
-                    $"{nameof(TabSystem)} is not loaded. Please use [{nameof(CommonAPISubmoduleDependency)}(nameof({nameof(TabSystem)})]");
-            }
-        }
 
         public static int RegisterTab(string tabId, TabData tab)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             int tabIndex = tabsRegistry.Register(tabId, tab);
             tab.tabIndex = tabIndex;
             
@@ -57,7 +34,7 @@ namespace CommonAPI.Systems
         
         public static int GetTabId(string tabId)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             return tabsRegistry.GetUniqueId(tabId);
         }
 

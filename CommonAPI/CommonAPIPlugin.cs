@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Security;
 using System.Security.Permissions;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using CommonAPI.Patches;
 using CommonAPI.ShotScene;
@@ -35,19 +37,19 @@ namespace CommonAPI
 
         public const string VERSION = ThisAssembly.AssemblyVersion;
 
-        internal static HashSet<string> LoadedSubmodules;
         internal static Harmony harmony;
         internal static ICommonLogger logger;
         internal static ResourceData resource;
         internal static Action onIntoOtherSave;
-        internal static APISubmoduleHandler submoduleHandler;
+        internal static SubmoduleHandler submoduleHandler;
         
         public static Dictionary<string, Registry> registries = new Dictionary<string, Registry>();
         public static readonly Version buildFor = GameVersionUtil.GetVersion(0,9,27,14659);
 
         public static bool iconShotMenuEnabled;
         public static KeyCode openIconShotMenuButton;
-        
+        internal static ConfigEntry<string> forceLoaded;
+
 
         void Awake()
         {
@@ -63,8 +65,8 @@ namespace CommonAPI
             harmony = new Harmony(GUID);
             
             var pluginScanner = new PluginScanner();
-            submoduleHandler = new APISubmoduleHandler(buildFor, Logger);
-            LoadedSubmodules = submoduleHandler.LoadRequested(pluginScanner);
+            submoduleHandler = new SubmoduleHandler(buildFor, Logger);
+            submoduleHandler.LoadRequested(pluginScanner);
             pluginScanner.ScanPlugins();
             
             string pluginfolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -73,6 +75,8 @@ namespace CommonAPI
 
             LoadSaveOnLoad.Init();
             harmony.PatchAll(typeof(VFPreloadPatch));
+            
+            CheckModuleForceLoad();
             
             logger.LogInfo("Common API is initialized!");
         }
@@ -101,12 +105,9 @@ namespace CommonAPI
         /// Return true if the specified submodule is loaded.
         /// </summary>
         /// <param name="submodule">nameof the submodule</param>
-        public static bool IsSubmoduleLoaded(string submodule) {
-            if (LoadedSubmodules == null) {
-                logger.LogWarning("IsLoaded called before submodules were loaded, result may not reflect actual load status.");
-                return false;
-            }
-            return LoadedSubmodules.Contains(submodule);
+        public static bool IsSubmoduleLoaded(string submodule)
+        {
+            return submoduleHandler.IsLoaded(submodule);
         }
 
         /// <summary>
@@ -118,6 +119,57 @@ namespace CommonAPI
         public static bool TryLoadModule(Type moduleType)
         {
             return submoduleHandler.RequestModuleLoad(moduleType);
+        }
+        
+        internal static T GetModuleInstance<T>()
+            where T : BaseSubmodule
+        {
+            return submoduleHandler.GetModuleInstance<T>();
+        }
+
+        /// <summary>
+        /// Load specified modules
+        /// </summary>
+        /// <param name="moduleTypes">Types of needed modules</param>
+        public static void LoadModules(params Type[] moduleTypes)
+        {
+            LoadModules((IEnumerable<Type>)moduleTypes);
+        }
+        
+        private void CheckModuleForceLoad()
+        {
+            List<Type> allSubmodules = submoduleHandler.allModules.Keys.ToList();
+            string[] submoduleNames = allSubmodules
+                .Select(type => type.Name)
+                .AddItem("all").ToArray();
+        
+            forceLoaded = Config.Bind("Debug", "ForceModuleLoad", "",
+                new ConfigDescription("Manually force certain modules to be loaded. Do not use unless you know what you are doing.",
+                    new AcceptableValueOptionsList(submoduleNames)));
+
+            if (string.IsNullOrWhiteSpace(forceLoaded.Value))
+                return;
+
+            if (forceLoaded.Value == "all")
+            {
+                LoadModules(allSubmodules);
+                return;
+            }
+
+            var forceLoadTypes = forceLoaded.Value
+                .Split(',')
+                .Select(name => allSubmodules.Find(type => type.Name.Equals(name)));
+
+            LoadModules(forceLoadTypes);
+        }
+
+        private static void LoadModules(IEnumerable<Type> forceLoadTypes)
+        {
+            foreach (Type module in forceLoadTypes)
+            {
+                if (module == null) continue;
+                TryLoadModule(module);
+            }
         }
 
         public void Import(BinaryReader r)

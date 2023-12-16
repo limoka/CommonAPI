@@ -16,7 +16,7 @@ namespace CommonAPI.Systems
         
         public static UISignalPicker PreparePicker()
         {
-            PickerExtensionsSystem.ThrowIfNotLoaded();
+            PickerExtensionsSystem.Instance.ThrowIfNotLoaded();
             if (UIRoot.instance == null)
             {
                 throw new PickerNotReadyException();
@@ -49,7 +49,7 @@ namespace CommonAPI.Systems
         /// <param name="filter">Filter function</param>
         public static void Popup(Vector2 pos, Action<int> _onReturn, Func<int, bool> filter)
         {
-            PickerExtensionsSystem.ThrowIfNotLoaded();
+            PickerExtensionsSystem.Instance.ThrowIfNotLoaded();
             try
             {
                 extensions.Clear();
@@ -75,7 +75,7 @@ namespace CommonAPI.Systems
 
         public static void Popup(Vector2 pos, IPickerExtension<UISignalPicker> extension)
         {
-            PickerExtensionsSystem.ThrowIfNotLoaded();
+            PickerExtensionsSystem.Instance.ThrowIfNotLoaded();
             try
             {
                 extensions.Clear();

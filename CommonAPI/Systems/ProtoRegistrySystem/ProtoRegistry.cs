@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CommonAPI.Patches;
+using CommonAPI.Systems.ModLocalization;
 using HarmonyLib;
 using UnityEngine;
 using xiaoye97;
@@ -17,9 +18,8 @@ namespace CommonAPI.Systems
     {
         public LoadException(string message) : base(message) { }
     }
-
-    [CommonAPISubmodule(Dependencies = new []{typeof(PickerExtensionsSystem)})]
-    public static class ProtoRegistry
+    
+    public class ProtoRegistry : BaseSubmodule
     {
         public const string UNKNOWN_MOD = "Unknown";
         internal static string currentMod = "";
@@ -52,19 +52,10 @@ namespace CommonAPI.Systems
         internal static string[] spriteFileExtensions;
         internal static string[] audioClipFileExtensions;
         
-        /// <summary>
-        /// Return true if the submodule is loaded.
-        /// </summary>
-        public static bool Loaded {
-            get => _loaded;
-            internal set => _loaded = value;
-        }
+        internal static ProtoRegistry Instance => CommonAPIPlugin.GetModuleInstance<ProtoRegistry>();
+        internal override Type[] Dependencies => new[] { typeof(PickerExtensionsSystem), typeof(LocalizationModule) };
 
-        private static bool _loaded;
-
-
-        [CommonAPISubmoduleInit(Stage = InitStage.SetHooks)]
-        internal static void SetHooks()
+        internal override void SetHooks()
         {
             CommonAPIPlugin.harmony.PatchAll(typeof(ResourcesPatch));
             CommonAPIPlugin.harmony.PatchAll(typeof(StorageComponentPatch));
@@ -78,8 +69,7 @@ namespace CommonAPI.Systems
         }
 
 
-        [CommonAPISubmoduleInit(Stage = InitStage.Load)]
-        internal static void load()
+        internal override void Load()
         {
 
             int mainTex = Shader.PropertyToID("_MainTex");
@@ -95,21 +85,11 @@ namespace CommonAPI.Systems
             LDBTool.PostAddDataAction += OnPostAdd;
             LDBTool.EditDataAction += EditProto;
         }
-
-        [CommonAPISubmoduleInit(Stage = InitStage.PostLoad)]
-        internal static void PostLoad()
-        {
-            RegisterString("ModItemMissingWarnTitle", "Missing mod machines");
-            RegisterString("ModItemMissingWarnDesc", "Following mods had missing machines that were removed from your save:");
-        }
         
-        internal static void ThrowIfNotLoaded()
+        internal override void PostLoad()
         {
-            if (!Loaded)
-            {
-                throw new InvalidOperationException(
-                    $"{nameof(ProtoRegistry)} is not loaded. Please use [{nameof(CommonAPISubmoduleDependency)}(nameof({nameof(ProtoRegistry)})]");
-            }
+            LocalizationModule.RegisterTranslation("ModItemMissingWarnTitle", "Missing mod machines");
+            LocalizationModule.RegisterTranslation("ModItemMissingWarnDesc", "Following mods had missing machines that were removed from your save:");
         }
 
         /// <summary>
@@ -118,7 +98,7 @@ namespace CommonAPI.Systems
         /// <param name="resource"></param>
         public static void AddResource(ResourceData resource)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             modResources.Add(resource);
         }
 
@@ -129,7 +109,7 @@ namespace CommonAPI.Systems
         /// <exception cref="ArgumentException">If a mod is trying to interrupt other mods loading phase</exception>
         public static IDisposable StartModLoad(string modGUID)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             if (currentMod.Equals(""))
             {
                 currentMod = modGUID;
@@ -414,7 +394,7 @@ namespace CommonAPI.Systems
         public static Material CreateMaterial(string shaderName, string materialName, Color color,
             string[] textures, string[] keywords, int[] textureIDs)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
 
             Material mainMat = new Material(Shader.Find(shaderName))
             {
@@ -458,7 +438,7 @@ namespace CommonAPI.Systems
         /// <param name="mats">List of materials to use</param>
         public static ModelProto RegisterModel(int id, string prefabPath, Material[] mats = null, int rendererType = 0)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             ModelProto model = new ModelProto
             {
                 Name = id.ToString(),
@@ -524,7 +504,7 @@ namespace CommonAPI.Systems
         public static ModelProto RegisterModel(int id, ItemProto proto, string prefabPath, Material[] mats,
             int[] descFields, int buildIndex, int grade, int[] upgradesIDs, int rendererType)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             ModelProto model = new ModelProto
             {
                 Name = id.ToString(),
@@ -552,7 +532,7 @@ namespace CommonAPI.Systems
         /// <param name="mats">Array of materials</param>
         public static void AddLodMaterials(string prefabPath, int lod, Material[] mats)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             if (modelMats.ContainsKey(prefabPath))
             {
                 LodMaterials lodMats = modelMats[prefabPath];
@@ -589,7 +569,7 @@ namespace CommonAPI.Systems
         /// <param name="upgradesIDs">List of buildings ids, that are upgradable to this one. You need to include all of them here in order. ID of this building should be zero</param>
         public static void AddModelToItemProto(ModelProto model, ItemProto item, int[] descFields, int buildIndex, int grade, int[] upgradesIDs)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             item.Type = EItemType.Production;
             item.ModelIndex = model.ID;
             item.ModelCount = 1;
@@ -688,7 +668,7 @@ namespace CommonAPI.Systems
         public static ItemProto RegisterItem(int id, string name, string description, string iconPath,
             int gridIndex, int stackSize, EItemType type, IconToolNew.IconDesc beltItemDesc)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
 
             beltItemDesc ??= GetDefaultIconDesc(Color.gray, Color.gray);
 
@@ -792,7 +772,7 @@ namespace CommonAPI.Systems
             int[] output,
             int[] outCounts, string description, int techID, int gridIndex)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
 
             return RegisterRecipe(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex, "", "");
         }
@@ -813,7 +793,7 @@ namespace CommonAPI.Systems
             int[] output,
             int[] outCounts, string description, int techID, int gridIndex, string iconPath)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
 
             return RegisterRecipe(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex, "", iconPath);
         }
@@ -834,7 +814,7 @@ namespace CommonAPI.Systems
             int[] output,
             int[] outCounts, string description, int techID, int gridIndex, string name, string iconPath)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             if (AssemblerRecipeSystem.IsRecipeTypeRegistered(type))
             {
                 RecipeProto recipe = RegisterRecipe(id, ERecipeType.Custom, time, input, inCounts, output, outCounts, description, techID, gridIndex, name, iconPath);
@@ -900,7 +880,7 @@ namespace CommonAPI.Systems
             int[] output,
             int[] outCounts, string description, int techID, int gridIndex)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex, "", "");
 
             LDBTool.PreAddProto(proto);
@@ -925,7 +905,7 @@ namespace CommonAPI.Systems
             int[] output,
             int[] outCounts, string description, int techID, int gridIndex, string iconPath)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex, "", iconPath);
 
             LDBTool.PreAddProto(proto);
@@ -950,7 +930,7 @@ namespace CommonAPI.Systems
             int[] output,
             int[] outCounts, string description, int techID, int gridIndex, string name, string iconPath)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex, name, iconPath);
 
             LDBTool.PreAddProto(proto);
@@ -963,7 +943,7 @@ namespace CommonAPI.Systems
             string description,
             int techID, int gridIndex, string name, string iconPath)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             if (output.Length > 0)
             {
                 ItemProto first = null;
@@ -1074,7 +1054,7 @@ namespace CommonAPI.Systems
             int[] output,
             int[] outCounts, string description, int techID, int gridIndex, string iconPath)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             RecipeProto proto = NewRecipeProto(id, type, time, input, inCounts, output, outCounts, description, techID, gridIndex, "", iconPath);
             recipeReplace.Add(proto.ID, proto);
         }
@@ -1100,7 +1080,7 @@ namespace CommonAPI.Systems
             int[] unlockRecipes, Vector2 position)
 
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             bool isLabTech = jellos.Any(itemId => LabComponent.matrixIds.Contains(itemId));
 
 
@@ -1299,7 +1279,7 @@ namespace CommonAPI.Systems
         /// <returns>New Audio Proto</returns>
         public static AudioProto RegisterAudio(int id, string audioClipPath, int clipCount, float volume, float pitch, float pitchRandomness, float spatialBlend, bool loop, bool localized, bool bypassEffect)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             string name = audioClipPath.Split('/', '\\').Last();
 
             AudioProto proto = new AudioProto()
@@ -1334,7 +1314,7 @@ namespace CommonAPI.Systems
         /// <param name="spatialBlend">New spatial blend. Sets how much this audio is affected by 3D spatialisation calculations (attenuation, doppler etc). 0.0 makes the sound full 2D, 1.0 makes it full 3D.</param>
         public static void EditAudio(int id, string newAudioClipPath, float volume, float pitch, float pitchRandomness, float spatialBlend)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             AudioProto proto = LDB.audios.Select(id);
 
             proto.ClipPath = newAudioClipPath;
@@ -1384,7 +1364,7 @@ namespace CommonAPI.Systems
         /// <returns>New Signal Proto</returns>
         public static SignalProto RegisterSignal(int id, string iconPath, int gridIndex, string name, string desc)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             SignalProto proto = new SignalProto()
             {
                 ID = id,
@@ -1408,7 +1388,7 @@ namespace CommonAPI.Systems
         /// <param name="name">New localizedKey of name of the signal</param>
         public static void EditSignal(int id, string iconPath, int gridIndex, string name)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             SignalProto proto = LDB.signals.Select(id);
 
             if (!iconPath.Equals("")) proto.IconPath = iconPath;

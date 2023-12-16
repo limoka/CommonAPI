@@ -4,34 +4,14 @@ using System.Linq;
 
 namespace CommonAPI
 {
-    [CommonAPISubmodule]
-    public static class NetworksSystem
+    public class NetworksSystem : BaseSubmodule
     {
         public static List<NetworkHandler> handlers = new List<NetworkHandler>();
 
-        /// <summary>
-        /// Return true if the submodule is loaded.
-        /// </summary>
-        public static bool Loaded {
-            get => _loaded;
-            internal set => _loaded = value;
-        }
-
-        private static bool _loaded;
+        internal static NetworksSystem Instance => CommonAPIPlugin.GetModuleInstance<NetworksSystem>();
         
-        internal static void ThrowIfNotLoaded()
-        {
-            if (!Loaded)
-            {
-                throw new InvalidOperationException(
-                    $"{nameof(NetworksSystem)} is not loaded. Please use [{nameof(CommonAPISubmoduleDependency)}(nameof({nameof(NetworksSystem)})]");
-            }
-        }
-
-
-
-        [CommonAPISubmoduleInit(Stage = InitStage.Load)]
-        internal static void Load()
+        
+        internal override void Load()
         {
             AddHandler(new PowerNetworkHandler());
         }
@@ -43,7 +23,7 @@ namespace CommonAPI
 
         public static bool IsConnectedToNetwork(PlanetFactory factory, int objId)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             try
             {
                 NetworkHandler handler = GetNetworkHandler(factory, objId);
@@ -57,7 +37,7 @@ namespace CommonAPI
 
         public static bool IsConnectedToSameNetwork(PlanetFactory factory, int firstId, int secondId)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             try
             {
                 NetworkHandler handler = GetCommonNetwork(factory, firstId, secondId);
@@ -71,7 +51,7 @@ namespace CommonAPI
 
         public static NetworkHandler GetNetworkHandler(PlanetFactory factory, int objId)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             if (objId == 0) return null;
 
             int protoId = objId > 0 ? factory.entityPool[objId].protoId : factory.prebuildPool[-objId].protoId;
@@ -90,7 +70,7 @@ namespace CommonAPI
 
         public static NetworkHandler GetCommonNetwork(PlanetFactory factory, int firstId, int secondId)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             if (firstId == 0 || secondId == 0) return null;
 
             int firstProtoId = firstId > 0 ? factory.entityPool[firstId].protoId : factory.prebuildPool[-firstId].protoId;

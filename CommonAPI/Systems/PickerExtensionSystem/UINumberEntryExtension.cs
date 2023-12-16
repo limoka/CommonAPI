@@ -27,7 +27,7 @@ namespace CommonAPI.Systems
 
         public static UINumberPickerExtension GetExtension()
         {
-            PickerExtensionsSystem.ThrowIfNotLoaded();
+            PickerExtensionsSystem.Instance.ThrowIfNotLoaded();
             UISignalPicker picker = UISignalPickerExtension.PreparePicker();
 
             if (numberPanel == null)
@@ -42,7 +42,7 @@ namespace CommonAPI.Systems
 
         public static void Popup(Vector2 pos, Action<int> onItem, Action<int> onCount, int currentValue = 0, Func<int, bool> filterFunc = null)
         {
-            PickerExtensionsSystem.ThrowIfNotLoaded();
+            PickerExtensionsSystem.Instance.ThrowIfNotLoaded();
             UINumberPickerExtension extension = GetExtension();
 
             extension.onReturnSignal = onItem;
@@ -55,7 +55,7 @@ namespace CommonAPI.Systems
 
         public static void Popup(Vector2 pos, Action<int, int> onBoth, int currentValue = 0, int currentItem = 0, Func<int, bool> filterFunc = null) 
         {
-            PickerExtensionsSystem.ThrowIfNotLoaded();
+            PickerExtensionsSystem.Instance.ThrowIfNotLoaded();
             UINumberPickerExtension extension = GetExtension();
 
             extension.onReturnSignal = null;

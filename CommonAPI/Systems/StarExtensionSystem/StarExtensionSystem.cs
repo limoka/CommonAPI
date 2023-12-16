@@ -5,50 +5,28 @@ using CommonAPI.Patches;
 
 namespace CommonAPI.Systems
 {
-    [CommonAPISubmodule]
-    public static class StarExtensionSystem
+    public class StarExtensionSystem : BaseSubmodule
     {
         public static List<StarExtensionStorage> extensions = new List<StarExtensionStorage>();
         public static TypeRegistry<IStarExtension, StarExtensionStorage> registry = new TypeRegistry<IStarExtension, StarExtensionStorage>();
 
-        /// <summary>
-        /// Return true if the submodule is loaded.
-        /// </summary>
-        public static bool Loaded {
-            get => _loaded;
-            internal set => _loaded = value;
-        }
-
-        private static bool _loaded;
-
-
-        [CommonAPISubmoduleInit(Stage = InitStage.SetHooks)]
-        internal static void SetHooks()
+        internal static StarExtensionSystem Instance => CommonAPIPlugin.GetModuleInstance<StarExtensionSystem>();
+        
+        internal override void SetHooks()
         {
             CommonAPIPlugin.harmony.PatchAll(typeof(StarExtensionHooks));
         }
 
-
-        [CommonAPISubmoduleInit(Stage = InitStage.Load)]
-        internal static void load()
+        
+        internal override void Load()
         {
             CommonAPIPlugin.registries.Add($"{CommonAPIPlugin.ID}:StarSystemsRegistry", registry);
             
         }
 
-        private static void ThrowIfNotLoaded()
-        {
-            if (!Loaded)
-            {
-                throw new InvalidOperationException(
-                    $"{nameof(StarExtensionSystem)} is not loaded. Please use [{nameof(CommonAPISubmoduleDependency)}(nameof({nameof(StarExtensionSystem)})]");
-            }
-        }
-
-
         public static void InitOnLoad()
         {
-            if (Loaded)
+            if (Instance.Loaded)
             {
                 CommonAPIPlugin.logger.LogInfo("Loading star extension system");
                 GameData data = GameMain.data;
@@ -56,8 +34,10 @@ namespace CommonAPI.Systems
                 extensions.Clear();
                 extensions.Capacity = registry.data.Count + 1;
                 extensions.Add(null);
+                CommonAPIPlugin.logger.LogInfo($"Got {registry.data.Count} entries!");
                 for (int i = 1; i < registry.data.Count; i++)
                 {
+                    
                     StarExtensionStorage storage = new StarExtensionStorage();
                     storage.InitOnLoad(i);
                     extensions.Add(storage);
@@ -76,14 +56,14 @@ namespace CommonAPI.Systems
 
         public static T GetExtension<T>(int starId, int systemId) where T : IStarExtension
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             StarData star = GameMain.galaxy.StarById(starId);
             return GetExtension<T>(star, systemId);
         }
 
         public static T GetExtension<T>(StarData star, int systemId) where T : IStarExtension
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             if (systemId <= 0 || systemId >= extensions.Count) return default;
             return (T) extensions[systemId].GetSystem(star);
         }
@@ -193,9 +173,9 @@ namespace CommonAPI.Systems
         public static void Export(BinaryWriter w)
         {
             w.Write(0);
-            w.Write(Loaded);
+            w.Write(Instance.Loaded);
 
-            if (Loaded)
+            if (Instance.Loaded)
             {
                 registry.ExportContainer(extensions, w);
             }

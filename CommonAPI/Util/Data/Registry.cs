@@ -16,10 +16,16 @@ namespace CommonAPI
         public HashSet<int> removedIntIds = new HashSet<int>();
 
         protected int lastId;
+        protected bool throwErrorOnConflict;
 
-        public Registry(int startId = 1)
+        public Registry(int startId, bool throwErrorOnConflict)
         {
             lastId = startId - 1;
+            this.throwErrorOnConflict = throwErrorOnConflict;
+        }
+        
+        public Registry(int startId = 1) : this(startId, false)
+        {
         }
 
         /// <summary>
@@ -58,6 +64,11 @@ namespace CommonAPI
                 OnItemRegistered(key, lastId + 1, item);
                 idMap.Add(key, ++lastId);
                 return lastId;
+            }
+
+            if (throwErrorOnConflict)
+            {
+                throw new InvalidOperationException($"Failed to register object with key '{key}', because it is taken!");
             }
 
             return GetUniqueId(key);

@@ -169,7 +169,7 @@ namespace CommonAPI.ShotScene
                 {
                     Mesh mesh = prefabDesc.lodMeshes[0];
                     BatchRenderer batchRenderer = new BatchRenderer(mesh, prefabDesc.lodMaterials[0], 0, 16, instBuffer, argBuffer, num,
-                        prefabDesc.lodVertas[0]);
+                        prefabDesc.lodVertas[0],  0, prefabDesc.castShadow, prefabDesc.recvShadow);
                     batchRenderer.modelProto = modelProto;
                     int subMeshCount = mesh.subMeshCount;
                     for (int j = 0; j < subMeshCount; j++)

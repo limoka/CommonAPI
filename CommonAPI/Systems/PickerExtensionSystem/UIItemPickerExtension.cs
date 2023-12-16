@@ -18,7 +18,7 @@ namespace CommonAPI.Systems
         
         public static UIItemPicker PreparePicker()
         {
-            PickerExtensionsSystem.ThrowIfNotLoaded();
+            PickerExtensionsSystem.Instance.ThrowIfNotLoaded();
             if (UIRoot.instance == null)
             {
                 throw new PickerNotReadyException();
@@ -35,7 +35,7 @@ namespace CommonAPI.Systems
         
         public static void Popup(Vector2 pos, Action<ItemProto> _onReturn, bool showLockedItems, Func<ItemProto, bool> filter)
         {
-            PickerExtensionsSystem.ThrowIfNotLoaded();
+            PickerExtensionsSystem.Instance.ThrowIfNotLoaded();
             try
             {
                 showLocked = showLockedItems;
@@ -65,7 +65,7 @@ namespace CommonAPI.Systems
 
         public static void Popup(Vector2 pos, IPickerExtension<UIItemPicker> extension)
         {
-            PickerExtensionsSystem.ThrowIfNotLoaded();
+            PickerExtensionsSystem.Instance.ThrowIfNotLoaded();
             try
             {
                 // ReSharper disable once SuspiciousTypeConversion.Global

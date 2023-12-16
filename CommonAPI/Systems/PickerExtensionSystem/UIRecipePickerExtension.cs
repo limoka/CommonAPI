@@ -13,7 +13,7 @@ namespace CommonAPI.Systems
         
         public static UIRecipePicker PreparePicker()
         {
-            PickerExtensionsSystem.ThrowIfNotLoaded();
+            PickerExtensionsSystem.Instance.ThrowIfNotLoaded();
             if (UIRoot.instance == null)
             {
                 throw new PickerNotReadyException();
@@ -37,7 +37,7 @@ namespace CommonAPI.Systems
         /// <param name="filter">Filter function</param>
         public static void Popup(Vector2 pos, Action<RecipeProto> _onReturn, bool showLockedRecipes, Func<RecipeProto, bool> filter)
         {
-            PickerExtensionsSystem.ThrowIfNotLoaded();
+            PickerExtensionsSystem.Instance.ThrowIfNotLoaded();
             try
             {
                 showLocked = showLockedRecipes;
@@ -74,7 +74,7 @@ namespace CommonAPI.Systems
         
         public static void Popup(Vector2 pos, IPickerExtension<UIRecipePicker> extension)
         {
-            PickerExtensionsSystem.ThrowIfNotLoaded();
+            PickerExtensionsSystem.Instance.ThrowIfNotLoaded();
             try
             {
                 // ReSharper disable once SuspiciousTypeConversion.Global

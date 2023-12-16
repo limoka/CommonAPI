@@ -1,59 +1,50 @@
 ﻿using System;
 using CommonAPI.Patches;
+using CommonAPI.Systems.ModLocalization;
 
 namespace CommonAPI.Systems
 {
-    [CommonAPISubmodule]
-    public static class PickerExtensionsSystem
+    public class PickerExtensionsSystem : BaseSubmodule
     {
-        /// <summary>
-        /// Return true if the submodule is loaded.
-        /// </summary>
-        public static bool Loaded {
-            get => _loaded;
-            internal set => _loaded = value;
-        }
-
-        private static bool _loaded;
+        internal static PickerExtensionsSystem Instance => CommonAPIPlugin.GetModuleInstance<PickerExtensionsSystem>();
+        internal override Type[] Dependencies => new[] { typeof(LocalizationModule) };
 
 
-        [CommonAPISubmoduleInit(Stage = InitStage.SetHooks)]
-        internal static void SetHooks()
+        internal override void SetHooks()
         {
             CommonAPIPlugin.harmony.PatchAll(typeof(UIItemPicker_Patch));
             CommonAPIPlugin.harmony.PatchAll(typeof(UIRecipePicker_Patch));
             CommonAPIPlugin.harmony.PatchAll(typeof(UISignalPicker_Patch));
         }
-
-        [CommonAPISubmoduleInit(Stage = InitStage.PostLoad)]
-        internal static void PostLoad()
+        
+        internal override void PostLoad()
         {
-            if (ProtoRegistry.Loaded)
+            if (ProtoRegistry.Instance.Loaded)
             {
-                ProtoRegistry.RegisterString("SIGNAL-401", "Signal Information");
-                ProtoRegistry.RegisterString("SIGNAL-402", "Signal Warning");
-                ProtoRegistry.RegisterString("SIGNAL-403", "Signal Critical warning");
-                ProtoRegistry.RegisterString("SIGNAL-404", "Signal Error");
-                ProtoRegistry.RegisterString("SIGNAL-405", "Signal Settings");
+                LocalizationModule.RegisterTranslation("SIGNAL-401", "Signal Information");
+                LocalizationModule.RegisterTranslation("SIGNAL-402", "Signal Warning");
+                LocalizationModule.RegisterTranslation("SIGNAL-403", "Signal Critical warning");
+                LocalizationModule.RegisterTranslation("SIGNAL-404", "Signal Error");
+                LocalizationModule.RegisterTranslation("SIGNAL-405", "Signal Settings");
 
-                ProtoRegistry.RegisterString("SIGNAL-501", "Signal Missing power connection");
-                ProtoRegistry.RegisterString("SIGNAL-502", "Signal Not Enough Power");
-                ProtoRegistry.RegisterString("SIGNAL-503", "Signal Lightning");
-                ProtoRegistry.RegisterString("SIGNAL-504", "Signal Set Recipe");
-                ProtoRegistry.RegisterString("SIGNAL-506", "Signal Product stacking");
-                ProtoRegistry.RegisterString("SIGNAL-507", "Signal Vein depleting");
-                ProtoRegistry.RegisterString("SIGNAL-508", "Signal No fuel");
-                ProtoRegistry.RegisterString("SIGNAL-509", "Signal Can't do");
-                ProtoRegistry.RegisterString("SIGNAL-510", "Signal Missing connection");
+                LocalizationModule.RegisterTranslation("SIGNAL-501", "Signal Missing power connection");
+                LocalizationModule.RegisterTranslation("SIGNAL-502", "Signal Not Enough Power");
+                LocalizationModule.RegisterTranslation("SIGNAL-503", "Signal Lightning");
+                LocalizationModule.RegisterTranslation("SIGNAL-504", "Signal Set Recipe");
+                LocalizationModule.RegisterTranslation("SIGNAL-506", "Signal Product stacking");
+                LocalizationModule.RegisterTranslation("SIGNAL-507", "Signal Vein depleting");
+                LocalizationModule.RegisterTranslation("SIGNAL-508", "Signal No fuel");
+                LocalizationModule.RegisterTranslation("SIGNAL-509", "Signal Can't do");
+                LocalizationModule.RegisterTranslation("SIGNAL-510", "Signal Missing connection");
 
                 for (int i = 0; i < 10; i++)
                 {
-                    ProtoRegistry.RegisterString($"SIGNAL-60{i}", $"Signal {i}");
+                    LocalizationModule.RegisterTranslation($"SIGNAL-60{i}", $"Signal {i}");
                 }
                 
-                ProtoRegistry.RegisterString("setCountManually", "Select value");
-                ProtoRegistry.RegisterString("CountLabel", "Value");
-                ProtoRegistry.RegisterString("ConfirmButtonLabel", "Confirm");
+                LocalizationModule.RegisterTranslation("setCountManually", "Select value");
+                LocalizationModule.RegisterTranslation("CountLabel", "Value");
+                LocalizationModule.RegisterTranslation("ConfirmButtonLabel", "Confirm");
 
                 ProtoRegistry.onLoadingFinished += () =>
                 {
@@ -66,15 +57,6 @@ namespace CommonAPI.Systems
                         }
                     }
                 };
-            }
-        }
-
-        internal static void ThrowIfNotLoaded()
-        {
-            if (!Loaded)
-            {
-                throw new InvalidOperationException(
-                    $"{nameof(PickerExtensionsSystem)} is not loaded. Please use [{nameof(CommonAPISubmoduleDependency)}(nameof({nameof(PickerExtensionsSystem)})]");
             }
         }
     }

@@ -16,7 +16,11 @@ namespace CommonAPI
             data.Add(default);
         }
         
-        public InstanceRegistry(int startId) : base(startId)
+        public InstanceRegistry(int startId) : this(startId, false)
+        {
+        }
+        
+        public InstanceRegistry(int startId, bool throwErrorOnConflict) : base(startId, throwErrorOnConflict)
         {
             for (int i = 0; i < startId; i++)
             {

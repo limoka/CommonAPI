@@ -4,7 +4,6 @@ using CommonAPI.Patches;
 
 namespace CommonAPI.Systems
 {
-    [CommonAPISubmodule(Dependencies = new []{typeof(CustomDescSystem)})]
     public class ComponentExtension : IPlanetExtension, IUpdateMultithread, IPowerUpdateMultithread, IComponentStateListener
     {
         public static readonly string systemID = $"{CommonAPIPlugin.ID}:ComponentSystem";
@@ -20,35 +19,8 @@ namespace CommonAPI.Systems
                 return _cachedId;
             }
         }
-        
-        /// <summary>
-        /// Return true if the submodule is loaded.
-        /// </summary>
-        public static bool Loaded {
-            get => _loaded;
-            internal set => _loaded = value;
-        }
-
-        private static bool _loaded;
 
 
-        [CommonAPISubmoduleInit(Stage = InitStage.SetHooks)]
-        internal static void SetHooks()
-        {
-            CommonAPIPlugin.harmony.PatchAll(typeof(CopyPastePatch));
-            CommonAPIPlugin.harmony.PatchAll(typeof(EntityDataSetNullPatch));
-            CommonAPIPlugin.harmony.PatchAll(typeof(UIGamePatch));
-        }
-
-
-        [CommonAPISubmoduleInit(Stage = InitStage.Load)]
-        internal static void load()
-        {
-            CommonAPIPlugin.registries.Add($"{CommonAPIPlugin.ID}:ComponentRegistry", componentRegistry);
-            PlanetExtensionSystem.registry.Register(systemID, typeof(ComponentExtension));
-        }
-        
-        
         public static TypeRegistry<FactoryComponent, ComponentTypePool> componentRegistry = new TypeRegistry<FactoryComponent, ComponentTypePool>();
         
         private PlanetFactory factory;

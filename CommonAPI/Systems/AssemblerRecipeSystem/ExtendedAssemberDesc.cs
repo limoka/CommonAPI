@@ -13,7 +13,7 @@ namespace CommonAPI.Systems
         
         public override void ApplyProperties(PrefabDesc desc)
         {
-            AssemblerRecipeSystem.ThrowIfNotLoaded();
+            AssemblerRecipeSystem.Instance.ThrowIfNotLoaded();
             desc.assemblerSpeed = Mathf.RoundToInt(speed * 10000f);
             desc.assemblerRecipeType = ERecipeType.Custom;
             desc.SetProperty(RECIPE_TYPE_NAME, AssemblerRecipeSystem.recipeTypes.GetUniqueId(recipeType));

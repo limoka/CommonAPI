@@ -91,7 +91,7 @@ namespace CommonAPI.Systems
                         try
                         {
                             CommonAPIPlugin.logger.LogInfo($"Removing entity ID: {j}, proto ID: {protoId} from mod {modGuid}");
-                            factory.RemoveEntityWithComponents(j);
+                            factory.RemoveEntityWithComponents(j, false);
                             IncrementRemoved(modGuid);
                         }
                         catch (Exception e)
@@ -124,9 +124,9 @@ namespace CommonAPI.Systems
         internal static void Export(BinaryWriter w)
         {
             w.Write((byte)0);
-            w.Write(ProtoRegistry.Loaded);
+            w.Write(ProtoRegistry.Instance.Loaded);
 
-            if (!ProtoRegistry.Loaded) return;
+            if (!ProtoRegistry.Instance.Loaded) return;
 
             w.Write((byte)modMachines.Count);
             foreach (var machines in modMachines)

@@ -5,8 +5,7 @@ using CommonAPI.Patches;
 
 namespace CommonAPI.Systems
 {
-    [CommonAPISubmodule]
-    public static class PlanetExtensionSystem
+    public class PlanetExtensionSystem : BaseSubmodule
     {
         public static List<PlanetExtensionStorage> extensions = new List<PlanetExtensionStorage>();
         public static TypeRegistry<IPlanetExtension, PlanetExtensionStorage> registry = new TypeRegistry<IPlanetExtension, PlanetExtensionStorage>();
@@ -14,43 +13,22 @@ namespace CommonAPI.Systems
         internal static Dictionary<int, byte[]> pendingData = new Dictionary<int, byte[]>();
         internal static Action<PlanetData> onInitNewPlanet;
         
-        /// <summary>
-        /// Return true if the submodule is loaded.
-        /// </summary>
-        public static bool Loaded {
-            get => _loaded;
-            internal set => _loaded = value;
-        }
+        internal static PlanetExtensionSystem Instance => CommonAPIPlugin.GetModuleInstance<PlanetExtensionSystem>();
 
-        private static bool _loaded;
-
-
-        [CommonAPISubmoduleInit(Stage = InitStage.SetHooks)]
-        internal static void SetHooks()
+        
+        internal override void SetHooks()
         {
             CommonAPIPlugin.harmony.PatchAll(typeof(PlanetExtensionHooks));
         }
-
-
-        [CommonAPISubmoduleInit(Stage = InitStage.Load)]
-        internal static void load()
+        
+        internal override void Load()
         {
             CommonAPIPlugin.registries.Add($"{CommonAPIPlugin.ID}:PlanetExtensionRegistry", registry);
         }
-        
-        internal static void ThrowIfNotLoaded()
-        {
-            if (!Loaded)
-            {
-                throw new InvalidOperationException(
-                    $"{nameof(PlanetExtensionSystem)} is not loaded. Please use [{nameof(CommonAPISubmoduleDependency)}(nameof({nameof(PlanetExtensionSystem)})]");
-            }
-        }
-
 
         public static void InitOnLoad()
         {
-            if (Loaded)
+            if (Instance.Loaded)
             {
                 CommonAPIPlugin.logger.LogInfo("Loading planet extension system");
                 GameData data = GameMain.data;
@@ -291,10 +269,11 @@ namespace CommonAPI.Systems
 
         public static void Export(BinaryWriter w)
         {
+            var loaded = Instance.Loaded;
             w.Write(0);
-            w.Write(Loaded);
+            w.Write(loaded);
 
-            if (Loaded)
+            if (loaded)
             {
                 registry.ExportContainer(extensions, w);
             }

@@ -13,44 +13,23 @@ namespace CommonAPI.Systems
     /// <summary>
     /// This class allows to define new KeyBinds and use them easily in your code
     /// </summary>
-    [CommonAPISubmodule]
-    public static class CustomKeyBindSystem
+    public class CustomKeyBindSystem : BaseSubmodule
     {
 
         internal static Dictionary<string, PressKeyBind> customKeys = new Dictionary<string, PressKeyBind>();
         internal static Registry keyRegistry;
         
-        /// <summary>
-        /// Return true if the submodule is loaded.
-        /// </summary>
-        public static bool Loaded {
-            get => _loaded;
-            internal set => _loaded = value;
-        }
-
-        private static bool _loaded;
-
-
-        [CommonAPISubmoduleInit(Stage = InitStage.SetHooks)]
-        internal static void SetHooks()
+        internal static CustomKeyBindSystem Instance => CommonAPIPlugin.GetModuleInstance<CustomKeyBindSystem>();
+        
+        internal override void SetHooks()
         {
             CommonAPIPlugin.harmony.PatchAll(typeof(KeyBindPatches));
             CommonAPIPlugin.harmony.PatchAll(typeof(Chainloader_Patch));
         }
         
-        [CommonAPISubmoduleInit(Stage = InitStage.Load)]
-        internal static void Load()
+        internal override void Load()
         {
             keyRegistry = new Registry(100);
-        }
-        
-        internal static void ThrowIfNotLoaded()
-        {
-            if (!Loaded)
-            {
-                throw new InvalidOperationException(
-                    $"{nameof(CustomKeyBindSystem)} is not loaded. Please use [{nameof(CommonAPISubmoduleDependency)}(nameof({nameof(CustomKeyBindSystem)})]");
-            }
         }
 
         /// <summary>
@@ -60,7 +39,7 @@ namespace CommonAPI.Systems
         /// <typeparam name="T">Key press type class. For example PressKeyBind</typeparam>
         public static void RegisterKeyBind<T>(BuiltinKey key) where T : PressKeyBind, new()
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             
             string id = "KEY" + key.name;
             int index = keyRegistry.Register(id);
@@ -79,7 +58,7 @@ namespace CommonAPI.Systems
         /// <returns>Does such KeyBind exist?</returns>
         public static bool HasKeyBind(string id)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             string key = "KEY" + id;
             return customKeys.ContainsKey(key);
         }
@@ -91,7 +70,7 @@ namespace CommonAPI.Systems
         /// <returns>registered KeyBind. if it KeyBind for ID was not found returns null</returns>
         public static PressKeyBind GetKeyBind(string id)
         {
-            ThrowIfNotLoaded();
+            Instance.ThrowIfNotLoaded();
             string key = "KEY" + id;
             if (customKeys.ContainsKey(key))
             {
