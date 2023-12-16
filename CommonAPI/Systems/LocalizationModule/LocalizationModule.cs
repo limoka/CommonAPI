@@ -163,7 +163,13 @@ namespace CommonAPI.Systems.ModLocalization
         {
             Instance.ThrowIfNotLoaded();
             var english = GetOrCreateLanguageDict(Localization.LCID_ENUS);
-            english[key] = enTrans;
+            
+            if (!english.ContainsKey(key))
+                english[key] = enTrans;
+            else
+            {
+                CommonAPIPlugin.logger.LogWarning("Trying to override translations via RegisterTranslation, this is not supported. Use EditTranslation");
+            }
         }
 
         /// <summary>
@@ -178,17 +184,31 @@ namespace CommonAPI.Systems.ModLocalization
         {
             Instance.ThrowIfNotLoaded();
             var english = GetOrCreateLanguageDict(Localization.LCID_ENUS);
-            english[key] = enTrans;
+            if (!english.ContainsKey(key))
+                english[key] = enTrans;
+            else
+                CommonAPIPlugin.logger.LogWarning($"Trying to override translation '{key}' via RegisterTranslation, this is not supported. Use EditTranslation");
+            
             if (!string.IsNullOrEmpty(cnTrans))
             {
                 var chinese = GetOrCreateLanguageDict(Localization.LCID_ZHCN);
-                chinese[key] = cnTrans;
+
+                if (!chinese.ContainsKey(key))
+                    chinese[key] = cnTrans;
+                else
+                    CommonAPIPlugin.logger.LogWarning($"Trying to override translation '{key}' via RegisterTranslation, this is not supported. Use EditTranslation");
             }
+            
 
             if (!string.IsNullOrEmpty(frTrans))
             {
                 var french = GetOrCreateLanguageDict(Localization.LCID_FRFR);
-                french[key] = frTrans;
+
+                if (!french.ContainsKey(key))
+                    french[key] = frTrans;
+                else
+                    CommonAPIPlugin.logger.LogWarning($"Trying to override translation '{key}' via RegisterTranslation, this is not supported. Use EditTranslation");
+
             }
         }
 
@@ -211,7 +231,12 @@ namespace CommonAPI.Systems.ModLocalization
                 }
 
                 var languageData = GetOrCreateLanguageDict(languageId);
-                languageData[key] = pair.Value;
+
+                if (!languageData.ContainsKey(key))
+                    languageData[key] = pair.Value;
+                else
+                    CommonAPIPlugin.logger.LogWarning($"Trying to override translation '{key}' via RegisterTranslation, this is not supported. Use EditTranslation");
+
             }
         }
 
@@ -373,7 +398,11 @@ namespace CommonAPI.Systems.ModLocalization
 
             var strings = GetOrCreateLanguageDict(languageId);
             
-            strings[key] = translation;
+            if (!strings.ContainsKey(key))
+                strings[key] = translation;
+            else
+                CommonAPIPlugin.logger.LogWarning($"Trying to override translation '{key}' via local files, this is not supported. Use EditTranslation");
+
             return true;
         }
 
