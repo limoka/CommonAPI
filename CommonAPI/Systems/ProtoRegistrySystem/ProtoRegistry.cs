@@ -196,10 +196,19 @@ namespace CommonAPI.Systems
                     kv.Value.Preload();
                     kv.Value.description = kv.Value.description.Translate();
                 }
+                
+                CommonAPIPlugin.logger.LogInfo("Reinit cached data!");
+                
                 ItemProto.InitFuelNeeds();
                 ItemProto.InitFluids();
                 ItemProto.InitItemIds();
                 ItemProto.InitItemIndices();
+
+                SpaceSector.PrefabDescByModelIndex = null;
+                SpaceSector.InitPrefabDescArray();
+
+                PlanetFactory.PrefabDescByModelIndex = null;
+                PlanetFactory.InitPrefabDescArray();
 
                 onLoadingFinished?.Invoke();
 

@@ -1,3 +1,7 @@
+### v1.6.1
+- Fix errors when adding custom protos
+- Fix warnings about Common API not being built for 0.10.28.20729
+
 ### v1.6.0
 - Updated to work with game version 0.10.28.20729 or higher
 - Added Localization Module to support custom localizations.
