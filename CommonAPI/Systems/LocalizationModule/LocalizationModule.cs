@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using CommonAPI.Systems.ModLocalization.Patch;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace CommonAPI.Systems.ModLocalization
 {
@@ -28,6 +30,70 @@ namespace CommonAPI.Systems.ModLocalization
             return id;
         }
 
+        /// <summary>
+        /// Register existing system font to be used with this language.
+        /// Get list of available fonts via <see cref="Font.GetOSInstalledFontNames"/>
+        /// </summary>
+        /// <param name="languageId">Id of the target language</param>
+        /// <param name="systemFontName">System font name</param>
+        public static void RegisterFontForLanguage(int languageId, string systemFontName)
+        {
+            var font = Font.CreateDynamicFontFromOSFont(systemFontName, 12);
+            var languageData = GetOrCreateExtraData(languageId);
+            languageData.customFont = font;
+        }
+
+        /// <summary>
+        /// Load fonts from asset bundle at path and register it for use with this language
+        /// The first font asset found inside the bundle will be used
+        /// </summary>
+        /// <param name="languageId">Id of the target language</param>
+        /// <param name="assetBundlePath">Full path to the asset bundle</param>
+        public static void RegisterFontForLanguageFromBundle(int languageId, string assetBundlePath)
+        {
+            AssetBundle fontBundle = AssetBundle.LoadFromFile(assetBundlePath);
+            if (fontBundle == null)
+            {
+                CommonAPIPlugin.logger.LogWarning($"Failed to load asset bundle from path: {assetBundlePath}");
+                return;
+            }
+
+            var fonts = fontBundle.LoadAllAssets<Font>();
+            if (fonts == null || fonts.Length <= 0)
+            {
+                CommonAPIPlugin.logger.LogWarning($"Asset bundle at path {assetBundlePath} does not contain any fonts!");
+                return;
+            }
+
+            var languageData = GetOrCreateExtraData(languageId);
+            languageData.customFont = fonts[0];
+        }
+        
+        /// <summary>
+        /// Get language id by it's abbreviation
+        /// </summary>
+        /// <param name="abbreviation">Language abbreviation</param>
+        /// <returns></returns>
+        public static int GetLanguageId(string abbreviation)
+        {
+            if (int.TryParse(abbreviation, out int languageId))
+            {
+                return languageId;
+            }
+
+            switch (abbreviation)
+            {
+                case "enUS": return Localization.LCID_ENUS;
+                case "zhCN": return Localization.LCID_ZHCN;
+                case "frFR": return Localization.LCID_FRFR;
+            }
+
+            var language = modLanguages.Values.FirstOrDefault(language => language.abbr.Equals(abbreviation));
+            if (language == null) return 0;
+
+            return language.lcId;
+        }
+        
         /// <summary>
         /// Load mod translations from path. This path should point to your mod plugin folder, and have the following structure:
         /// <code>
@@ -55,7 +121,7 @@ namespace CommonAPI.Systems.ModLocalization
             foreach (string directory in subDirectories)
             {
                 string directoryName = Path.GetFileName(directory);
-                int languageId = InterpretLanguageIdFromName(directoryName);
+                int languageId = GetLanguageId(directoryName);
                 
                 if (languageId == 0)
                 {
@@ -63,11 +129,23 @@ namespace CommonAPI.Systems.ModLocalization
                     continue;
                 }
 
-                var subFiles = Directory.EnumerateFiles(directory);
+                var subFiles = Directory.EnumerateFiles(directory).ToList();
+                
+                subFiles.Sort((path1, path2) =>
+                {
+                    var file1 = Path.GetFileNameWithoutExtension(path1);
+                    var file2 = Path.GetFileNameWithoutExtension(path2);
+
+                    var index1 = GetOrder(file1);
+                    var index2 = GetOrder(file2);
+
+                    return index1.CompareTo(index2);
+                });
+
                 foreach (string file in subFiles)
                 {
                     if (!File.Exists(file)) continue;
-
+                    
                     try
                     {
                         var streamReader = new StreamReader(file, true);
@@ -77,7 +155,7 @@ namespace CommonAPI.Systems.ModLocalization
                             if (line == null) break;
                             if (line.Equals(string.Empty)) continue;
 
-                            if (!LoadTranslationFromLine(line, languageId))
+                            if (!LoadTranslationFromLine(line, languageId, true))
                                 failCount++;
                         }
                     }
@@ -115,7 +193,7 @@ namespace CommonAPI.Systems.ModLocalization
         public static void LoadTranslationsFromString(string data, string languageAbbr)
         {
             Instance.ThrowIfNotLoaded();
-            int languageId = InterpretLanguageIdFromName(languageAbbr);
+            int languageId = GetLanguageId(languageAbbr);
             if (languageId == 0)
             {
                 CommonAPIPlugin.logger.LogWarning($"Failed to interpret '{languageAbbr}' as a language!");
@@ -139,7 +217,7 @@ namespace CommonAPI.Systems.ModLocalization
             
             foreach (string line in lines)
             {
-                if (!LoadTranslationFromLine(line, languageId))
+                if (!LoadTranslationFromLine(line, languageId, false))
                     failCount++;
             }
 
@@ -162,10 +240,10 @@ namespace CommonAPI.Systems.ModLocalization
         public static void RegisterTranslation(string key, string enTrans)
         {
             Instance.ThrowIfNotLoaded();
-            var english = GetOrCreateLanguageDict(Localization.LCID_ENUS);
+            var english = GetOrCreateExtraData(Localization.LCID_ENUS);
             
-            if (!english.ContainsKey(key))
-                english[key] = enTrans;
+            if (!english.modStrings.ContainsKey(key))
+                english.modStrings[key] = enTrans;
             else
             {
                 CommonAPIPlugin.logger.LogWarning("Trying to override translations via RegisterTranslation, this is not supported. Use EditTranslation");
@@ -183,18 +261,18 @@ namespace CommonAPI.Systems.ModLocalization
         public static void RegisterTranslation(string key, string enTrans, string cnTrans, string frTrans)
         {
             Instance.ThrowIfNotLoaded();
-            var english = GetOrCreateLanguageDict(Localization.LCID_ENUS);
-            if (!english.ContainsKey(key))
-                english[key] = enTrans;
+            var english = GetOrCreateExtraData(Localization.LCID_ENUS);
+            if (!english.modStrings.ContainsKey(key))
+                english.modStrings[key] = enTrans;
             else
                 CommonAPIPlugin.logger.LogWarning($"Trying to override translation '{key}' via RegisterTranslation, this is not supported. Use EditTranslation");
             
             if (!string.IsNullOrEmpty(cnTrans))
             {
-                var chinese = GetOrCreateLanguageDict(Localization.LCID_ZHCN);
+                var chinese = GetOrCreateExtraData(Localization.LCID_ZHCN);
 
-                if (!chinese.ContainsKey(key))
-                    chinese[key] = cnTrans;
+                if (!chinese.modStrings.ContainsKey(key))
+                    chinese.modStrings[key] = cnTrans;
                 else
                     CommonAPIPlugin.logger.LogWarning($"Trying to override translation '{key}' via RegisterTranslation, this is not supported. Use EditTranslation");
             }
@@ -202,10 +280,10 @@ namespace CommonAPI.Systems.ModLocalization
 
             if (!string.IsNullOrEmpty(frTrans))
             {
-                var french = GetOrCreateLanguageDict(Localization.LCID_FRFR);
+                var french = GetOrCreateExtraData(Localization.LCID_FRFR);
 
-                if (!french.ContainsKey(key))
-                    french[key] = frTrans;
+                if (!french.modStrings.ContainsKey(key))
+                    french.modStrings[key] = frTrans;
                 else
                     CommonAPIPlugin.logger.LogWarning($"Trying to override translation '{key}' via RegisterTranslation, this is not supported. Use EditTranslation");
 
@@ -223,17 +301,17 @@ namespace CommonAPI.Systems.ModLocalization
             Instance.ThrowIfNotLoaded();
             foreach (KeyValuePair<string,string> pair in translations)
             {
-                int languageId = InterpretLanguageIdFromName(pair.Key);
+                int languageId = GetLanguageId(pair.Key);
                 if (languageId == 0)
                 {
                     CommonAPIPlugin.logger.LogWarning($"Failed to interpret '{pair.Key}' as a language!");
                     continue;
                 }
 
-                var languageData = GetOrCreateLanguageDict(languageId);
+                var languageData = GetOrCreateExtraData(languageId);
 
-                if (!languageData.ContainsKey(key))
-                    languageData[key] = pair.Value;
+                if (!languageData.modStrings.ContainsKey(key))
+                    languageData.modStrings[key] = pair.Value;
                 else
                     CommonAPIPlugin.logger.LogWarning($"Trying to override translation '{key}' via RegisterTranslation, this is not supported. Use EditTranslation");
 
@@ -260,18 +338,18 @@ namespace CommonAPI.Systems.ModLocalization
         public static void EditTranslation(string key, string enTrans, string cnTrans, string frTrans)
         {
             Instance.ThrowIfNotLoaded();
-            var english = GetOrCreateEditLanguageDict(Localization.LCID_ENUS);
-            english[key] = enTrans;
+            var english = GetOrCreateExtraData(Localization.LCID_ENUS);
+            english.stringsToEdit[key] = enTrans;
             if (!string.IsNullOrEmpty(cnTrans))
             {
-                var chinese = GetOrCreateEditLanguageDict(Localization.LCID_ZHCN);
-                chinese[key] = cnTrans;
+                var chinese = GetOrCreateExtraData(Localization.LCID_ZHCN);
+                chinese.stringsToEdit[key] = cnTrans;
             }
 
             if (!string.IsNullOrEmpty(frTrans))
             {
-                var french = GetOrCreateEditLanguageDict(Localization.LCID_FRFR);
-                french[key] = frTrans;
+                var french = GetOrCreateExtraData(Localization.LCID_FRFR);
+                french.stringsToEdit[key] = frTrans;
             }
         }
 
@@ -285,15 +363,15 @@ namespace CommonAPI.Systems.ModLocalization
             Instance.ThrowIfNotLoaded();
             foreach (KeyValuePair<string,string> pair in translations)
             {
-                int languageId = InterpretLanguageIdFromName(pair.Key);
+                int languageId = GetLanguageId(pair.Key);
                 if (languageId == 0)
                 {
                     CommonAPIPlugin.logger.LogWarning($"Failed to interpret '{pair.Key}' as a language!");
                     continue;
                 }
 
-                var languageData = GetOrCreateEditLanguageDict(languageId);
-                languageData[key] = pair.Value;
+                var languageData = GetOrCreateExtraData(languageId);
+                languageData.modStrings[key] = pair.Value;
             }
         }
         
@@ -308,65 +386,57 @@ namespace CommonAPI.Systems.ModLocalization
 
         internal static Registry languageRegistry = new Registry(FIRST_MOD_LANGUAGE_ID, true);
         
+
         internal static Dictionary<int, Localization.Language> modLanguages = new Dictionary<int, Localization.Language>();
-        internal static Dictionary<int, Dictionary<string, string>> modStrings = new Dictionary<int, Dictionary<string, string>>();
-        internal static Dictionary<int, Dictionary<string, string>> stringsToEdit = new Dictionary<int, Dictionary<string, string>>();
+        internal static Dictionary<int, ExtraLanguageData> extraDataEntires = new Dictionary<int, ExtraLanguageData>();
+        
+        private static readonly Dictionary<Text, TextDefaultFont> _textReferences = new Dictionary<Text, TextDefaultFont>();
+        private static readonly Dictionary<string, int> fileOrder = new Dictionary<string, int>();
 
         internal override void SetHooks()
         {
             CommonAPIPlugin.harmony.PatchAll(typeof(Localization_Patch));
+            CommonAPIPlugin.harmony.PatchAll(typeof(Text_Patch));
+            CommonAPIPlugin.harmony.PatchAll(typeof(UIBehaviour_Patch));
         }
 
-        internal override void Load() { }
-
-        private static int InterpretLanguageIdFromName(string name)
+        internal override void Load()
         {
-            if (int.TryParse(name, out int languageId))
-            {
-                return languageId;
-            }
-
-            switch (name)
-            {
-                case "enUS": return Localization.LCID_ENUS;
-                case "zhCN": return Localization.LCID_ZHCN;
-                case "frFR": return Localization.LCID_FRFR;
-            }
-
-            var language = modLanguages.Values.FirstOrDefault(language => language.abbr.Equals(name));
-            if (language == null) return 0;
-
-            return language.lcId;
+            Localization.OnLanguageChange += RefreshAllTextElements;
+            
+            //TODO too lazy to read the file right now
+            fileOrder["base"] = 0;
+            fileOrder["combat"] = 0;
+            fileOrder["prototype"] = -1;
+            fileOrder["dictionary"] = 3;
         }
-        
+
+        private static int GetOrder(string fileName)
+        {
+            if (fileOrder.TryGetValue(fileName, out int order))
+            {
+                return order;
+            }
+
+            return -9;
+        }
+
         private static readonly StringBuilder tempBuffer1 = new StringBuilder();
         private static readonly StringBuilder tempBuffer2 = new StringBuilder();
 
-        private static Dictionary<string, string> GetOrCreateLanguageDict(int languageId)
+        private static ExtraLanguageData GetOrCreateExtraData(int languageId)
         {
-            if (modStrings.ContainsKey(languageId))
+            if (extraDataEntires.ContainsKey(languageId))
             {
-                return modStrings[languageId];
+                return extraDataEntires[languageId];
             }
 
-            var strings = new Dictionary<string, string>();
-            modStrings[languageId] = strings;
-            return strings;
-        }
-        
-        private static Dictionary<string, string> GetOrCreateEditLanguageDict(int languageId)
-        {
-            if (stringsToEdit.ContainsKey(languageId))
-            {
-                return stringsToEdit[languageId];
-            }
-
-            var strings = new Dictionary<string, string>();
-            stringsToEdit[languageId] = strings;
-            return strings;
+            var data = new ExtraLanguageData();
+            extraDataEntires[languageId] = data;
+            return data;
         }
 
-        private static bool LoadTranslationFromLine(string line, int languageId)
+        private static bool LoadTranslationFromLine(string line, int languageId, bool allowOverride)
         {
             if (string.IsNullOrEmpty(line)) return false;
             if (languageId == 0) return false;
@@ -396,14 +466,60 @@ namespace CommonAPI.Systems.ModLocalization
                 return false;
             }
 
-            var strings = GetOrCreateLanguageDict(languageId);
+            var strings = GetOrCreateExtraData(languageId);
             
-            if (!strings.ContainsKey(key))
-                strings[key] = translation;
+            if (!strings.modStrings.ContainsKey(key))
+                strings.modStrings[key] = translation;
             else
-                CommonAPIPlugin.logger.LogWarning($"Trying to override translation '{key}' via local files, this is not supported. Use EditTranslation");
+            {
+                if (!allowOverride)
+                {
+                    CommonAPIPlugin.logger.LogWarning($"Trying to override translation '{key}' via local files, this is not supported. Use EditTranslation");
+                    return false;
+                }
+                strings.modStrings[key] = translation;
+            }
 
             return true;
+        }
+        
+        internal static TextDefaultFont Get(Text text)
+        {
+            _textReferences.TryGetValue(text, out var value);
+            return value;
+        }
+        
+        internal static void Add(Text text)
+        {
+            var find = Get(text);
+            if (find == null)
+            {
+                _textReferences.Add(text, new TextDefaultFont(text));
+            }
+        }
+        
+        internal static void Remove(Text text)
+        {
+            var find = Get(text);
+            if (find != null)
+            {
+                _textReferences.Remove(text);
+            }        
+        }
+
+        public static void RefreshAllTextElements()
+        {
+            int currentLanguageId = Localization.CurrentLanguageLCID;
+            if (!extraDataEntires.ContainsKey(currentLanguageId)) return;
+
+            var languageData = extraDataEntires[currentLanguageId];
+
+            foreach (var text in _textReferences)
+            {
+                TextDefaultFont textData = text.Value;
+                Font fontToUse = languageData.customFont != null ? languageData.customFont : textData.DefaultFont;
+                textData.UseCustomFontImmediate(fontToUse);
+            }
         }
 
         #endregion

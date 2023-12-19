@@ -93,13 +93,13 @@ namespace CommonAPI.Systems.ModLocalization.Patch
 
         private static void AddModTranslations(int index, Localization.Language language)
         {
-            if (!LocalizationModule.modStrings.ContainsKey(language.lcId)) return;
+            if (!LocalizationModule.extraDataEntires.ContainsKey(language.lcId)) return;
 
             CommonAPIPlugin.logger.LogDebug($"Applying translations for {language.abbr}");
             string[] strings = Localization.strings[index];
 
-            var modStrings = LocalizationModule.modStrings[language.lcId];
-            foreach (var pair in modStrings)
+            var languageData = LocalizationModule.extraDataEntires[language.lcId];
+            foreach (var pair in languageData.modStrings)
             {
                 // Ignore key if it does not exist in namesIndexer: it must be invalid!
                 if (!Localization.namesIndexer.ContainsKey(pair.Key)) continue;
@@ -111,13 +111,13 @@ namespace CommonAPI.Systems.ModLocalization.Patch
 
         private static void EditTranslations(int index, Localization.Language language)
         {
-            if (!LocalizationModule.stringsToEdit.ContainsKey(language.lcId)) return;
+            if (!LocalizationModule.extraDataEntires.ContainsKey(language.lcId)) return;
 
             CommonAPIPlugin.logger.LogDebug($"Editing translations for {language.abbr}");
             string[] strings = Localization.strings[index];
 
-            var modStrings = LocalizationModule.stringsToEdit[language.lcId];
-            foreach (var pair in modStrings)
+            var languageData = LocalizationModule.extraDataEntires[language.lcId];
+            foreach (var pair in languageData.stringsToEdit)
             {
                 // Ignore key if it does not exist in namesIndexer: it must be invalid!
                 if (!Localization.namesIndexer.ContainsKey(pair.Key))
@@ -157,8 +157,8 @@ namespace CommonAPI.Systems.ModLocalization.Patch
 
         private static void AddModKeys()
         {
-            var unqiueKeys = LocalizationModule.modStrings
-                .SelectMany(pair => pair.Value.Keys)
+            var unqiueKeys = LocalizationModule.extraDataEntires
+                .SelectMany(pair => pair.Value.modStrings.Keys)
                 .Distinct()
                 .ToList();
 
