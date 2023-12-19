@@ -1,3 +1,6 @@
+### v1.6.2
+- Add ability to change text fonts
+
 ### v1.6.1
 - Fix errors when adding custom protos
 - Fix warnings about Common API not being built for 0.10.28.20729
