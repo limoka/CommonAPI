@@ -1,3 +1,6 @@
+### v1.6.3
+- Added `RegisterKeyBindWithReturn()` method to `CustomKeyBindSystem`
+
 ### v1.6.2
 - Add ability to change text fonts
 

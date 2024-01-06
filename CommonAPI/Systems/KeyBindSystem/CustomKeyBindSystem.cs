@@ -39,6 +39,16 @@ namespace CommonAPI.Systems
         /// <typeparam name="T">Key press type class. For example PressKeyBind</typeparam>
         public static void RegisterKeyBind<T>(BuiltinKey key) where T : PressKeyBind, new()
         {
+            RegisterKeyBindWithReturn<T>(key);
+        }
+        
+        /// <summary>
+        /// Register new KeyBind.
+        /// </summary>
+        /// <param name="key">Default value for new Keybind</param>
+        /// <typeparam name="T">Key press type class. For example PressKeyBind</typeparam>
+        public static T RegisterKeyBindWithReturn<T>(BuiltinKey key) where T : PressKeyBind, new()
+        {
             Instance.ThrowIfNotLoaded();
             
             string id = "KEY" + key.name;
@@ -49,6 +59,12 @@ namespace CommonAPI.Systems
             keyBind.Init(key);
 
             customKeys.Add(id, keyBind);
+            return keyBind;
+        }
+
+        public static ICollection<PressKeyBind> GetRegisteredKeybinds()
+        {
+            return customKeys.Values;
         }
 
         /// <summary>
