@@ -142,7 +142,7 @@ namespace CommonAPI.Systems
         {
             if (!requestBoth || lastSelectedIndex < 0) return;
             
-            Vector2 newPos = new Vector2(lastSelectedIndex % 12 * 46 - 1, -Mathf.FloorToInt(lastSelectedIndex / 12f) * 46 + 1);
+            Vector2 newPos = new Vector2(lastSelectedIndex % 14 * 46 - 1, -Mathf.FloorToInt(lastSelectedIndex / 14f) * 46 + 1);
             picker.selImage.rectTransform.anchoredPosition = newPos;
             picker.selImage.gameObject.SetActive(true);
         }
@@ -150,14 +150,14 @@ namespace CommonAPI.Systems
         public void Open(UISignalPicker picker)
         {
             gameObject.SetActive(true);
-            ((RectTransform) picker.transform).sizeDelta = new Vector2(600, 650);
+            ((RectTransform) picker.transform).sizeDelta = new Vector2(692, 696);
         }
 
         public void Close(UISignalPicker picker)
         {
             requestBoth = false;
             gameObject.SetActive(false);
-            ((RectTransform) picker.transform).sizeDelta = new Vector2(600, 568);
+            ((RectTransform) picker.transform).sizeDelta = new Vector2(692, 614);
         }
 
         public void OnPopup(UISignalPicker picker)

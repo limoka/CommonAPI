@@ -1,5 +1,13 @@
+### v1.6.4
+- Fixed UINumberEntryExtension breaking layout and functionality of the signal picker.
+- Fixed picker extension translation entries not being added
+- Fixed NRE issues when adding TechProtos via ProtoRegistry
+
 ### v1.6.3
 - Added `RegisterKeyBindWithReturn()` method to `CustomKeyBindSystem`
+
+<details>
+<summary>Changelog</summary>
 
 ### v1.6.2
 - Add ability to change text fonts
@@ -13,9 +21,6 @@
 - Added Localization Module to support custom localizations.
 - ProtoRegistry methods related to StringProto are deprecated in favor of Localization Module
 - Internal restructure of the submodule system
-
-<details>
-<summary>Changelog</summary>
 
 ### v1.5.7
 - Fix modded items not appearing on the production graphs.

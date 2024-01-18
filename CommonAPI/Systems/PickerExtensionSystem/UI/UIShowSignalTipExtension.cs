@@ -15,8 +15,8 @@ namespace CommonAPI.Systems.UI
             if (picker.hoveredIndex >= 0)
             {
                 signalId = picker.signalArray[picker.hoveredIndex];
-                xPos = picker.hoveredIndex % 12;
-                yPos = picker.hoveredIndex / 12;
+                xPos = picker.hoveredIndex % 14;
+                yPos = picker.hoveredIndex / 14;
             }
             
             if (signalId != 0 && signalId < 1000)

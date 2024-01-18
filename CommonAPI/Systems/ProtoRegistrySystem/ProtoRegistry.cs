@@ -1110,6 +1110,7 @@ namespace CommonAPI.Systems
                 AddItems = Array.Empty<int>(), // what items to gift after research is done
                 AddItemCounts = Array.Empty<int>(),
                 Position = position,
+                PreItem = Array.Empty<int>(),
                 PreTechsImplicit = Array.Empty<int>(), //Those funky implicit requirements
                 UnlockFunctions = Array.Empty<int>(), //Upgrades.
                 UnlockValues = Array.Empty<double>(),
