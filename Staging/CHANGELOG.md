@@ -1,3 +1,6 @@
+### v1.6.5
+- Fixed issues when running with Nebula Multiplayer Mod API version 2.0.0 or higher
+
 ### v1.6.4
 - Fixed UINumberEntryExtension breaking layout and functionality of the signal picker.
 - Fixed picker extension translation entries not being added

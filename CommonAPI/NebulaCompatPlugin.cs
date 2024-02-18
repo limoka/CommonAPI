@@ -4,6 +4,7 @@ using BepInEx;
 using CommonAPI.Nebula;
 using CommonAPI.Systems;
 using NebulaAPI;
+using NebulaAPI.Interfaces;
 
 namespace CommonAPI
 {

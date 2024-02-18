@@ -1,5 +1,7 @@
 ﻿using CommonAPI.Systems;
 using NebulaAPI;
+using NebulaAPI.Networking;
+using NebulaAPI.Packets;
 
 namespace CommonAPI.Nebula
 {
