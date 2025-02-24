@@ -23,6 +23,6 @@ outdir = "./../Build"
   target = "./"
 
 [publish]
-repository = "https://dsp.thunderstore.io"
+repository = "https://thunderstore.io"
 communities = [ "dyson-sphere-program" ]
 categories = [ ]	
