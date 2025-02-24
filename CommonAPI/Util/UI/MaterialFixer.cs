@@ -27,9 +27,9 @@ namespace CommonAPI
                 foreach (TranslucentImage image in images)
                 {
                     image.material = trsmat;
-                    image.vibrancy = 1.1f;
-                    image.brightness = -0.5f;
-                    image.flatten = 0.005f;
+                    //image.vibrancy = 1.1f;
+                    //image.brightness = -0.5f;
+                    //image.flatten = 0.005f;
                     image.spriteBlending = 0.7f;
                 }
             }

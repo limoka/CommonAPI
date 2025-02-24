@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,7 @@ namespace CommonAPI.Systems.ModLocalization
         public static int AddLanguage(Localization.Language language)
         {
             Instance.ThrowIfNotLoaded();
+            language.published = true;
             int id = languageRegistry.Register(language.abbr);
 
             language.lcId = id;
