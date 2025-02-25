@@ -59,7 +59,7 @@ namespace CommonAPI
         /// <returns></returns>
         public int Register(string key, object item = null)
         {
-            if (!idMap.ContainsKey(key))
+            if (!idMap.TryGetValue(key, out var id))
             {
                 OnItemRegistered(key, lastId + 1, item);
                 idMap.Add(key, ++lastId);
@@ -71,7 +71,7 @@ namespace CommonAPI
                 throw new InvalidOperationException($"Failed to register object with key '{key}', because it is taken!");
             }
 
-            return GetUniqueId(key);
+            return id;
         }
 
         /// <summary>
@@ -82,8 +82,8 @@ namespace CommonAPI
         /// <exception cref="ArgumentException">Thrown if requested string ID was never registered</exception>
         public int GetUniqueId(string typeId)
         {
-            if (idMap.ContainsKey(typeId))
-                return idMap[typeId];
+            if (idMap.TryGetValue(typeId, out var id))
+                return id;
             
             throw new ArgumentException($"Item with id {typeId} is not registered!");
         }
@@ -95,12 +95,7 @@ namespace CommonAPI
         /// <returns></returns>
         public int MigrateId(int oldId)
         {
-            if (migrationMap.ContainsKey(oldId))
-            {
-                return migrationMap[oldId];
-            }
-
-            return 0;
+            return migrationMap.TryGetValue(oldId, out var newId) ? newId : 0;
         }
 
         public void Free()

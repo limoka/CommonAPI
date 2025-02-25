@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using BepInEx.Bootstrap;
 using CommonAPI.Patches;
@@ -29,7 +30,8 @@ namespace CommonAPI.Systems
         
         internal override void Load()
         {
-            keyRegistry = new Registry(100);
+            // Built-in array length is 256, we will resize it to 512 later, and use 256 as startId to avoid possible conflicts in future
+            keyRegistry = new Registry(256);
         }
 
         /// <summary>
@@ -94,6 +96,66 @@ namespace CommonAPI.Systems
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Save KeyBind data
+        /// </summary>
+        /// <param name="w">Binary Writer class</param>
+        public static void Export(BinaryWriter w)
+        {
+            w.Write((byte)0);
+            // Save begin position
+            long beginPos = w.Seek(0, SeekOrigin.Current);
+            // Write zero here, we will replace it later
+            w.Write(0);
+
+            int count = 0;
+            foreach (var kv in customKeys)
+            {
+                ref CombineKey key = ref DSPGame.globalOption.overrideKeys[kv.Value.defaultBind.id];
+                if (key.IsNull())
+                    continue;
+                count++;
+                w.Write(kv.Key);
+                w.Write(key.keyCode);
+                w.Write(key.modifier);
+                w.Write((byte)key.action);
+                w.Write(key.noneKey);
+            }
+
+            // Save end position
+            long endPos = w.Seek(0, SeekOrigin.Current);
+
+            // Write count at the beginning
+            w.Seek((int)beginPos, SeekOrigin.Begin);
+            w.Write(count);
+
+            // Seek back to end position
+            w.Seek((int)endPos, SeekOrigin.Begin);
+        }
+
+        /// <summary>
+        /// Load KeyBind data
+        /// </summary>
+        /// <param name="r">Binary Reader class</param>
+        public static void Import(BinaryReader r)
+        {
+            r.ReadByte();
+            int count = r.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                string keyId = r.ReadString();
+                int keyCode = r.ReadInt32();
+                byte modifier = r.ReadByte();
+                ECombineKeyAction action = (ECombineKeyAction)r.ReadByte();
+                bool noneKey = r.ReadBoolean();
+
+                if (customKeys.TryGetValue(keyId, out var customKey))
+                {
+                    DSPGame.globalOption.overrideKeys[customKey.defaultBind.id] = new CombineKey(keyCode, modifier, action, noneKey);
+                }
+            }
         }
     }
 }
