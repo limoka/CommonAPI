@@ -1,5 +1,6 @@
 ### v1.6.7
 - Updated to work with game version 0.10.33.26934 or higher
+- Fixed known issues for KeyBindSystem (Thanks [soarqin](https://github.com/soarqin))
 
 **Note:** Version v1.6.7 was **NOT** sufficiently tested. Some functionality might not work. Report an issue if that's the case.
 
