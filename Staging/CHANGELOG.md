@@ -1,3 +1,14 @@
+### v1.6.7
+- Updated to work with game version 0.10.33.26934 or higher
+
+**Note:** Version v1.6.7 was **NOT** sufficiently tested. Some functionality might not work. Report an issue if that's the case.
+
+<details>
+<summary>Changelog</summary>
+
+### v1.6.6
+- Fixed custom languages not loading
+
 ### v1.6.5
 - Fixed issues when running with Nebula Multiplayer Mod API version 2.0.0 or higher
 
@@ -8,9 +19,6 @@
 
 ### v1.6.3
 - Added `RegisterKeyBindWithReturn()` method to `CustomKeyBindSystem`
-
-<details>
-<summary>Changelog</summary>
 
 ### v1.6.2
 - Add ability to change text fonts
