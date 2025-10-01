@@ -53,7 +53,7 @@ namespace CommonAPI.Patches
         
         //Fall-back calls for systems that do not support multi-thread update calls
         
-        [HarmonyPatch(typeof(MultithreadSystem), "PreparePowerSystemFactoryData")]
+        /*[HarmonyPatch(typeof(MultithreadSystem), "PreparePowerSystemFactoryData")]
         [HarmonyPrefix]
         public static void PowerUpdateSinglethread()
         {
@@ -75,13 +75,13 @@ namespace CommonAPI.Patches
         {
             if (!GameMain.multithreadSystem.multithreadSystemEnable) return;
             PlanetExtensionSystem.UpdateOnlySinglethread(GameMain.data);
-        }
+        }*/
         
         [HarmonyPatch(typeof(TrashSystem), "GameTick")]
         [HarmonyPrefix]
         public static void PostUpdateSinglethread()
         {
-            if (!GameMain.multithreadSystem.multithreadSystemEnable) return;
+            //if (!GameMain.multithreadSystem.multithreadSystemEnable) return;
             PlanetExtensionSystem.PostUpdateOnlySinglethread(GameMain.data);
         }
         

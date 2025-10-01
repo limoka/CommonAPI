@@ -228,7 +228,7 @@ namespace CommonAPI
         /// <param name="initFunc">Optional Update logic function</param>
         public void UpdatePoolMultithread(int usedThreadCount, int currentThreadIdx, int minimumCount, Action<T> initFunc = null)
         {
-            Action<T> update = (initFunc ?? InitUpdate());
+          /*  Action<T> update = (initFunc ?? InitUpdate());
             if (WorkerThreadExecutor.CalculateMissionIndex(1, poolCursor - 1, usedThreadCount, currentThreadIdx, minimumCount, out int start, out int end))
             {
                 for (int i = start; i < end; i++)
@@ -237,7 +237,7 @@ namespace CommonAPI
 
                     update(pool[i]);
                 }
-            }
+            }*/
         }
     }
 }

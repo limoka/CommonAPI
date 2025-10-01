@@ -11,13 +11,13 @@ namespace CommonAPI.Patches
         [HarmonyPostfix]
         public static void DrawCall(GameData __instance, int frame)
         {
-            PerformanceMonitor.BeginSample(ECpuWorkEntry.DrawCall);
+           // PerformanceMonitor.BeginSample(ECpuWorkEntry.DrawCall);
             StarExtensionSystem.DrawUpdate();
-            PerformanceMonitor.EndSample(ECpuWorkEntry.DrawCall);
+            //PerformanceMonitor.EndSample(ECpuWorkEntry.DrawCall);
         }
 
         //Single thread update calls
-        [HarmonyPatch(typeof(GameData), "GameTick")]
+       /* [HarmonyPatch(typeof(GameData), "GameTick")]
         [HarmonyPrefix]
         public static void PreUpdateST(GameData __instance, long time)
         {
@@ -38,8 +38,8 @@ namespace CommonAPI.Patches
                 StarExtensionSystem.PreUpdate(star);
             }
             PerformanceMonitor.EndSample(ECpuWorkEntry.DysonSphere);
-        }
-        
+        }*/
+        /*
         [HarmonyPatch(typeof(TrashSystem), "GameTick")]
         [HarmonyPostfix]
         public static void UpdateST(TrashSystem __instance, long time)
@@ -65,7 +65,7 @@ namespace CommonAPI.Patches
             }
             PerformanceMonitor.EndSample(ECpuWorkEntry.DysonSphere);
             PerformanceMonitor.BeginSample(ECpuWorkEntry.Trash);
-        }
+        }*/
         
         //Multi-thread update calls, used only if player system support multithreading
         
