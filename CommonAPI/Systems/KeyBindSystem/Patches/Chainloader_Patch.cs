@@ -68,16 +68,12 @@ namespace CommonAPI.Patches
             stream.Dispose();
         }
 
-	// Search for loading 256 and replace it with new size
+        // Skip GameOption.InitKeys() to avoid reset of GameOption.overrideKeys.
         [HarmonyPatch(typeof(GameOption), nameof(GameOption.InitKeys))]
-        [HarmonyTranspiler]
-        public static IEnumerable<CodeInstruction> PatchInitKeys(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+        [HarmonyPrefix]
+        public static bool PatchInitKeys()
         {
-            CodeMatcher matcher = new CodeMatcher(instructions, generator)
-                .MatchForward(false,
-                    new CodeMatch(OpCodes.Ldc_I4, 256));
-            matcher.Set(OpCodes.Ldc_I4, OverrideKeysNewSize);
-            return matcher.InstructionEnumeration();
+            return false;
         }
 
         // Search for:
