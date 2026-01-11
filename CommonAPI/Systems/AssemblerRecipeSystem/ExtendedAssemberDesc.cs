@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace CommonAPI.Systems
@@ -15,7 +15,7 @@ namespace CommonAPI.Systems
         {
             AssemblerRecipeSystem.Instance.ThrowIfNotLoaded();
             desc.assemblerSpeed = Mathf.RoundToInt(speed * 10000f);
-            desc.assemblerRecipeType = ERecipeType.Custom;
+            desc.assemblerRecipeType = (ERecipeType)20;
             desc.SetProperty(RECIPE_TYPE_NAME, AssemblerRecipeSystem.recipeTypes.GetUniqueId(recipeType));
             
             desc.isAssembler = (desc.assemblerRecipeType > ERecipeType.None);
